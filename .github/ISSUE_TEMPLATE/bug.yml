@@ -8,8 +8,7 @@ body:
       label: 📋 Checklist
       description: 반드시 먼저 체크해주세요!
       options:
-        - label: 📁 프로젝트는 등록했나요?
-        - label: 🎯 마일스톤은 등록했나요?
+        - label: 📁 Jira에 이슈를 등록했나요?
   - type: textarea
     attributes:
       label: 🐞 Problem
