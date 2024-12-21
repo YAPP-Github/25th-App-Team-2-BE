@@ -42,3 +42,5 @@ application-prod.yml
 
 ### Mac OS ###
 .DS_Store
+
+./src/main/resources/config
