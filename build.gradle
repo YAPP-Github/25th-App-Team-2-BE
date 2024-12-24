@@ -15,7 +15,7 @@ checkstyle {
 
 check.dependsOn editorconfigCheck
 
-group = 'com.ptmate'
+group = 'com.TnT'
 version = '0.0.1-SNAPSHOT'
 jar.enabled = false
 
@@ -24,6 +24,10 @@ java {
 }
 
 configurations {
+    all {
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
+    }
+
     compileOnly {
         extendsFrom annotationProcessor
     }
@@ -44,16 +48,21 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
     // 애플 로그인을 위한 라이브러리
-    implementation 'com.auth0:jwks-rsa:0.21.1'
+    implementation 'com.auth0:jwks-rsa:0.22.1'
     implementation 'org.json:json:20231013'
-    implementation 'org.bouncycastle:bcprov-jdk15on:1.70'
+    implementation 'org.bouncycastle:bcprov-jdk18on:1.79'
 
     // 레디스
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
+    // Log4j2
+    // -DLog4jContextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector -> VM for Async Logger
+    implementation 'org.springframework.boot:spring-boot-starter-log4j2'
+    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.18.2'
+    implementation 'com.lmax:disruptor:4.0.0'
+
     annotationProcessor 'org.projectlombok:lombok'
 
-    developmentOnly 'org.springframework.boot:spring-boot-devtools'
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'com.mysql:mysql-connector-j'
 

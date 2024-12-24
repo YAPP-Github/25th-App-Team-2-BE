@@ -1,4 +1,4 @@
-package com.ptmate.global.config;
+package com.tnt.global.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

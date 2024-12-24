@@ -1,0 +1,30 @@
+Configuration:
+  name: Local-Logger
+  status: info
+
+  Properties:
+    Property:
+      - name: LOG_LEVEL_PATTERN
+        value: "{FATAL=red blink, ERROR=red bold, WARN=yellow bold, INFO=green bold, DEBUG=blue bold, TRACE=blue}"
+
+      - name: LOG_PATTERN_SYS
+        value: "%style{%d{yyyy-MM-dd HH:mm:ss}}{magenta} [%highlight{%p}${LOG_LEVEL_PATTERN}] %style{[%c{1.1.1.*}]}{cyan} %m%n"
+
+  Appenders:
+    Console:
+      name: Console_Appender
+      target: SYSTEM_OUT
+      PatternLayout:
+        pattern: "${LOG_PATTERN_SYS}"
+
+  Loggers:
+    Root:
+      level: INFO
+      AppenderRef:
+        ref: Console_Appender
+    Logger:
+      name: com.tnt
+      additivity: false
+      level: DEBUG
+      AppenderRef:
+        ref: Console_Appender
