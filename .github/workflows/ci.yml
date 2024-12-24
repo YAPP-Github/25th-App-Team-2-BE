@@ -23,7 +23,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           java-version: 21
-          distribution: 'correto'
+          distribution: 'corretto'
 
       - name: Cache SonarQube packages
         uses: actions/cache@v4
