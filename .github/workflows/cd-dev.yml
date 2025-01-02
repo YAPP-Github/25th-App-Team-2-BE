@@ -37,7 +37,7 @@ jobs:
         with:
           host: ${{ secrets.EC2_DEV_HOST }}
           username: ${{ secrets.EC2_DEV_USERNAME }}
-          password: ${{ secrets.EC2_DEV_PASSWORD }}
+          key: ${{ secrets.EC2_DEV_KEY }}
           port: ${{ secrets.EC2_SSH_PORT }}
           timeout: 60s
           script: |
@@ -52,7 +52,7 @@ jobs:
         with:
           host: ${{ secrets.EC2_DEV_HOST }}
           username: ${{ secrets.EC2_DEV_USERNAME }}
-          password: ${{ secrets.EC2_DEV_PASSWORD }}
+          key: ${{ secrets.EC2_DEV_KEY }}
           port: ${{ secrets.EC2_SSH_PORT }}
           timeout: 60s
           source: "infra"
@@ -139,7 +139,7 @@ jobs:
           envs: COMPOSE
           host: ${{ secrets.EC2_DEV_HOST }}
           username: ${{ secrets.EC2_DEV_USERNAME }}
-          password: ${{ secrets.EC2_DEV_PASSWORD }}
+          key: ${{ secrets.EC2_DEV_KEY }}
           port: ${{ secrets.EC2_SSH_PORT }}
           script: |
             docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p ${{ secrets.DOCKER_HUB_TOKEN }}
