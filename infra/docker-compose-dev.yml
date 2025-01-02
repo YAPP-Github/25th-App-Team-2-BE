@@ -1,0 +1,38 @@
+services:
+  tnt:
+    image: ${DOCKER_HUB_USERNAME}/${DOCKER_HUB_REPOSITORY}:latest
+    container_name: tnt-spring-dev
+    restart: unless-stopped
+    expose:
+      - ${SERVER_PORT}
+    depends_on:
+      - mysql
+    environment:
+      SPRING_ACTIVE_PROFILE: ${SPRING_ACTIVE_PROFILE}
+
+  mysql:
+    image: mysql:8.0.40
+    container_name: mysql
+    platform: linux/arm64/v8
+    restart: always
+    ports:
+      - "3306:3306"
+    environment:
+      TZ: Asia/Seoul
+      MYSQL_DATABASE: ${DEV_MYSQL_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${DEV_MYSQL_PASSWORD}
+      MYSQL_USERNAME: ${DEV_MYSQL_USERNAME}
+      MYSQL_PASSWORD: ${DEV_MYSQL_PASSWORD}
+    command:
+      - --skip-character-set-client-handshake
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+
+  redis:
+    image: redis:alpine
+    container_name: redis
+    platform: linux/arm64
+    restart: always
+    command: redis-server
+    ports:
+      - "6379:6379"

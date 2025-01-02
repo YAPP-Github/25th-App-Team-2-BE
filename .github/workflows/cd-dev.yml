@@ -1,0 +1,151 @@
+name: TnT CD for dev with Gradle, Docker, AWS
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  move-files:
+    name: move-files
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout with Submodule
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+          token: ${{ secrets.SUBMODULE_PAT }}
+          fetch-depth: 0
+
+      - name: Public IP
+        uses: haythem/public-ip@v1.3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Github Actions IP 보안그룹 추가
+        run: |
+          aws ec2 authorize-security-group-ingress --group-id ${{ secrets.AWS_DEV_SG_ID }} --protocol tcp --port 22 --cidr ${{ steps.ip.outputs.ipv4 }}/32
+
+      - name: AWS EC2 Create Directory
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_DEV_HOST }}
+          username: ${{ secrets.EC2_DEV_USERNAME }}
+          password: ${{ secrets.EC2_DEV_PASSWORD }}
+          port: ${{ secrets.EC2_SSH_PORT }}
+          timeout: 60s
+          script: |
+            mkdir -p /home/ubuntu/tnt/
+
+      - name: Docker env File
+        run:
+          cp src/main/resources/config/dev.env ./infra/.env
+
+      - name: AWS EC2 Copy Files
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.EC2_DEV_HOST }}
+          username: ${{ secrets.EC2_DEV_USERNAME }}
+          password: ${{ secrets.EC2_DEV_PASSWORD }}
+          port: ${{ secrets.EC2_SSH_PORT }}
+          timeout: 60s
+          source: "infra"
+          target: "/home/ubuntu/tnt"
+
+      - name: Github Actions IP 보안그룹 삭제
+        run: |
+          aws ec2 revoke-security-group-ingress --group-id ${{ secrets.AWS_DEV_SG_ID }} --protocol tcp --port 22 --cidr ${{ steps.ip.outputs.ipv4 }}/32
+
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout with Submodule
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+          token: ${{ secrets.SUBMODULE_PAT }}
+          fetch-depth: 0
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: 'corretto'
+
+      - name: Gradle cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Gradle 실행 권한 부여
+        run: chmod +x gradlew
+
+      - name: Build without test
+        run: ./gradlew build -x test
+
+      - name: Docker Buildx setting
+        uses: docker/setup-buildx-action@v3.8.0
+
+      - name: Dockerhub Login
+        uses: docker/login-action@v3.3.0
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+      - name: Dockerhub build and push
+        uses: docker/build-push-action@6.10.0
+        with:
+          context: .
+          file: ./infra/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO }}:latest
+          build-args: |
+            "SPRING_ACTIVE_PROFILE=dev"
+          platforms: |
+            linux/amd64
+            linux/arm64
+
+      - name: Public IP
+        uses: haythem/public-ip@v1.3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Github Actions IP 보안그룹 추가
+        run: |
+          aws ec2 authorize-security-group-ingress --group-id ${{ secrets.AWS_DEV_SG_ID }} --protocol tcp --port 22 --cidr ${{ steps.ip.outputs.ipv4 }}/32
+
+      - name: AWS EC2 Server Deploy
+        uses: appleboy/ssh-action@master
+        env:
+          COMPOSE: "home/ubuntu/infra/docker-compose-dev.yml"
+        with:
+          envs: COMPOSE
+          host: ${{ secrets.EC2_DEV_HOST }}
+          username: ${{ secrets.EC2_DEV_USERNAME }}
+          password: ${{ secrets.EC2_DEV_PASSWORD }}
+          port: ${{ secrets.EC2_SSH_PORT }}
+          script: |
+            docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p ${{ secrets.DOCKER_HUB_TOKEN }}
+            docker-compose -f $COMPOSE down --rmi all
+            docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO }}
+            docker-compose -f $COMPOSE up -d
+            echo "##### EC2 배포 완료 #####"
+
+      - name: Github Actions IP 보안그룹 삭제
+        run: |
+          aws ec2 revoke-security-group-ingress --group-id ${{ secrets.AWS_DEV_SG_ID }} --protocol tcp --port 22 --cidr ${{ steps.ip.outputs.ipv4 }}/32
