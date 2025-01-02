@@ -3,8 +3,8 @@ services:
     image: ${DOCKER_HUB_USERNAME}/${DOCKER_HUB_REPOSITORY}:latest
     container_name: tnt-spring-dev
     restart: unless-stopped
-    expose:
-      - ${SERVER_PORT}
+    ports:
+      - "8080:8080"
     depends_on:
       - mysql
     environment:
