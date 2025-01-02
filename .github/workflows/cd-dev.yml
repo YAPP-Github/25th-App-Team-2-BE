@@ -63,6 +63,8 @@ jobs:
           aws ec2 revoke-security-group-ingress --group-id ${{ secrets.AWS_DEV_SG_ID }} --protocol tcp --port 22 --cidr ${{ steps.ip.outputs.ipv4 }}/32
 
   deploy:
+    name: deploy
+    needs: move-files
     runs-on: ubuntu-latest
     steps:
       - name: Checkout with Submodule
@@ -104,7 +106,7 @@ jobs:
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
       - name: Dockerhub build and push
-        uses: docker/build-push-action@6.10.0
+        uses: docker/build-push-action@v6.10.0
         with:
           context: .
           file: ./infra/Dockerfile
