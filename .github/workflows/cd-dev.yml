@@ -136,7 +136,7 @@ jobs:
       - name: AWS EC2 Server Deploy
         uses: appleboy/ssh-action@master
         env:
-          COMPOSE: "home/ubuntu/infra/docker-compose-dev.yml"
+          COMPOSE: "home/ubuntu/tnt/infra/docker-compose-dev.yml"
         with:
           envs: COMPOSE
           host: ${{ secrets.EC2_DEV_HOST }}
@@ -144,7 +144,7 @@ jobs:
           key: ${{ secrets.EC2_DEV_KEY }}
           port: ${{ secrets.EC2_SSH_PORT }}
           script: |
-            docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p ${{ secrets.DOCKER_HUB_TOKEN }}
+            echo "${{ secrets.DOCKER_HUB_TOKEN }}" | docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
             docker-compose -f $COMPOSE down --rmi all
             docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO }}
             docker-compose -f $COMPOSE up -d
