@@ -136,7 +136,7 @@ jobs:
       - name: AWS EC2 Server Deploy
         uses: appleboy/ssh-action@master
         env:
-          COMPOSE: "home/ubuntu/tnt/infra/docker-compose-dev.yml"
+          COMPOSE: "tnt/infra/docker-compose-dev.yml"
         with:
           envs: COMPOSE
           host: ${{ secrets.EC2_DEV_HOST }}
