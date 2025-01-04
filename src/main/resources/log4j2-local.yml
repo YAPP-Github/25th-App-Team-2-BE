@@ -15,6 +15,7 @@ Configuration:
       name: Console_Appender
       target: SYSTEM_OUT
       PatternLayout:
+        disableAnsi: false
         pattern: "${LOG_PATTERN_SYS}"
 
   Loggers:
