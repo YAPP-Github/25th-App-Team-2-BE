@@ -77,7 +77,7 @@ jacocoTestReport {
                     fileTree(dir: it, excludes: [
                             "**/*Application*.class",
                             "**/*Config*.class",
-                            "**/*GlobalExceptionHandler*.class"
+                            "**/error/handler/*GlobalExceptionHandler*.class"
                     ])
                 })
         )
