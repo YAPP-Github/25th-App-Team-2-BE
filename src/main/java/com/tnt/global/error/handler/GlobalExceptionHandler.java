@@ -37,6 +37,7 @@ public class GlobalExceptionHandler {
 		MissingServletRequestParameterException exception) {
 		log.warn("Required request parameter is missing: {}", exception.getParameterName());
 		String errorMessage = String.format("필수 파라미터 '%s'가 누락되었습니다.", exception.getParameterName());
+
 		return new ErrorResponse(errorMessage);
 	}
 
@@ -54,6 +55,7 @@ public class GlobalExceptionHandler {
 		} else {
 			errorMessage = String.format("파라미터 '%s'의 형식이 올바르지 않습니다.", exception.getName());
 		}
+
 		return new ErrorResponse(errorMessage);
 	}
 
@@ -69,6 +71,7 @@ public class GlobalExceptionHandler {
 			.toList();
 
 		String errorMessage = String.join(", ", errors);
+
 		return new ErrorResponse("입력값이 유효하지 않습니다: " + errorMessage);
 	}
 
@@ -78,6 +81,7 @@ public class GlobalExceptionHandler {
 	public ErrorResponse handleMethodArgumentNotValidException(
 		MethodArgumentNotValidException exception) {
 		log.warn(exception.getBindingResult().getAllErrors().getFirst().getDefaultMessage());
+
 		return new ErrorResponse(exception.getBindingResult().getAllErrors().getFirst().getDefaultMessage());
 	}
 
@@ -89,6 +93,7 @@ public class GlobalExceptionHandler {
 	})
 	public ErrorResponse handleDateTimeParseException(DateTimeException exception) {
 		log.warn(exception.getMessage());
+
 		return new ErrorResponse("DateTime 형식이 잘못되었습니다. 서버 관리자에게 문의해 주세요.");
 	}
 
@@ -97,6 +102,7 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler
 	public ErrorResponse handleNotFoundException(RuntimeException exception) {
 		log.warn(exception.getMessage());
+
 		return new ErrorResponse(exception.getMessage());
 	}
 
@@ -105,6 +111,7 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler
 	public ErrorResponse handleExistException(RuntimeException exception) {
 		log.warn(exception.getMessage());
+
 		return new ErrorResponse(exception.getMessage());
 	}
 
@@ -113,16 +120,17 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler(value = {
 		MaxUploadSizeExceededException.class
 	})
-	public ErrorResponse handleCustomBadRequestException(final RuntimeException exception) {
+	public ErrorResponse handleCustomBadRequestException( RuntimeException exception) {
 		log.warn(exception.getMessage());
+
 		return new ErrorResponse(exception.getMessage());
 	}
 
 	// 기타 500 예외
 	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
 	@ExceptionHandler(RuntimeException.class)
-	public ErrorResponse handleRuntimeException(final RuntimeException exception) {
-		final StringBuilder sb = new StringBuilder();
+	public ErrorResponse handleRuntimeException( RuntimeException exception) {
+		 StringBuilder sb = new StringBuilder();
 
 		for (int i = 0; i < ERROR_KEY_LENGTH; i++) {
 			sb.append(CHARACTERS.charAt(secureRandom.nextInt(CHARACTERS.length())));
@@ -131,6 +139,7 @@ public class GlobalExceptionHandler {
 		String errorKeyInfo = String.format(ERROR_KEY_FORMAT, sb);
 		String exceptionTypeInfo = String.format(EXCEPTION_CLASS_TYPE_MESSAGE_FORMANT, exception.getClass());
 		log.error("{}{}{}", exception.getMessage(), errorKeyInfo, exceptionTypeInfo);
+
 		return new ErrorResponse(DEFAULT_ERROR_MESSAGE + errorKeyInfo);
 	}
 }
