@@ -1,5 +1,7 @@
 package com.tnt.global.config;
 
+import java.util.Arrays;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -10,6 +12,8 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+
+import com.tnt.global.auth.SessionAuthenticationFilter;
 
 import lombok.RequiredArgsConstructor;
 
@@ -44,4 +48,10 @@ public class SecurityConfig {
 
 		return http.build();
 	}
+
+	@Bean
+	public SessionAuthenticationFilter sessionAuthenticationFilter() {
+		return new SessionAuthenticationFilter(jwtService, redisService, Arrays.asList(ALLOWED_URIS));
+	}
+
 }
