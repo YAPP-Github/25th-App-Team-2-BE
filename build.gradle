@@ -40,7 +40,7 @@ sonar {
         property "sonar.organization", "yapp-github"
         property "sonar.host.url", "https://sonarcloud.io"
         property "sonar.coverage.jacoco.xmlReportPaths", "build/reports/jacoco/test/jacocoTestReport.xml"
-        property "sonar.exclusions", "**/*Application*.java, **/*Config*.java"
+        property "sonar.exclusions", "**/*Application*.java, **/*Config*.java, **/*GlobalExceptionHandler.java"
         property "sonar.java.coveragePlugin", "jacoco"
     }
 }
@@ -76,7 +76,7 @@ jacocoTestReport {
                 files(classDirectories.files.collect {
                     fileTree(dir: it, excludes: [
                             "**/*Application*.class",
-                            "**/*Config*.class",
+                            "**/*Config*.class"
                     ])
                 })
         )
@@ -105,7 +105,8 @@ jacocoTestCoverageVerification {
 
             excludes = [
                     '*.*Application',
-                    '*.*Config'
+                    '*.*Config',
+                    '*.*.*GlobalExceptionHandler'
             ]
         }
     }
