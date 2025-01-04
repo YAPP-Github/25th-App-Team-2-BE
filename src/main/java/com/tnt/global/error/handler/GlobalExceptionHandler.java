@@ -94,7 +94,7 @@ public class GlobalExceptionHandler {
 
 	// 존재x 예외
 	@ResponseStatus(HttpStatus.NOT_FOUND)
-	@ExceptionHandler(value = {})
+	@ExceptionHandler
 	public ErrorResponse handleNotFoundException(RuntimeException exception) {
 		log.warn(exception.getMessage());
 		return new ErrorResponse(exception.getMessage());
@@ -102,7 +102,7 @@ public class GlobalExceptionHandler {
 
 	// 존재 예외
 	@ResponseStatus(HttpStatus.CONFLICT)
-	@ExceptionHandler(value = {})
+	@ExceptionHandler
 	public ErrorResponse handleExistException(RuntimeException exception) {
 		log.warn(exception.getMessage());
 		return new ErrorResponse(exception.getMessage());
