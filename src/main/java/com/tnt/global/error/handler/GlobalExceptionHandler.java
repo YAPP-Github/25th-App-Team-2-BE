@@ -1,8 +1,8 @@
 package com.tnt.global.error.handler;
 
+import java.security.SecureRandom;
 import java.time.DateTimeException;
 import java.util.List;
-import java.util.Random;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -28,7 +28,7 @@ public class GlobalExceptionHandler {
 	private static final String CHARACTERS = "abcdefghijklmnopqrstuvwxyz";
 	private static final int ERROR_KEY_LENGTH = 5;
 	private static final String EXCEPTION_CLASS_TYPE_MESSAGE_FORMANT = "%n class type : %s";
-	private final Random random = new Random();
+	private final SecureRandom secureRandom = new SecureRandom();
 
 	// 필수 파라미터 예외
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -125,7 +125,7 @@ public class GlobalExceptionHandler {
 		final StringBuilder sb = new StringBuilder();
 
 		for (int i = 0; i < ERROR_KEY_LENGTH; i++) {
-			sb.append(CHARACTERS.charAt(random.nextInt(CHARACTERS.length())));
+			sb.append(CHARACTERS.charAt(secureRandom.nextInt(CHARACTERS.length())));
 		}
 
 		String errorKeyInfo = String.format(ERROR_KEY_FORMAT, sb);
