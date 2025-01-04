@@ -97,30 +97,12 @@ public class GlobalExceptionHandler {
 		return new ErrorResponse("DateTime 형식이 잘못되었습니다. 서버 관리자에게 문의해 주세요.");
 	}
 
-	// 존재x 예외
-	@ResponseStatus(HttpStatus.NOT_FOUND)
-	@ExceptionHandler
-	public ErrorResponse handleNotFoundException(RuntimeException exception) {
-		log.warn(exception.getMessage());
-
-		return new ErrorResponse(exception.getMessage());
-	}
-
-	// 존재 예외
-	@ResponseStatus(HttpStatus.CONFLICT)
-	@ExceptionHandler
-	public ErrorResponse handleExistException(RuntimeException exception) {
-		log.warn(exception.getMessage());
-
-		return new ErrorResponse(exception.getMessage());
-	}
-
 	// 커스텀 예외
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	@ExceptionHandler(value = {
 		MaxUploadSizeExceededException.class
 	})
-	public ErrorResponse handleCustomBadRequestException( RuntimeException exception) {
+	public ErrorResponse handleCustomBadRequestException(RuntimeException exception) {
 		log.warn(exception.getMessage());
 
 		return new ErrorResponse(exception.getMessage());
@@ -129,8 +111,8 @@ public class GlobalExceptionHandler {
 	// 기타 500 예외
 	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
 	@ExceptionHandler(RuntimeException.class)
-	public ErrorResponse handleRuntimeException( RuntimeException exception) {
-		 StringBuilder sb = new StringBuilder();
+	public ErrorResponse handleRuntimeException(RuntimeException exception) {
+		StringBuilder sb = new StringBuilder();
 
 		for (int i = 0; i < ERROR_KEY_LENGTH; i++) {
 			sb.append(CHARACTERS.charAt(secureRandom.nextInt(CHARACTERS.length())));
