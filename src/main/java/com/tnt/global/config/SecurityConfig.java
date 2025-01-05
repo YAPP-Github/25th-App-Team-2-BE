@@ -15,7 +15,6 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
 
 import com.tnt.application.auth.SessionService;
-import com.tnt.domain.member.repository.MemberRepository;
 import com.tnt.global.auth.SessionAuthenticationFilter;
 
 import lombok.RequiredArgsConstructor;
@@ -36,7 +35,6 @@ public class SecurityConfig {
 		"/api/oauth2/**"
 	};
 	private final SessionService sessionService;
-	private final MemberRepository memberRepository;
 
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -60,6 +58,6 @@ public class SecurityConfig {
 
 	@Bean
 	public SessionAuthenticationFilter sessionAuthenticationFilter() {
-		return new SessionAuthenticationFilter(Arrays.asList(ALLOWED_URIS), sessionService, memberRepository);
+		return new SessionAuthenticationFilter(Arrays.asList(ALLOWED_URIS), sessionService);
 	}
 }

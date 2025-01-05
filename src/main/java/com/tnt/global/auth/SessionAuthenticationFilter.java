@@ -17,7 +17,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tnt.application.auth.SessionService;
-import com.tnt.domain.member.repository.MemberRepository;
 import com.tnt.global.error.exception.UnauthorizedException;
 
 import jakarta.servlet.FilterChain;
@@ -35,7 +34,6 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
 	private final AntPathMatcher pathMatcher = new AntPathMatcher();
 	private final List<String> allowedUris;
 	private final SessionService sessionService;
-	private final MemberRepository memberRepository;
 
 	@Override
 	protected void doFilterInternal(
