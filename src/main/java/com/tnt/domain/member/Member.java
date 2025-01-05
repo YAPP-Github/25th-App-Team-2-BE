@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 
 import com.tnt.global.entity.BaseTimeEntity;
 
+import io.hypersistence.utils.hibernate.id.Tsid;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -22,6 +23,7 @@ import lombok.NoArgsConstructor;
 public class Member extends BaseTimeEntity {
 
 	@Id
+	@Tsid
 	@Column(name = "id", nullable = false, unique = true)
 	private Long id;
 
@@ -48,8 +50,7 @@ public class Member extends BaseTimeEntity {
 	private SocialType socialType;
 
 	@Builder
-	public Member(Long id, String socialId, String email, String name, String age, SocialType socialType) {
-		this.id = id;
+	public Member(String socialId, String email, String name, String age, SocialType socialType) {
 		this.socialId = socialId;
 		this.email = email;
 		this.name = name;
