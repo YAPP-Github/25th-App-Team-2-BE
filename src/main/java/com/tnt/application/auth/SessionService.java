@@ -2,7 +2,6 @@ package com.tnt.application.auth;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.data.redis.core.RedisTemplate;
@@ -25,7 +24,7 @@ public class SessionService {
 	private static final String SESSION_COOKIE_NAME = "SESSION";
 	private final RedisTemplate<String, SessionInfo> redisTemplate;
 
-	public Optional<String> extractMemberSession(HttpServletRequest request) {
+	public String extractMemberSession(HttpServletRequest request) {
 		Cookie[] cookies = request.getCookies();
 		if (cookies == null) {
 			log.info("쿠키가 존재하지 않습니다.");
@@ -34,15 +33,13 @@ public class SessionService {
 
 		return Arrays.stream(cookies)
 			.filter(cookie -> SESSION_COOKIE_NAME.equals(cookie.getName()))
-			.map(Cookie::getValue)
 			.findFirst()
-			.or(() -> {
-				throw new UnauthorizedException("세션 쿠키가 존재하지 않습니다.");
-			});
+			.map(Cookie::getValue)
+			.orElseThrow(() -> new UnauthorizedException("세션 쿠키가 존재하지 않습니다."));
 	}
 
 	public void validateMemberSession(String sessionId) {
-		// 1. 세션 존재 여부 확인
+		// 세션 존재 여부 확인
 		if (Boolean.FALSE.equals(redisTemplate.hasKey(sessionId))) {
 			log.info("세션이 존재하지 않음 - SessionId: {}", sessionId);
 			throw new UnauthorizedException("세션 스토리지에 세션이 존재하지 않습니다.");
@@ -50,15 +47,15 @@ public class SessionService {
 
 		SessionInfo sessionInfo = redisTemplate.opsForValue().get(sessionId);
 
-		// 2. 세션 유효성 확인
+		// 세션 유효성 확인
 		LocalDateTime lastAccessTime = sessionInfo.getLastAccessTime();
-		if (lastAccessTime.isBefore(LocalDateTime.now().minusDays(2))) {  // 48시간 지났는지 체크
+		if (lastAccessTime.isBefore(LocalDateTime.now().minusDays(2))) {
 			log.info("세션이 만료됨 - SessionId: {}, LastAccessTime: {}", sessionId, lastAccessTime);
-			redisTemplate.delete(sessionId);  // 만료된 세션 삭제
+			redisTemplate.delete(sessionId);
 			throw new UnauthorizedException("세션이 만료되었습니다.");
 		}
 
-		// 3. 세션 갱신 (마지막 접근 시간 업데이트)
+		// 세션 갱신
 		sessionInfo = SessionInfo.builder()
 			.lastAccessTime(LocalDateTime.now())
 			.userAgent(sessionInfo.getUserAgent())
