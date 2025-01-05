@@ -7,7 +7,10 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
+import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+
+import com.tnt.domain.auth.SessionInfo;
 
 @Configuration
 @EnableRedisRepositories
@@ -25,11 +28,15 @@ public class RedisConfig {
 	}
 
 	@Bean
-	public RedisTemplate<String, String> redisTemplate() {
-		RedisTemplate<String, String> redisTemplate = new RedisTemplate<>();
+	public RedisTemplate<String, SessionInfo> redisTemplate() {
+		RedisTemplate<String, SessionInfo> redisTemplate = new RedisTemplate<>();
 		redisTemplate.setConnectionFactory(redisConnectionFactory());
 		redisTemplate.setKeySerializer(new StringRedisSerializer());
-		redisTemplate.setValueSerializer(new StringRedisSerializer());
+
+		Jackson2JsonRedisSerializer<SessionInfo> jsonRedisSerializer =
+			new Jackson2JsonRedisSerializer<>(SessionInfo.class);
+		redisTemplate.setValueSerializer(jsonRedisSerializer);
+
 		return redisTemplate;
 	}
 }
