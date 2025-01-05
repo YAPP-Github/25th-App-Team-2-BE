@@ -1,20 +1,24 @@
 package com.tnt.global.auth;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.security.core.authority.mapping.NullAuthoritiesMapper;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tnt.application.auth.SessionService;
-import com.tnt.domain.member.Member;
 import com.tnt.domain.member.repository.MemberRepository;
+import com.tnt.global.error.exception.UnauthorizedException;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -45,15 +49,18 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
 			requestUri,
 			queryString != null ? queryString : "쿼리 스트링 없음",
 			request.getMethod());
+
 		if (isAllowedUri(requestUri)) {
 			log.info("{} 허용 URI. 세션 유효성 검사 스킵.", requestUri);
 			filterChain.doFilter(request, response);
 			return;
 		}
-		String memberSession = sessionService.extractMemberSession(request).orElse(null);
-		log.info("사용자 세션 추출 - MemberSession: {}", memberSession != null ? "존재" : "존재하지 않음");
 
-		checkMemberSessionAndAuthentication(request, response, filterChain);
+		try {
+			checkSessionAndAuthentication(request, response, filterChain);
+		} catch (UnauthorizedException e) {
+			handleUnauthorizedException(response, e);
+		}
 	}
 
 	private boolean isAllowedUri(String requestUri) {
@@ -69,32 +76,56 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
 		return allowed;
 	}
 
-	private void checkMemberSessionAndAuthentication(
+	private void checkSessionAndAuthentication(
 		HttpServletRequest request,
 		HttpServletResponse response,
 		FilterChain filterChain
 	) throws ServletException, IOException {
-		log.info("checkMemberSessionAndAuthentication() 호출");
-		sessionService.extractMemberSession(request)
-			.filter(sessionService::validateMemberSession)
-			.flatMap(sessionService::extractMemberId)
-			.flatMap(memberId -> memberRepository.findByIdAndDeletedAt(memberId, null))
-			.ifPresent(this::saveAuthentication);
+		log.info("세션 검증 시작");
 
+		String sessionId = sessionService.extractMemberSession(request)
+			.orElseThrow(() -> new UnauthorizedException("세션이 존재하지 않습니다."));
+
+		sessionService.validateMemberSession(sessionId);
+
+		Long memberId = Long.parseLong(sessionId);
+
+		saveAuthentication(memberId);
 		filterChain.doFilter(request, response);
 	}
 
-	private void saveAuthentication(Member currentMember) {
-		String password = currentMember.getEmail(); // SecurityContext password
+	private void handleUnauthorizedException(
+		HttpServletResponse response,
+		UnauthorizedException exception
+	) throws IOException {
+		log.error("인증 실패: {}", exception.getMessage());
+		response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+		response.setContentType("application/json;charset=UTF-8");
 
-		UserDetails userDetailsUser = org.springframework.security.core.userdetails.User.builder()
-			.username(String.valueOf(currentMember.getId()))
-			.password(password)
+		Map<String, Object> errorResponse = Map.of(
+			"message", exception.getMessage(),
+			"status", HttpServletResponse.SC_UNAUTHORIZED,
+			"timestamp", LocalDateTime.now().toString()
+		);
+
+		new ObjectMapper().writeValueAsString(errorResponse);
+		response.getWriter().write(new ObjectMapper().writeValueAsString(errorResponse));
+	}
+
+	private void saveAuthentication(Long memberId) {
+		UserDetails userDetails = User.builder()
+			.username(String.valueOf(memberId))
+			.password("")
+			.roles("USER")
 			.build();
 
-		Authentication authentication = new UsernamePasswordAuthenticationToken(userDetailsUser, null,
-			authoritiesMapper.mapAuthorities(userDetailsUser.getAuthorities()));
+		Authentication authentication = new UsernamePasswordAuthenticationToken(
+			userDetails,
+			null,
+			authoritiesMapper.mapAuthorities(userDetails.getAuthorities())
+		);
 
 		SecurityContextHolder.getContext().setAuthentication(authentication);
+		log.info("시큐리티 컨텍스트에 인증 정보 저장 완료 - MemberId: {}", memberId);
 	}
 }
