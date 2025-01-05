@@ -50,7 +50,8 @@ public class Member extends BaseTimeEntity {
 	private SocialType socialType;
 
 	@Builder
-	public Member(String socialId, String email, String name, String age, SocialType socialType) {
+	public Member(Long id, String socialId, String email, String name, String age, SocialType socialType) {
+		this.id = id;
 		this.socialId = socialId;
 		this.email = email;
 		this.name = name;
