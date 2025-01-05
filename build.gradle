@@ -126,7 +126,10 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-aop'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
-    // 애플 로그인을 위한 라이브러리
+    // TSID
+    implementation 'com.github.f4b6a3:tsid-creator:5.2.6'
+
+    // 애플 로그인 관련 라이브러리
     implementation 'com.auth0:jwks-rsa:0.22.1'
     implementation 'org.json:json:20231013'
     implementation 'org.bouncycastle:bcprov-jdk18on:1.79'
