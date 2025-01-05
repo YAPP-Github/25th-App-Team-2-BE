@@ -1,7 +1,6 @@
 package com.tnt.application.auth;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.data.redis.core.RedisTemplate;
@@ -10,7 +9,6 @@ import org.springframework.stereotype.Service;
 import com.tnt.domain.auth.SessionInfo;
 import com.tnt.global.error.exception.UnauthorizedException;
 
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,21 +19,18 @@ import lombok.extern.slf4j.Slf4j;
 public class SessionService {
 
 	static final long SESSION_DURATION = 2L * 24 * 60 * 60; // 48시간
-	private static final String SESSION_COOKIE_NAME = "SESSION";
+	private static final String AUTHORIZATION_HEADER = "Authorization";
+	private static final String BEARER_PREFIX = "Bearer ";
 	private final RedisTemplate<String, SessionInfo> redisTemplate;
 
 	public String extractMemberSession(HttpServletRequest request) {
-		Cookie[] cookies = request.getCookies();
-		if (cookies == null) {
-			log.info("쿠키가 존재하지 않습니다.");
-			throw new UnauthorizedException("세션 쿠키가 존재하지 않습니다.");
+		String authHeader = request.getHeader(AUTHORIZATION_HEADER);
+		if (authHeader == null || !authHeader.startsWith(BEARER_PREFIX)) {
+			log.info("Authorization 헤더가 존재하지 않거나 올바르지 않은 형식입니다.");
+			throw new UnauthorizedException("인증 세션이 존재하지 않습니다.");
 		}
 
-		return Arrays.stream(cookies)
-			.filter(cookie -> SESSION_COOKIE_NAME.equals(cookie.getName()))
-			.findFirst()
-			.map(Cookie::getValue)
-			.orElseThrow(() -> new UnauthorizedException("세션 쿠키가 존재하지 않습니다."));
+		return authHeader.substring(BEARER_PREFIX.length());
 	}
 
 	public void validateMemberSession(String sessionId) {
