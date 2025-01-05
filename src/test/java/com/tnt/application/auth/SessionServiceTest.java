@@ -1,5 +1,6 @@
 package com.tnt.application.auth;
 
+import static com.tnt.application.auth.SessionService.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
 
@@ -36,15 +37,41 @@ class SessionServiceTest {
 	private HttpServletRequest request;
 
 	@Test
-	@DisplayName("요청에 세션 쿠키가 없으면 예외 발생")
-	void request_does_not_have_session_cookie_error() {
+	@DisplayName("요청 헤더에 세션이 없으면 예외 발생")
+	void no_authorization_header_error() {
 		// given
-		given(request.getCookies()).willReturn(null);
+		given(request.getHeader("Authorization")).willReturn(null);
 
-		// when
+		// when & then
 		assertThatThrownBy(() -> sessionService.extractMemberSession(request))
 			.isInstanceOf(UnauthorizedException.class)
-			.hasMessage("세션 쿠키가 존재하지 않습니다.");
+			.hasMessage("인증 세션이 존재하지 않습니다.");
+	}
+
+	@Test
+	@DisplayName("Authorization 헤더가 Bearer로 시작하지 않으면 예외 발생")
+	void invalid_authorization_header_format_error() {
+		// given
+		given(request.getHeader("Authorization")).willReturn("Invalid 12345");
+
+		// when & then
+		assertThatThrownBy(() -> sessionService.extractMemberSession(request))
+			.isInstanceOf(UnauthorizedException.class)
+			.hasMessage("인증 세션이 존재하지 않습니다.");
+	}
+
+	@Test
+	@DisplayName("Authorization 헤더에서 세션 ID 추출 성공")
+	void extract_session_id_success() {
+		// given
+		String sessionId = "test-session-id";
+		given(request.getHeader("Authorization")).willReturn("Bearer " + sessionId);
+
+		// when
+		String extractedSessionId = sessionService.extractMemberSession(request);
+
+		// then
+		assertThat(extractedSessionId).isEqualTo(sessionId);
 	}
 
 	@Test
@@ -82,6 +109,33 @@ class SessionServiceTest {
 	}
 
 	@Test
+	@DisplayName("세션 유효성 검증 및 갱신 성공")
+	void validate_and_refresh_session_success() {
+		// given
+		String sessionId = "test-session-id";
+		SessionInfo sessionInfo = SessionInfo.builder()
+			.lastAccessTime(LocalDateTime.now().minusHours(1))
+			.userAgent("Mozilla")
+			.clientIp("127.0.0.1")
+			.build();
+
+		given(redisTemplate.hasKey(sessionId)).willReturn(true);
+		given(redisTemplate.opsForValue()).willReturn(valueOperations);
+		given(valueOperations.get(sessionId)).willReturn(sessionInfo);
+
+		// when
+		sessionService.validateMemberSession(sessionId);
+
+		// then
+		verify(valueOperations).set(
+			eq(sessionId),
+			any(SessionInfo.class),
+			eq(SESSION_DURATION),
+			eq(TimeUnit.SECONDS)
+		);
+	}
+
+	@Test
 	@DisplayName("세션 생성 성공")
 	void create_session_success() {
 		// given
@@ -98,5 +152,18 @@ class SessionServiceTest {
 			eq(2L * 24 * 60 * 60),
 			eq(TimeUnit.SECONDS)
 		);
+	}
+
+	@Test
+	@DisplayName("세션 삭제 성공")
+	void remove_session_success() {
+		// given
+		String sessionId = "12345";
+
+		// when
+		sessionService.removeSession(sessionId);
+
+		// then
+		verify(redisTemplate).delete(sessionId);
 	}
 }

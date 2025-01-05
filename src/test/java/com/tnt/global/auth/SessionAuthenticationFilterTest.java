@@ -69,12 +69,12 @@ class SessionAuthenticationFilterTest {
 	}
 
 	@Test
-	@DisplayName("요청에 세션이 없는 경우 예외 발생")
-	void do_not_exist_session_in_request_error() throws ServletException, IOException {
+	@DisplayName("Authorization 헤더가 없는 경우 예외 발생")
+	void missing_authorization_header_error() throws ServletException, IOException {
 		// given
 		given(request.getRequestURI()).willReturn("/api/members/me");
 		given(sessionService.extractMemberSession(request))
-			.willThrow(new UnauthorizedException("세션 쿠키가 존재하지 않습니다."));
+			.willThrow(new UnauthorizedException("인증 세션이 존재하지 않습니다."));
 
 		StringWriter stringWriter = new StringWriter();
 		given(response.getWriter()).willReturn(new PrintWriter(stringWriter));
@@ -86,12 +86,12 @@ class SessionAuthenticationFilterTest {
 		verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 		verify(response).setContentType("application/json;charset=UTF-8");
 		verify(filterChain, never()).doFilter(request, response);
-		assertThat(stringWriter.toString()).contains("세션 쿠키가 존재하지 않습니다.");
+		assertThat(stringWriter.toString()).contains("인증 세션이 존재하지 않습니다.");
 	}
 
 	@Test
 	@DisplayName("세션이 스토리지에 존재하지 않는 경우 예외 발생")
-	void do_not_exist_session_in_storage_error() throws ServletException, IOException {
+	void session_not_exist_in_storage_error() throws ServletException, IOException {
 		// given
 		String sessionId = "12345";
 		given(request.getRequestURI()).willReturn("/api/members/me");
@@ -115,7 +115,7 @@ class SessionAuthenticationFilterTest {
 
 	@Test
 	@DisplayName("유효한 세션이 아닐 경우 예외 발생")
-	void do_not_validate_session_error() throws ServletException, IOException {
+	void expired_session_error() throws ServletException, IOException {
 		// given
 		String sessionId = "12345";
 		given(request.getRequestURI()).willReturn("/api/members/me");
@@ -135,6 +135,24 @@ class SessionAuthenticationFilterTest {
 		verify(response).setContentType("application/json;charset=UTF-8");
 		verify(filterChain, never()).doFilter(request, response);
 		assertThat(stringWriter.toString()).contains("세션이 만료되었습니다.");
+	}
+
+	@Test
+	@DisplayName("유효한 세션으로 인증 성공")
+	void authenticate_with_valid_session_success() throws ServletException, IOException {
+		// given
+		String sessionId = "12345";
+		given(request.getRequestURI()).willReturn("/api/members/me");
+		given(sessionService.extractMemberSession(request)).willReturn(sessionId);
+		willDoNothing().given(sessionService).validateMemberSession(sessionId);
+
+		// when
+		sessionAuthenticationFilter.doFilterInternal(request, response, filterChain);
+
+		// then
+		verify(filterChain).doFilter(request, response);
+		verify(sessionService).extractMemberSession(request);
+		verify(sessionService).validateMemberSession(sessionId);
 	}
 
 	@AfterEach
