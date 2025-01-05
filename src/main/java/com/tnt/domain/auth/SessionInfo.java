@@ -9,7 +9,6 @@ import lombok.Getter;
 @Builder
 public class SessionInfo {
 
-	private String status;  // login/logout
 	private LocalDateTime lastAccessTime;
 	private String userAgent;
 	private String clientIp;
