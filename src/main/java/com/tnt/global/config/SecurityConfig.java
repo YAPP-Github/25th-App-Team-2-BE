@@ -29,6 +29,9 @@ public class SecurityConfig {
 	private static final String[] ALLOWED_URIS = {
 		"/",
 		"/login",
+		"/api",
+		"/v3/api-docs/**",
+		"/swagger-ui/**",
 		"/index.html",
 		"/api/oauth2/**"
 	};
