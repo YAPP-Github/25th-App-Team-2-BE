@@ -12,6 +12,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.tnt.application.auth.SessionService;
+import com.tnt.domain.member.Member;
+import com.tnt.domain.member.repository.MemberRepository;
+
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,9 +28,10 @@ import lombok.extern.slf4j.Slf4j;
 public class SessionAuthenticationFilter extends OncePerRequestFilter {
 
 	private final GrantedAuthoritiesMapper authoritiesMapper = new NullAuthoritiesMapper();
-	private final SessionService sessionService;
 	private final AntPathMatcher pathMatcher = new AntPathMatcher();
 	private final List<String> allowedUris;
+	private final SessionService sessionService;
+	private final MemberRepository memberRepository;
 
 	@Override
 	protected void doFilterInternal(
@@ -40,16 +45,13 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
 			requestUri,
 			queryString != null ? queryString : "쿼리 스트링 없음",
 			request.getMethod());
-
 		if (isAllowedUri(requestUri)) {
 			log.info("{} 허용 URI. 세션 유효성 검사 스킵.", requestUri);
 			filterChain.doFilter(request, response);
 			return;
 		}
-
-		String currentMemberSession = sessionService.extractCurrentMemberSession(request).orElse(null);
-
-		log.info("사용자 세션 추출 - MemberSession: {}", currentMemberSession != null ? "존재" : "존재하지 않음");
+		String memberSession = sessionService.extractMemberSession(request).orElse(null);
+		log.info("사용자 세션 추출 - MemberSession: {}", memberSession != null ? "존재" : "존재하지 않음");
 
 		checkMemberSessionAndAuthentication(request, response, filterChain);
 	}
@@ -63,29 +65,30 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
 			}
 		}
 		log.info("URI {} is {}allowed", requestUri, allowed ? "" : "not ");
+
 		return allowed;
 	}
 
-	public void checkMemberSessionAndAuthentication(
+	private void checkMemberSessionAndAuthentication(
 		HttpServletRequest request,
 		HttpServletResponse response,
 		FilterChain filterChain
 	) throws ServletException, IOException {
 		log.info("checkMemberSessionAndAuthentication() 호출");
-		sessionService.extractCurrentMemberSession(request)
-			.filter(sessionService::validateCurrentMemberSession)
+		sessionService.extractMemberSession(request)
+			.filter(sessionService::validateMemberSession)
 			.flatMap(sessionService::extractMemberId)
-			.flatMap(memberId -> memberRepository.findByMemberIdAndMemberDelete(memberId, null))
+			.flatMap(memberId -> memberRepository.findByIdAndDeletedAt(memberId, null))
 			.ifPresent(this::saveAuthentication);
 
 		filterChain.doFilter(request, response);
 	}
 
-	public void saveAuthentication(Member currentMember) {
-		String password = currentMember.getEmail();
+	private void saveAuthentication(Member currentMember) {
+		String password = currentMember.getEmail(); // SecurityContext password
 
 		UserDetails userDetailsUser = org.springframework.security.core.userdetails.User.builder()
-			.username(currentMember.getMemberId())
+			.username(String.valueOf(currentMember.getId()))
 			.password(password)
 			.build();
 
