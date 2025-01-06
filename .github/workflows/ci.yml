@@ -47,7 +47,7 @@ jobs:
 
       - name: MySQL Docker container for tests
         run: |
-          sudo docker run -d -p 3306:3306 --env MYSQL_DATABASE=tnt_dev --env MYSQL_ROOT_PASSWORD=root mysql:latest
+          sudo docker run -d -p 3306:3306 --env MYSQL_DATABASE=app2 --env MYSQL_ROOT_PASSWORD=root mysql:latest
 
       - name: Build
         env:
