@@ -47,10 +47,11 @@ jobs:
 
       - name: MySQL Docker container for tests
         run: |
-          sudo docker run -d -p 3306:3306 --env MYSQL_DATABASE=app2 --env MYSQL_ROOT_PASSWORD=root mysql:latest
+          sudo docker run -d -p 3306:3306 --env MYSQL_DATABASE=tnt_dev --env MYSQL_ROOT_PASSWORD=root mysql:latest
 
       - name: Build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SPRING_PROFILES_ACTIVE: dev
         run: ./gradlew build sonar --info --stacktrace
