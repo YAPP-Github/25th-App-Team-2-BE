@@ -61,7 +61,6 @@ public class SessionService {
 		log.info("세션 유효성 검증 완료 및 갱신 - SessionId: {}", sessionId);
 	}
 
-	// 로그인 시 세션 생성을 위한 메서드
 	public void createSession(String memberId, HttpServletRequest request) {
 		SessionInfo sessionInfo = SessionInfo.builder()
 			.lastAccessTime(LocalDateTime.now())
@@ -77,7 +76,6 @@ public class SessionService {
 		);
 	}
 
-	// 로그아웃 시 세션 삭제
 	public void removeSession(String sessionId) {
 		redisTemplate.delete(sessionId);
 	}
