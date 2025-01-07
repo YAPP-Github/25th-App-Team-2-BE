@@ -1,9 +1,10 @@
 package com.tnt.global.error.handler;
 
+import static java.util.Objects.*;
+
 import java.security.SecureRandom;
 import java.time.DateTimeException;
 import java.util.List;
-import java.util.Objects;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -49,7 +50,7 @@ public class GlobalExceptionHandler {
 	protected ErrorResponse handleMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException exception) {
 		String errorMessage;
 		log.warn("Type mismatch for parameter: {}. Required type: {}", exception.getName(),
-			Objects.requireNonNull(exception.getRequiredType()).getSimpleName());
+			requireNonNull(exception.getRequiredType()).getSimpleName());
 
 		errorMessage = String.format("파라미터 '%s'의 형식이 올바르지 않습니다. 예상 타입: %s", exception.getName(),
 			exception.getRequiredType().getSimpleName());
