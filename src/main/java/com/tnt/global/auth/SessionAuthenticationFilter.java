@@ -79,7 +79,7 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
 
 	private void handleUnauthorizedException(HttpServletResponse response, UnauthorizedException exception) throws
 		IOException {
-		log.error("인증 실패: {}", exception.getMessage());
+		log.error("인증 실패: ", exception);
 		response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 		response.setContentType("application/json;charset=UTF-8");
 
