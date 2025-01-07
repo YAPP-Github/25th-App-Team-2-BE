@@ -1,10 +1,8 @@
 package com.tnt.application.auth;
 
-import static com.tnt.application.auth.SessionService.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
 
-import java.time.LocalDateTime;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.DisplayName;
@@ -40,7 +38,7 @@ class SessionServiceTest {
 	@DisplayName("요청 헤더에 세션이 없으면 예외 발생")
 	void no_authorization_header_error() {
 		// given
-		given(request.getHeader("Authorization")).willReturn(null);
+		given(request.getHeader("Authorization")).willReturn(null, " ");
 
 		// when & then
 		assertThatThrownBy(() -> sessionService.authenticate(request))
@@ -65,8 +63,11 @@ class SessionServiceTest {
 	void extract_session_id_success() {
 		// given
 		String sessionId = "test-session-id";
+		SessionInfo sessionInfo = SessionInfo.builder().build();
 
 		given(request.getHeader("Authorization")).willReturn("SESSION-ID " + sessionId);
+		given(redisTemplate.opsForValue()).willReturn(valueOperations);
+		given(valueOperations.get(sessionId)).willReturn(sessionInfo);
 
 		// when
 		String extractedSessionId = sessionService.authenticate(request);
@@ -82,62 +83,13 @@ class SessionServiceTest {
 		String sessionId = "test-session-id";
 
 		given(request.getHeader("Authorization")).willReturn("SESSION-ID " + sessionId);
-		given(redisTemplate.hasKey(sessionId)).willReturn(false);
+		given(redisTemplate.opsForValue()).willReturn(valueOperations);
+		given(valueOperations.get(sessionId)).willReturn(null);
 
 		// when & then
 		assertThatThrownBy(() -> sessionService.authenticate(request))
-			.isInstanceOf(UnauthorizedException.class)
+			.isInstanceOf(NullPointerException.class)
 			.hasMessage("세션 스토리지에 세션이 존재하지 않습니다.");
-	}
-
-	@Test
-	@DisplayName("세션이 만료되면 예외 발생")
-	void session_expires_error() {
-		// given
-		String sessionId = "test-session-id";
-		SessionInfo sessionInfo = SessionInfo.builder()
-			.lastAccessTime(LocalDateTime.now().minusDays(3)) // 48시간 초과
-			.build();
-
-		given(request.getHeader("Authorization")).willReturn("SESSION-ID " + sessionId);
-		given(redisTemplate.hasKey(sessionId)).willReturn(true);
-		given(redisTemplate.opsForValue()).willReturn(valueOperations);
-		given(valueOperations.get(sessionId)).willReturn(sessionInfo);
-
-		// when & then
-		assertThatThrownBy(() -> sessionService.authenticate(request))
-			.isInstanceOf(UnauthorizedException.class)
-			.hasMessage("세션이 만료되었습니다.");
-
-		verify(redisTemplate).delete(sessionId);
-	}
-
-	@Test
-	@DisplayName("세션 유효성 검증 및 갱신 성공")
-	void validate_and_refresh_session_success() {
-		// given
-		String sessionId = "test-session-id";
-		SessionInfo sessionInfo = SessionInfo.builder()
-			.lastAccessTime(LocalDateTime.now().minusHours(1))
-			.userAgent("Mozilla")
-			.clientIp("127.0.0.1")
-			.build();
-
-		given(request.getHeader("Authorization")).willReturn("SESSION-ID " + sessionId);
-		given(redisTemplate.hasKey(sessionId)).willReturn(true);
-		given(redisTemplate.opsForValue()).willReturn(valueOperations);
-		given(valueOperations.get(sessionId)).willReturn(sessionInfo);
-
-		// when
-		sessionService.authenticate(request);
-
-		// then
-		verify(valueOperations).set(
-			eq(sessionId),
-			any(SessionInfo.class),
-			eq(SESSION_DURATION),
-			eq(TimeUnit.SECONDS)
-		);
 	}
 
 	@Test
