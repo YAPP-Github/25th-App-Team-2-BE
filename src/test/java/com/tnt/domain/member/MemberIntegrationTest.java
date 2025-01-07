@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.tnt.domain.member.repository.MemberRepository;
 
 @SpringBootTest
-@Transactional // 롤백 비활성화
+@Transactional
 class MemberIntegrationTest {
 
 	@Autowired
