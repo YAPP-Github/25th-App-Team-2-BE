@@ -20,6 +20,6 @@ public class OAuthService {
 
 	public OAuthLoginResponse oauthLogin(OAuthLoginRequest request) {
 
-		return OAuthLoginResponse.from("");
+		return OAuthLoginResponse.of("", "", false);
 	}
 }
