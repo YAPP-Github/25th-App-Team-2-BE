@@ -20,17 +20,17 @@ public class SessionService {
 
 	static final long SESSION_DURATION = 2L * 24 * 60 * 60; // 48시간
 	private static final String AUTHORIZATION_HEADER = "Authorization";
-	private static final String BEARER_PREFIX = "Bearer ";
+	private static final String SESSION_ID_PREFIX = "SESSION-ID ";
 	private final RedisTemplate<String, SessionInfo> redisTemplate;
 
 	public String extractMemberSession(HttpServletRequest request) {
 		String authHeader = request.getHeader(AUTHORIZATION_HEADER);
-		if (authHeader == null || !authHeader.startsWith(BEARER_PREFIX)) {
+		if (authHeader == null || !authHeader.startsWith(SESSION_ID_PREFIX)) {
 			log.info("Authorization 헤더가 존재하지 않거나 올바르지 않은 형식입니다.");
 			throw new UnauthorizedException("인증 세션이 존재하지 않습니다.");
 		}
 
-		return authHeader.substring(BEARER_PREFIX.length());
+		return authHeader.substring(SESSION_ID_PREFIX.length());
 	}
 
 	public void validateMemberSession(String sessionId) {
