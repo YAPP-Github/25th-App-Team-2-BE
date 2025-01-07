@@ -28,13 +28,14 @@ public class SessionService {
 
 	public String authenticate(HttpServletRequest request) {
 		String authHeader = request.getHeader(AUTHORIZATION_HEADER);
-		String sessionId;
 
 		if (isBlank(authHeader) || !authHeader.startsWith(SESSION_ID_PREFIX)) {
 			log.error("Authorization 헤더가 존재하지 않거나 올바르지 않은 형식입니다.");
+
 			throw new UnauthorizedException("인가 세션이 존재하지 않습니다.");
 		}
-		sessionId = authHeader.substring(SESSION_ID_PREFIX.length());
+
+		String sessionId = authHeader.substring(SESSION_ID_PREFIX.length());
 
 		requireNonNull(redisTemplate.opsForValue().get(sessionId), "세션 스토리지에 세션이 존재하지 않습니다.");
 

@@ -39,6 +39,7 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler(MissingServletRequestParameterException.class)
 	protected ErrorResponse handleMissingServletRequestParameter(MissingServletRequestParameterException exception) {
 		String errorMessage = String.format("필수 파라미터 '%s'가 누락되었습니다.", exception.getParameterName());
+
 		log.warn("Required request parameter is missing: {}", exception.getParameterName());
 
 		return new ErrorResponse(errorMessage);
@@ -48,12 +49,11 @@ public class GlobalExceptionHandler {
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	@ExceptionHandler(MethodArgumentTypeMismatchException.class)
 	protected ErrorResponse handleMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException exception) {
-		String errorMessage;
-		log.warn("Type mismatch for parameter: {}. Required type: {}", exception.getName(),
+		String errorMessage = String.format("파라미터 '%s'의 형식이 올바르지 않습니다. 예상 타입: %s", exception.getName(),
 			requireNonNull(exception.getRequiredType()).getSimpleName());
 
-		errorMessage = String.format("파라미터 '%s'의 형식이 올바르지 않습니다. 예상 타입: %s", exception.getName(),
-			exception.getRequiredType().getSimpleName());
+		log.warn("Type mismatch for parameter: {}. Required type: {}", exception.getName(),
+			requireNonNull(exception.getRequiredType()).getSimpleName());
 
 		return new ErrorResponse(errorMessage);
 	}
@@ -62,14 +62,13 @@ public class GlobalExceptionHandler {
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	@ExceptionHandler(ConstraintViolationException.class)
 	protected ErrorResponse handleConstraintViolationException(ConstraintViolationException exception) {
-		log.warn("Constraint violation: {}", exception.getMessage());
-
 		List<String> errors = exception.getConstraintViolations()
 			.stream()
 			.map(violation -> violation.getPropertyPath() + ": " + violation.getMessage())
 			.toList();
-
 		String errorMessage = String.join(", ", errors);
+
+		log.warn("Constraint violation: {}", exception.getMessage());
 
 		return new ErrorResponse("입력값이 유효하지 않습니다: " + errorMessage);
 	}
@@ -120,6 +119,7 @@ public class GlobalExceptionHandler {
 
 		String errorKeyInfo = String.format(ERROR_KEY_FORMAT, sb);
 		String exceptionTypeInfo = String.format(EXCEPTION_CLASS_TYPE_MESSAGE_FORMANT, exception.getClass());
+
 		log.error("{}{}{}", exception.getMessage(), errorKeyInfo, exceptionTypeInfo);
 
 		return new ErrorResponse(DEFAULT_ERROR_MESSAGE + errorKeyInfo);

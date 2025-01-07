@@ -39,8 +39,10 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
 
 		log.info("들어온 요청 - URI: {}, Query: {}, Method: {}", requestUri, queryString != null ? queryString : "쿼리 스트링 없음",
 			request.getMethod());
+
 		if (isAllowedUri(requestUri)) {
 			log.info("{} 허용 URI. 세션 유효성 검사 스킵.", requestUri);
+
 			filterChain.doFilter(request, response);
 			return;
 		}
@@ -49,6 +51,7 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
 			checkSessionAndAuthentication(request);
 		} catch (RuntimeException e) {
 			log.error("인증 처리 중 에러 발생: ", e);
+
 			handleUnauthorizedException(response, e);
 			return;
 		}
@@ -65,6 +68,7 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
 				break;
 			}
 		}
+
 		log.info("URI {} is {}allowed", requestUri, allowed ? "" : "not ");
 
 		return allowed;
@@ -79,6 +83,7 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
 	private void handleUnauthorizedException(HttpServletResponse response, RuntimeException exception) throws
 		IOException {
 		log.error("인증 실패: ", exception);
+
 		response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 		response.setContentType("application/json;charset=UTF-8");
 		response.getWriter().write(exception.getMessage());
@@ -95,6 +100,7 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
 			authoritiesMapper.mapAuthorities(userDetails.getAuthorities()));
 
 		SecurityContextHolder.getContext().setAuthentication(authentication);
+
 		log.info("시큐리티 컨텍스트에 인증 정보 저장 완료 - SessionId: {}", sessionId);
 	}
 }
