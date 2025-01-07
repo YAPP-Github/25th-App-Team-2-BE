@@ -31,7 +31,6 @@ class MemberIntegrationTest {
 
 		// when
 		Member savedMember = memberRepository.save(member);
-		memberRepository.flush();
 
 		// then
 		Member foundMember = memberRepository.findById(savedMember.getId())
