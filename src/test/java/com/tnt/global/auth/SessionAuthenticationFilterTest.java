@@ -75,7 +75,7 @@ class SessionAuthenticationFilterTest {
 		StringWriter stringWriter = new StringWriter();
 
 		given(request.getRequestURI()).willReturn("/api/members/me");
-		given(sessionService.authenticate(request)).willThrow(new UnauthorizedException("인증 세션이 존재하지 않습니다."));
+		given(sessionService.authenticate(request)).willThrow(new UnauthorizedException("인가 세션이 존재하지 않습니다."));
 		given(response.getWriter()).willReturn(new PrintWriter(stringWriter));
 
 		// when
@@ -85,7 +85,7 @@ class SessionAuthenticationFilterTest {
 		verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 		verify(response).setContentType("application/json;charset=UTF-8");
 		verify(filterChain, never()).doFilter(request, response);
-		assertThat(stringWriter.toString()).contains("인증 세션이 존재하지 않습니다.");
+		assertThat(stringWriter.toString()).contains("인가 세션이 존재하지 않습니다.");
 	}
 
 	@Test
