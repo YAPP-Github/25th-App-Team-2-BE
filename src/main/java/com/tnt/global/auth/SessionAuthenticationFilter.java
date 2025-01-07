@@ -50,8 +50,9 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
 
 		try {
 			checkSessionAndAuthentication(request, response, filterChain);
-		} catch (UnauthorizedException e) {
-			handleUnauthorizedException(response, e);
+		} catch (RuntimeException e) {
+			log.error("인증 처리 중 에러 발생: ", e);
+			handleUnauthorizedException(response, new UnauthorizedException("인증 처리 중 에러가 발생했습니다."));
 		}
 	}
 
