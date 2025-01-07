@@ -4,10 +4,10 @@ import lombok.Builder;
 
 @Builder
 public record OAuthLoginResponse(
-	String sessionId
+	String memberId
 ) {
 
-	public static OAuthLoginResponse from(String sessionId) {
-		return new OAuthLoginResponse(sessionId);
+	public static OAuthLoginResponse from(String memberId) {
+		return new OAuthLoginResponse(memberId);
 	}
 }
