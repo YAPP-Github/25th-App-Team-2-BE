@@ -14,7 +14,6 @@ import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.tnt.application.auth.SessionService;
-import com.tnt.global.error.exception.UnauthorizedException;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -47,11 +46,13 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
 		}
 
 		try {
-			checkSessionAndAuthentication(request, response, filterChain);
+			checkSessionAndAuthentication(request);
 		} catch (RuntimeException e) {
 			log.error("인증 처리 중 에러 발생: ", e);
-			handleUnauthorizedException(response, new UnauthorizedException("인증 처리 중 에러가 발생했습니다."));
+			handleUnauthorizedException(response, e);
 		}
+
+		filterChain.doFilter(request, response);
 	}
 
 	private boolean isAllowedUri(String requestUri) {
@@ -68,15 +69,13 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
 		return allowed;
 	}
 
-	private void checkSessionAndAuthentication(HttpServletRequest request, HttpServletResponse response,
-		FilterChain filterChain) throws ServletException, IOException {
+	private void checkSessionAndAuthentication(HttpServletRequest request) {
 		String sessionId = sessionService.authenticate(request);
 
 		saveAuthentication(Long.parseLong(sessionId));
-		filterChain.doFilter(request, response);
 	}
 
-	private void handleUnauthorizedException(HttpServletResponse response, UnauthorizedException exception) throws
+	private void handleUnauthorizedException(HttpServletResponse response, RuntimeException exception) throws
 		IOException {
 		log.error("인증 실패: ", exception);
 		response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
