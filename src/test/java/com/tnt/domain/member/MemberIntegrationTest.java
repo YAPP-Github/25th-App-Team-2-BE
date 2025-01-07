@@ -25,7 +25,7 @@ class MemberIntegrationTest {
 			.socialId("12345")
 			.email("test@example.com")
 			.name("홍길동")
-			.age("20")
+			.age(20)
 			.socialType(SocialType.KAKAO)
 			.build();
 

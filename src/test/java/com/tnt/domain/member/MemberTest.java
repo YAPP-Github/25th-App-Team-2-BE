@@ -33,7 +33,7 @@ class MemberTest {
 				.socialId("12345")
 				.email("test@example.com")
 				.name("홍길동")
-				.age("20")
+				.age(20)
 				.socialType(SocialType.KAKAO)
 				.build();
 
@@ -52,7 +52,7 @@ class MemberTest {
 					.socialId("social" + i)
 					.email("test" + i + "@example.com")
 					.name("사용자" + i)
-					.age(String.valueOf(20 + (i % 20)))
+					.age(20 + (i % 20))
 					.socialType(SocialType.KAKAO)
 					.build())
 				.map(Member::getId)
@@ -76,7 +76,7 @@ class MemberTest {
 				.socialId("12345")
 				.email("test@example.com")
 				.name("홍길동")
-				.age("20")
+				.age(20)
 				.socialType(SocialType.KAKAO)
 				.build();
 			TSID tsid = TSID.from(member.getId());

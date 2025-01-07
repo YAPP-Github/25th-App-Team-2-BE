@@ -37,7 +37,7 @@ public class Member extends BaseTimeEntity {
 	private String name;
 
 	@Column(name = "age", nullable = false)
-	private String age;
+	private int age;
 
 	@Column(name = "profile", nullable = false)
 	private String profile;
@@ -50,7 +50,7 @@ public class Member extends BaseTimeEntity {
 	private SocialType socialType;
 
 	@Builder
-	public Member(Long id, String socialId, String email, String name, String age, SocialType socialType) {
+	public Member(Long id, String socialId, String email, String name, int age, SocialType socialType) {
 		this.id = id;
 		this.socialId = socialId;
 		this.email = email;
