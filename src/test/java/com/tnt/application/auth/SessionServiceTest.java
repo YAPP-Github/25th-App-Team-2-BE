@@ -43,19 +43,19 @@ class SessionServiceTest {
 		given(request.getHeader("Authorization")).willReturn(null);
 
 		// when & then
-		assertThatThrownBy(() -> sessionService.extractMemberSession(request))
+		assertThatThrownBy(() -> sessionService.authenticate(request))
 			.isInstanceOf(UnauthorizedException.class)
 			.hasMessage("인증 세션이 존재하지 않습니다.");
 	}
 
 	@Test
-	@DisplayName("Authorization 헤더가 Bearer로 시작하지 않으면 예외 발생")
+	@DisplayName("Authorization 헤더가 SESSION-ID로 시작하지 않으면 예외 발생")
 	void invalid_authorization_header_format_error() {
 		// given
 		given(request.getHeader("Authorization")).willReturn("Invalid 12345");
 
 		// when & then
-		assertThatThrownBy(() -> sessionService.extractMemberSession(request))
+		assertThatThrownBy(() -> sessionService.authenticate(request))
 			.isInstanceOf(UnauthorizedException.class)
 			.hasMessage("인증 세션이 존재하지 않습니다.");
 	}
@@ -65,10 +65,11 @@ class SessionServiceTest {
 	void extract_session_id_success() {
 		// given
 		String sessionId = "test-session-id";
-		given(request.getHeader("Authorization")).willReturn("Bearer " + sessionId);
+
+		given(request.getHeader("Authorization")).willReturn("SESSION-ID " + sessionId);
 
 		// when
-		String extractedSessionId = sessionService.extractMemberSession(request);
+		String extractedSessionId = sessionService.authenticate(request);
 
 		// then
 		assertThat(extractedSessionId).isEqualTo(sessionId);
@@ -79,10 +80,12 @@ class SessionServiceTest {
 	void session_does_not_exist_in_storage_error() {
 		// given
 		String sessionId = "test-session-id";
+
+		given(request.getHeader("Authorization")).willReturn("SESSION-ID " + sessionId);
 		given(redisTemplate.hasKey(sessionId)).willReturn(false);
 
 		// when & then
-		assertThatThrownBy(() -> sessionService.validateMemberSession(sessionId))
+		assertThatThrownBy(() -> sessionService.authenticate(request))
 			.isInstanceOf(UnauthorizedException.class)
 			.hasMessage("세션 스토리지에 세션이 존재하지 않습니다.");
 	}
@@ -96,12 +99,13 @@ class SessionServiceTest {
 			.lastAccessTime(LocalDateTime.now().minusDays(3)) // 48시간 초과
 			.build();
 
+		given(request.getHeader("Authorization")).willReturn("SESSION-ID " + sessionId);
 		given(redisTemplate.hasKey(sessionId)).willReturn(true);
 		given(redisTemplate.opsForValue()).willReturn(valueOperations);
 		given(valueOperations.get(sessionId)).willReturn(sessionInfo);
 
 		// when & then
-		assertThatThrownBy(() -> sessionService.validateMemberSession(sessionId))
+		assertThatThrownBy(() -> sessionService.authenticate(request))
 			.isInstanceOf(UnauthorizedException.class)
 			.hasMessage("세션이 만료되었습니다.");
 
@@ -119,12 +123,13 @@ class SessionServiceTest {
 			.clientIp("127.0.0.1")
 			.build();
 
+		given(request.getHeader("Authorization")).willReturn("SESSION-ID " + sessionId);
 		given(redisTemplate.hasKey(sessionId)).willReturn(true);
 		given(redisTemplate.opsForValue()).willReturn(valueOperations);
 		given(valueOperations.get(sessionId)).willReturn(sessionInfo);
 
 		// when
-		sessionService.validateMemberSession(sessionId);
+		sessionService.authenticate(request);
 
 		// then
 		verify(valueOperations).set(
@@ -139,8 +144,9 @@ class SessionServiceTest {
 	@DisplayName("세션 생성 성공")
 	void create_session_success() {
 		// given
-		given(redisTemplate.opsForValue()).willReturn(valueOperations);
 		String memberId = "12345";
+
+		given(redisTemplate.opsForValue()).willReturn(valueOperations);
 
 		// when
 		sessionService.createSession(memberId, request);

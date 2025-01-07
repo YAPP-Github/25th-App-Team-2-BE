@@ -23,17 +23,19 @@ public class SessionService {
 	private static final String SESSION_ID_PREFIX = "SESSION-ID ";
 	private final RedisTemplate<String, SessionInfo> redisTemplate;
 
-	public String extractMemberSession(HttpServletRequest request) {
+	public String authenticate(HttpServletRequest request) {
 		String authHeader = request.getHeader(AUTHORIZATION_HEADER);
+
 		if (authHeader.isBlank() || !authHeader.startsWith(SESSION_ID_PREFIX)) {
 			log.error("Authorization 헤더가 존재하지 않거나 올바르지 않은 형식입니다.");
 			throw new UnauthorizedException("인증 세션이 존재하지 않습니다.");
 		}
+		validateSession(authHeader.substring(SESSION_ID_PREFIX.length()));
 
 		return authHeader.substring(SESSION_ID_PREFIX.length());
 	}
 
-	public void validateMemberSession(String sessionId) {
+	private void validateSession(String sessionId) {
 		// 세션 존재 여부 확인
 		if (Boolean.FALSE.equals(redisTemplate.hasKey(sessionId))) {
 			log.error("세션이 존재하지 않음 - SessionId: {}", sessionId);

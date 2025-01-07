@@ -37,11 +37,9 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
 		FilterChain filterChain) throws ServletException, IOException {
 		String requestUri = request.getRequestURI();
 		String queryString = request.getQueryString();
-		log.info("들어온 요청 - URI: {}, Query: {}, Method: {}",
-			requestUri,
-			queryString != null ? queryString : "쿼리 스트링 없음",
-			request.getMethod());
 
+		log.info("들어온 요청 - URI: {}, Query: {}, Method: {}", requestUri, queryString != null ? queryString : "쿼리 스트링 없음",
+			request.getMethod());
 		if (isAllowedUri(requestUri)) {
 			log.info("{} 허용 URI. 세션 유효성 검사 스킵.", requestUri);
 			filterChain.doFilter(request, response);
@@ -58,6 +56,7 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
 
 	private boolean isAllowedUri(String requestUri) {
 		boolean allowed = false;
+
 		for (String pattern : allowedUris) {
 			if (pathMatcher.match(pattern, requestUri)) {
 				allowed = true;
@@ -71,8 +70,8 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
 
 	private void checkSessionAndAuthentication(HttpServletRequest request, HttpServletResponse response,
 		FilterChain filterChain) throws ServletException, IOException {
-		String sessionId = sessionService.extractMemberSession(request);
-		sessionService.validateMemberSession(sessionId);
+		String sessionId = sessionService.authenticate(request);
+
 		saveAuthentication(Long.parseLong(sessionId));
 		filterChain.doFilter(request, response);
 	}
@@ -82,7 +81,6 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
 		log.error("인증 실패: ", exception);
 		response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 		response.setContentType("application/json;charset=UTF-8");
-
 		response.getWriter().write(exception.getMessage());
 	}
 
@@ -93,11 +91,8 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
 			.roles("USER")
 			.build();
 
-		Authentication authentication = new UsernamePasswordAuthenticationToken(
-			userDetails,
-			null,
-			authoritiesMapper.mapAuthorities(userDetails.getAuthorities())
-		);
+		Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null,
+			authoritiesMapper.mapAuthorities(userDetails.getAuthorities()));
 
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 		log.info("시큐리티 컨텍스트에 인증 정보 저장 완료 - MemberId: {}", memberId);
