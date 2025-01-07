@@ -25,7 +25,7 @@ public class SessionService {
 
 	public String extractMemberSession(HttpServletRequest request) {
 		String authHeader = request.getHeader(AUTHORIZATION_HEADER);
-		if (authHeader == null || !authHeader.startsWith(SESSION_ID_PREFIX)) {
+		if (authHeader.isBlank() || !authHeader.startsWith(SESSION_ID_PREFIX)) {
 			log.info("Authorization 헤더가 존재하지 않거나 올바르지 않은 형식입니다.");
 			throw new UnauthorizedException("인증 세션이 존재하지 않습니다.");
 		}
