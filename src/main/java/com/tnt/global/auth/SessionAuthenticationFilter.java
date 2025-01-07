@@ -50,6 +50,7 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
 		} catch (RuntimeException e) {
 			log.error("인증 처리 중 에러 발생: ", e);
 			handleUnauthorizedException(response, e);
+			return;
 		}
 
 		filterChain.doFilter(request, response);
