@@ -26,7 +26,7 @@ public class SessionService {
 	public String extractMemberSession(HttpServletRequest request) {
 		String authHeader = request.getHeader(AUTHORIZATION_HEADER);
 		if (authHeader.isBlank() || !authHeader.startsWith(SESSION_ID_PREFIX)) {
-			log.info("Authorization 헤더가 존재하지 않거나 올바르지 않은 형식입니다.");
+			log.error("Authorization 헤더가 존재하지 않거나 올바르지 않은 형식입니다.");
 			throw new UnauthorizedException("인증 세션이 존재하지 않습니다.");
 		}
 
@@ -36,7 +36,7 @@ public class SessionService {
 	public void validateMemberSession(String sessionId) {
 		// 세션 존재 여부 확인
 		if (Boolean.FALSE.equals(redisTemplate.hasKey(sessionId))) {
-			log.info("세션이 존재하지 않음 - SessionId: {}", sessionId);
+			log.error("세션이 존재하지 않음 - SessionId: {}", sessionId);
 			throw new UnauthorizedException("세션 스토리지에 세션이 존재하지 않습니다.");
 		}
 
