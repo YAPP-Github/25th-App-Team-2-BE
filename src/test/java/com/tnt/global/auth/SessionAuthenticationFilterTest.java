@@ -64,7 +64,7 @@ class SessionAuthenticationFilterTest {
 		sessionAuthenticationFilter.doFilterInternal(request, response, filterChain);
 
 		// then
-		verify(sessionService, never()).extractMemberSession(any());
+		verify(sessionService, never()).authenticate(any());
 		verify(filterChain).doFilter(request, response);
 	}
 
@@ -72,11 +72,10 @@ class SessionAuthenticationFilterTest {
 	@DisplayName("Authorization 헤더가 없는 경우 예외 발생")
 	void missing_authorization_header_error() throws ServletException, IOException {
 		// given
-		given(request.getRequestURI()).willReturn("/api/members/me");
-		given(sessionService.extractMemberSession(request))
-			.willThrow(new UnauthorizedException("인증 세션이 존재하지 않습니다."));
-
 		StringWriter stringWriter = new StringWriter();
+
+		given(request.getRequestURI()).willReturn("/api/members/me");
+		given(sessionService.authenticate(request)).willThrow(new UnauthorizedException("인증 세션이 존재하지 않습니다."));
 		given(response.getWriter()).willReturn(new PrintWriter(stringWriter));
 
 		// when
@@ -93,14 +92,14 @@ class SessionAuthenticationFilterTest {
 	@DisplayName("세션이 스토리지에 존재하지 않는 경우 예외 발생")
 	void session_not_exist_in_storage_error() throws ServletException, IOException {
 		// given
+		StringWriter stringWriter = new StringWriter();
 		String sessionId = "12345";
+
 		given(request.getRequestURI()).willReturn("/api/members/me");
-		given(sessionService.extractMemberSession(request)).willReturn(sessionId);
+		given(sessionService.authenticate(request)).willReturn(sessionId);
 		willThrow(new UnauthorizedException("세션 스토리지에 세션이 존재하지 않습니다."))
 			.given(sessionService)
-			.validateMemberSession(sessionId);
-
-		StringWriter stringWriter = new StringWriter();
+			.authenticate(request);
 		given(response.getWriter()).willReturn(new PrintWriter(stringWriter));
 
 		// when
@@ -117,14 +116,14 @@ class SessionAuthenticationFilterTest {
 	@DisplayName("유효한 세션이 아닐 경우 예외 발생")
 	void expired_session_error() throws ServletException, IOException {
 		// given
+		StringWriter stringWriter = new StringWriter();
 		String sessionId = "12345";
+
 		given(request.getRequestURI()).willReturn("/api/members/me");
-		given(sessionService.extractMemberSession(request)).willReturn(sessionId);
+		given(sessionService.authenticate(request)).willReturn(sessionId);
 		willThrow(new UnauthorizedException("세션이 만료되었습니다."))
 			.given(sessionService)
-			.validateMemberSession(sessionId);
-
-		StringWriter stringWriter = new StringWriter();
+			.authenticate(request);
 		given(response.getWriter()).willReturn(new PrintWriter(stringWriter));
 
 		// when
@@ -142,17 +141,16 @@ class SessionAuthenticationFilterTest {
 	void authenticate_with_valid_session_success() throws ServletException, IOException {
 		// given
 		String sessionId = "12345";
+
 		given(request.getRequestURI()).willReturn("/api/members/me");
-		given(sessionService.extractMemberSession(request)).willReturn(sessionId);
-		willDoNothing().given(sessionService).validateMemberSession(sessionId);
+		given(sessionService.authenticate(request)).willReturn(sessionId);
 
 		// when
 		sessionAuthenticationFilter.doFilterInternal(request, response, filterChain);
 
 		// then
 		verify(filterChain).doFilter(request, response);
-		verify(sessionService).extractMemberSession(request);
-		verify(sessionService).validateMemberSession(sessionId);
+		verify(sessionService).authenticate(request);
 	}
 
 	@AfterEach
