@@ -23,7 +23,7 @@ public class LoginController {
 
 	@PostMapping("/oauth")
 	@ResponseStatus(value = HttpStatus.OK)
-	public OAuthLoginResponse login(@RequestBody @Valid OAuthLoginRequest request) {
-		return oauthService.login(request);
+	public OAuthLoginResponse oauthLogin(@RequestBody @Valid OAuthLoginRequest request) {
+		return oauthService.oauthLogin(request);
 	}
 }
