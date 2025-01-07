@@ -42,6 +42,15 @@ public class Member extends BaseTimeEntity {
 	@Column(name = "profile", nullable = false)
 	private String profile;
 
+	@Column(name = "agree_service", nullable = false)
+	private boolean agreeService;
+
+	@Column(name = "agree_collection", nullable = false)
+	private boolean agreeCollection;
+
+	@Column(name = "agree_push", nullable = false)
+	private boolean agreePush;
+
 	@Column(name = "deleted_at")
 	private LocalDateTime deletedAt;
 
@@ -57,6 +66,9 @@ public class Member extends BaseTimeEntity {
 		this.name = name;
 		this.age = age;
 		this.profile = "";
+		this.agreeService = true;
+		this.agreeCollection = true;
+		this.agreePush = true;
 		this.socialType = socialType;
 	}
 }
