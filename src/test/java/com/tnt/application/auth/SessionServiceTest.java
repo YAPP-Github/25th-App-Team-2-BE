@@ -132,9 +132,8 @@ class SessionServiceTest {
 		verify(valueOperations).set(
 			eq(memberId),
 			argThat(sessionValue ->
-				sessionValue.getUserAgent().equals(userAgent) &&
-					sessionValue.getClientIp().equals(clientIp) &&
-					sessionValue.getLastAccessTime() != null
+				sessionValue.getUserAgent().equals(userAgent) && sessionValue.getClientIp().equals(clientIp)
+					&& sessionValue.getLastAccessTime() != null
 			),
 			eq(SESSION_DURATION),
 			eq(TimeUnit.SECONDS)
