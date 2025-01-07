@@ -83,9 +83,9 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
 		response.getWriter().write(exception.getMessage());
 	}
 
-	private void saveAuthentication(Long memberId) {
+	private void saveAuthentication(Long sessionId) {
 		UserDetails userDetails = User.builder()
-			.username(String.valueOf(memberId))
+			.username(String.valueOf(sessionId))
 			.password("")
 			.roles("USER")
 			.build();
@@ -94,6 +94,6 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
 			authoritiesMapper.mapAuthorities(userDetails.getAuthorities()));
 
 		SecurityContextHolder.getContext().setAuthentication(authentication);
-		log.info("시큐리티 컨텍스트에 인증 정보 저장 완료 - MemberId: {}", memberId);
+		log.info("시큐리티 컨텍스트에 인증 정보 저장 완료 - SessionId: {}", sessionId);
 	}
 }
