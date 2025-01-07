@@ -15,9 +15,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import com.tnt.application.auth.SessionService;
 import com.tnt.global.error.exception.UnauthorizedException;
@@ -68,14 +72,23 @@ class SessionAuthenticationFilterTest {
 		verify(filterChain).doFilter(request, response);
 	}
 
-	@Test
-	@DisplayName("Authorization 헤더가 없는 경우 예외 발생")
-	void missing_authorization_header_error() throws ServletException, IOException {
+	@ParameterizedTest
+	@DisplayName("세션 인증 실패 시 예외 발생")
+	@ValueSource(strings = {
+		"인가 세션이 존재하지 않습니다.",
+		"세션 스토리지에 세션이 존재하지 않습니다.",
+		"세션이 만료되었습니다."
+	})
+	void session_authentication_failure_cases(String errorMessage) throws ServletException, IOException {
 		// given
 		StringWriter stringWriter = new StringWriter();
 
 		given(request.getRequestURI()).willReturn("/api/members/me");
-		given(sessionService.authenticate(request)).willThrow(new UnauthorizedException("인가 세션이 존재하지 않습니다."));
+		if (errorMessage.equals("세션 스토리지에 세션이 존재하지 않습니다.")) {
+			given(sessionService.authenticate(request)).willThrow(new RuntimeException(errorMessage));
+		} else {
+			given(sessionService.authenticate(request)).willThrow(new UnauthorizedException(errorMessage));
+		}
 		given(response.getWriter()).willReturn(new PrintWriter(stringWriter));
 
 		// when
@@ -85,55 +98,30 @@ class SessionAuthenticationFilterTest {
 		verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 		verify(response).setContentType("application/json;charset=UTF-8");
 		verify(filterChain, never()).doFilter(request, response);
-		assertThat(stringWriter.toString()).contains("인가 세션이 존재하지 않습니다.");
+		assertThat(stringWriter.toString()).contains(errorMessage);
 	}
 
 	@Test
-	@DisplayName("세션이 스토리지에 존재하지 않는 경우 예외 발생")
-	void session_not_exist_in_storage_error() throws ServletException, IOException {
+	@DisplayName("유효한 세션으로 인증 정보 저장 성공")
+	void save_authentication_success() throws ServletException, IOException {
 		// given
-		StringWriter stringWriter = new StringWriter();
 		String sessionId = "12345";
 
 		given(request.getRequestURI()).willReturn("/api/members/me");
 		given(sessionService.authenticate(request)).willReturn(sessionId);
-		willThrow(new UnauthorizedException("세션 스토리지에 세션이 존재하지 않습니다."))
-			.given(sessionService)
-			.authenticate(request);
-		given(response.getWriter()).willReturn(new PrintWriter(stringWriter));
 
 		// when
 		sessionAuthenticationFilter.doFilterInternal(request, response, filterChain);
 
 		// then
-		verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-		verify(response).setContentType("application/json;charset=UTF-8");
-		verify(filterChain, never()).doFilter(request, response);
-		assertThat(stringWriter.toString()).contains("세션 스토리지에 세션이 존재하지 않습니다.");
-	}
-
-	@Test
-	@DisplayName("유효한 세션이 아닐 경우 예외 발생")
-	void expired_session_error() throws ServletException, IOException {
-		// given
-		StringWriter stringWriter = new StringWriter();
-		String sessionId = "12345";
-
-		given(request.getRequestURI()).willReturn("/api/members/me");
-		given(sessionService.authenticate(request)).willReturn(sessionId);
-		willThrow(new UnauthorizedException("세션이 만료되었습니다."))
-			.given(sessionService)
-			.authenticate(request);
-		given(response.getWriter()).willReturn(new PrintWriter(stringWriter));
-
-		// when
-		sessionAuthenticationFilter.doFilterInternal(request, response, filterChain);
-
-		// then
-		verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-		verify(response).setContentType("application/json;charset=UTF-8");
-		verify(filterChain, never()).doFilter(request, response);
-		assertThat(stringWriter.toString()).contains("세션이 만료되었습니다.");
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		assertThat(authentication).isNotNull();
+		assertThat(authentication.getPrincipal()).isInstanceOf(UserDetails.class);
+		UserDetails userDetails = (UserDetails)authentication.getPrincipal();
+		assertThat(userDetails.getUsername()).isEqualTo(sessionId);
+		assertThat(userDetails.getAuthorities())
+			.extracting("authority")
+			.contains("ROLE_USER");
 	}
 
 	@Test
@@ -151,6 +139,25 @@ class SessionAuthenticationFilterTest {
 		// then
 		verify(filterChain).doFilter(request, response);
 		verify(sessionService).authenticate(request);
+	}
+
+	@Test
+	@DisplayName("필터 체인 실행 중 ServletException 예외 발생")
+	void handle_servlet_exception_error() throws ServletException, IOException {
+		// given
+		String sessionId = "12345";
+
+		given(request.getRequestURI()).willReturn("/api/members/me");
+		given(sessionService.authenticate(request)).willReturn(sessionId);
+		willThrow(new ServletException("필터 체인 에러"))
+			.given(filterChain)
+			.doFilter(any(), any());
+
+		// when & then
+		assertThatThrownBy(() ->
+			sessionAuthenticationFilter.doFilterInternal(request, response, filterChain))
+			.isInstanceOf(ServletException.class)
+			.hasMessage("필터 체인 에러");
 	}
 
 	@AfterEach
