@@ -33,11 +33,8 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
 	private final SessionService sessionService;
 
 	@Override
-	protected void doFilterInternal(
-		HttpServletRequest request,
-		HttpServletResponse response,
-		FilterChain filterChain
-	) throws ServletException, IOException {
+	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
+		FilterChain filterChain) throws ServletException, IOException {
 		String requestUri = request.getRequestURI();
 		String queryString = request.getQueryString();
 		log.info("들어온 요청 - URI: {}, Query: {}, Method: {}",
@@ -71,21 +68,16 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
 		return allowed;
 	}
 
-	private void checkSessionAndAuthentication(
-		HttpServletRequest request,
-		HttpServletResponse response,
-		FilterChain filterChain
-	) throws ServletException, IOException {
+	private void checkSessionAndAuthentication(HttpServletRequest request, HttpServletResponse response,
+		FilterChain filterChain) throws ServletException, IOException {
 		String sessionId = sessionService.extractMemberSession(request);
 		sessionService.validateMemberSession(sessionId);
 		saveAuthentication(Long.parseLong(sessionId));
 		filterChain.doFilter(request, response);
 	}
 
-	private void handleUnauthorizedException(
-		HttpServletResponse response,
-		UnauthorizedException exception
-	) throws IOException {
+	private void handleUnauthorizedException(HttpServletResponse response, UnauthorizedException exception) throws
+		IOException {
 		log.error("인증 실패: {}", exception.getMessage());
 		response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 		response.setContentType("application/json;charset=UTF-8");
