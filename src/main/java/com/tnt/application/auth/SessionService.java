@@ -42,14 +42,6 @@ public class SessionService {
 
 		SessionInfo sessionInfo = redisTemplate.opsForValue().get(sessionId);
 
-		// 세션 유효성 확인
-		LocalDateTime lastAccessTime = sessionInfo.getLastAccessTime();
-		if (lastAccessTime.isBefore(LocalDateTime.now().minusDays(2))) {
-			log.info("세션이 만료됨 - SessionId: {}, LastAccessTime: {}", sessionId, lastAccessTime);
-			redisTemplate.delete(sessionId);
-			throw new UnauthorizedException("세션이 만료되었습니다.");
-		}
-
 		// 세션 갱신
 		sessionInfo = SessionInfo.builder()
 			.lastAccessTime(LocalDateTime.now())
