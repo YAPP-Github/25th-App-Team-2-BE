@@ -15,13 +15,13 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/oauth")
+@RequestMapping("/api/login")
 @RequiredArgsConstructor
-public class OAuthController {
+public class LoginController {
 
 	private final OAuthService oauthService;
 
-	@PostMapping("/login")
+	@PostMapping("/oauth")
 	@ResponseStatus(value = HttpStatus.OK)
 	public OAuthLoginResponse login(@RequestBody @Valid OAuthLoginRequest request) {
 		return oauthService.login(request);
