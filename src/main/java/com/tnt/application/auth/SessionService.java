@@ -1,5 +1,7 @@
 package com.tnt.application.auth;
 
+import static java.util.Objects.*;
+
 import java.time.LocalDateTime;
 import java.util.concurrent.TimeUnit;
 
@@ -25,34 +27,17 @@ public class SessionService {
 
 	public String authenticate(HttpServletRequest request) {
 		String authHeader = request.getHeader(AUTHORIZATION_HEADER);
+		String sessionId;
 
 		if (authHeader.isBlank() || !authHeader.startsWith(SESSION_ID_PREFIX)) {
 			log.error("Authorization 헤더가 존재하지 않거나 올바르지 않은 형식입니다.");
-			throw new UnauthorizedException("인증 세션이 존재하지 않습니다.");
+			throw new UnauthorizedException("인가 세션이 존재하지 않습니다.");
 		}
-		validateSession(authHeader.substring(SESSION_ID_PREFIX.length()));
+		sessionId = authHeader.substring(SESSION_ID_PREFIX.length());
 
-		return authHeader.substring(SESSION_ID_PREFIX.length());
-	}
+		requireNonNull(redisTemplate.opsForValue().get(sessionId), "세션 스토리지에 세션이 존재하지 않습니다.");
 
-	private void validateSession(String sessionId) {
-		// 세션 존재 여부 확인
-		if (Boolean.FALSE.equals(redisTemplate.hasKey(sessionId))) {
-			log.error("세션이 존재하지 않음 - SessionId: {}", sessionId);
-			throw new UnauthorizedException("세션 스토리지에 세션이 존재하지 않습니다.");
-		}
-
-		SessionInfo sessionInfo = redisTemplate.opsForValue().get(sessionId);
-
-		// 세션 갱신
-		sessionInfo = SessionInfo.builder()
-			.lastAccessTime(LocalDateTime.now())
-			.userAgent(sessionInfo.getUserAgent())
-			.clientIp(sessionInfo.getClientIp())
-			.build();
-
-		redisTemplate.opsForValue().set(sessionId, sessionInfo, SESSION_DURATION, TimeUnit.SECONDS);
-		log.info("세션 유효성 검증 완료 및 갱신 - SessionId: {}", sessionId);
+		return sessionId;
 	}
 
 	public void createSession(String memberId, HttpServletRequest request) {
