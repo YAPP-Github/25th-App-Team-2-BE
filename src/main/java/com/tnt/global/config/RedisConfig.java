@@ -10,7 +10,7 @@ import org.springframework.data.redis.repository.configuration.EnableRedisReposi
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
-import com.tnt.domain.auth.SessionInfo;
+import com.tnt.domain.auth.SessionValue;
 
 @Configuration
 @EnableRedisRepositories
@@ -28,13 +28,13 @@ public class RedisConfig {
 	}
 
 	@Bean
-	public RedisTemplate<String, SessionInfo> redisTemplate() {
-		RedisTemplate<String, SessionInfo> redisTemplate = new RedisTemplate<>();
+	public RedisTemplate<String, SessionValue> redisTemplate() {
+		RedisTemplate<String, SessionValue> redisTemplate = new RedisTemplate<>();
 		redisTemplate.setConnectionFactory(redisConnectionFactory());
 		redisTemplate.setKeySerializer(new StringRedisSerializer());
 
-		Jackson2JsonRedisSerializer<SessionInfo> jsonRedisSerializer =
-			new Jackson2JsonRedisSerializer<>(SessionInfo.class);
+		Jackson2JsonRedisSerializer<SessionValue> jsonRedisSerializer =
+			new Jackson2JsonRedisSerializer<>(SessionValue.class);
 		redisTemplate.setValueSerializer(jsonRedisSerializer);
 
 		return redisTemplate;

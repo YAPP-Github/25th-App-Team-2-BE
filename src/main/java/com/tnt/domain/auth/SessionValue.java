@@ -7,7 +7,7 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class SessionInfo {
+public class SessionValue {
 
 	private LocalDateTime lastAccessTime;
 	private String userAgent;

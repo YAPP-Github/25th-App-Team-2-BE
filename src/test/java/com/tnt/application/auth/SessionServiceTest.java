@@ -1,5 +1,6 @@
 package com.tnt.application.auth;
 
+import static com.tnt.application.auth.SessionService.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
 
@@ -14,7 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 
-import com.tnt.domain.auth.SessionInfo;
+import com.tnt.domain.auth.SessionValue;
 import com.tnt.global.error.exception.UnauthorizedException;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,10 +27,10 @@ class SessionServiceTest {
 	private SessionService sessionService;
 
 	@Mock
-	private RedisTemplate<String, SessionInfo> redisTemplate;
+	private RedisTemplate<String, SessionValue> redisTemplate;
 
 	@Mock
-	private ValueOperations<String, SessionInfo> valueOperations;
+	private ValueOperations<String, SessionValue> valueOperations;
 
 	@Mock
 	private HttpServletRequest request;
@@ -63,11 +64,11 @@ class SessionServiceTest {
 	void extract_session_id_success() {
 		// given
 		String sessionId = "test-session-id";
-		SessionInfo sessionInfo = SessionInfo.builder().build();
+		SessionValue sessionValue = SessionValue.builder().build();
 
 		given(request.getHeader("Authorization")).willReturn("SESSION-ID " + sessionId);
 		given(redisTemplate.opsForValue()).willReturn(valueOperations);
-		given(valueOperations.get(sessionId)).willReturn(sessionInfo);
+		given(valueOperations.get(sessionId)).willReturn(sessionValue);
 
 		// when
 		String extractedSessionId = sessionService.authenticate(request);
@@ -106,8 +107,36 @@ class SessionServiceTest {
 		// then
 		verify(valueOperations).set(
 			eq(memberId),
-			any(SessionInfo.class),
+			any(SessionValue.class),
 			eq(2L * 24 * 60 * 60),
+			eq(TimeUnit.SECONDS)
+		);
+	}
+
+	@Test
+	@DisplayName("세션 스토리지에 저장 성공")
+	void create_session_with_request_info_success() {
+		// given
+		String memberId = "12345";
+		String userAgent = "Mozilla/5.0";
+		String clientIp = "127.0.0.1";
+
+		given(request.getHeader("User-Agent")).willReturn(userAgent);
+		given(request.getRemoteAddr()).willReturn(clientIp);
+		given(redisTemplate.opsForValue()).willReturn(valueOperations);
+
+		// when
+		sessionService.createSession(memberId, request);
+
+		// then
+		verify(valueOperations).set(
+			eq(memberId),
+			argThat(sessionValue ->
+				sessionValue.getUserAgent().equals(userAgent) &&
+					sessionValue.getClientIp().equals(clientIp) &&
+					sessionValue.getLastAccessTime() != null
+			),
+			eq(SESSION_DURATION),
 			eq(TimeUnit.SECONDS)
 		);
 	}

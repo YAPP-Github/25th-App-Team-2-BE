@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
-import com.tnt.domain.auth.SessionInfo;
+import com.tnt.domain.auth.SessionValue;
 import com.tnt.global.error.exception.UnauthorizedException;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,7 +24,7 @@ public class SessionService {
 	static final long SESSION_DURATION = 2L * 24 * 60 * 60; // 48시간
 	private static final String AUTHORIZATION_HEADER = "Authorization";
 	private static final String SESSION_ID_PREFIX = "SESSION-ID ";
-	private final RedisTemplate<String, SessionInfo> redisTemplate;
+	private final RedisTemplate<String, SessionValue> redisTemplate;
 
 	public String authenticate(HttpServletRequest request) {
 		String authHeader = request.getHeader(AUTHORIZATION_HEADER);
@@ -42,7 +42,7 @@ public class SessionService {
 	}
 
 	public void createSession(String memberId, HttpServletRequest request) {
-		SessionInfo sessionInfo = SessionInfo.builder()
+		SessionValue sessionValue = SessionValue.builder()
 			.lastAccessTime(LocalDateTime.now())
 			.userAgent(request.getHeader("User-Agent"))
 			.clientIp(request.getRemoteAddr())
@@ -50,7 +50,7 @@ public class SessionService {
 
 		redisTemplate.opsForValue().set(
 			memberId,
-			sessionInfo,
+			sessionValue,
 			SESSION_DURATION,
 			TimeUnit.SECONDS
 		);
