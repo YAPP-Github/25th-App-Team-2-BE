@@ -45,7 +45,7 @@ class SessionServiceTest {
 		// when & then
 		assertThatThrownBy(() -> sessionService.authenticate(request))
 			.isInstanceOf(UnauthorizedException.class)
-			.hasMessage("인증 세션이 존재하지 않습니다.");
+			.hasMessage("인가 세션이 존재하지 않습니다.");
 	}
 
 	@Test
