@@ -1,5 +1,6 @@
 package com.tnt.application.auth;
 
+import static io.micrometer.common.util.StringUtils.*;
 import static java.util.Objects.*;
 
 import java.time.LocalDateTime;
@@ -29,7 +30,7 @@ public class SessionService {
 		String authHeader = request.getHeader(AUTHORIZATION_HEADER);
 		String sessionId;
 
-		if (authHeader.isBlank() || !authHeader.startsWith(SESSION_ID_PREFIX)) {
+		if (isBlank(authHeader) || !authHeader.startsWith(SESSION_ID_PREFIX)) {
 			log.error("Authorization 헤더가 존재하지 않거나 올바르지 않은 형식입니다.");
 			throw new UnauthorizedException("인가 세션이 존재하지 않습니다.");
 		}
