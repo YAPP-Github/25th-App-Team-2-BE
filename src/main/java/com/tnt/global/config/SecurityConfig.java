@@ -15,7 +15,8 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
 
 import com.tnt.application.auth.SessionService;
-import com.tnt.global.auth.SessionAuthenticationFilter;
+import com.tnt.global.auth.filter.ServletExceptionFilter;
+import com.tnt.global.auth.filter.SessionAuthenticationFilter;
 
 import lombok.RequiredArgsConstructor;
 
@@ -27,12 +28,10 @@ public class SecurityConfig {
 
 	private static final String[] ALLOWED_URIS = {
 		"/",
-		"/login",
-		"/api",
+		"/index.html",
 		"/v3/api-docs/**",
 		"/swagger-ui/**",
-		"/index.html",
-		"/api/oauth2/**"
+		"/login"
 	};
 	private final SessionService sessionService;
 
@@ -51,9 +50,15 @@ public class SecurityConfig {
 			.authorizeHttpRequests(request ->
 				request.requestMatchers(ALLOWED_URIS).permitAll()
 					.anyRequest().authenticated())
+			.addFilterBefore(servletExceptionFilter(), LogoutFilter.class)
 			.addFilterAfter(sessionAuthenticationFilter(), LogoutFilter.class);
 
 		return http.build();
+	}
+
+	@Bean
+	public ServletExceptionFilter servletExceptionFilter() {
+		return new ServletExceptionFilter();
 	}
 
 	@Bean
