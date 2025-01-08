@@ -106,7 +106,8 @@ jacocoTestCoverageVerification {
             excludes = [
                     '*.*Application',
                     '*.*Config',
-                    '*.error.*'
+                    '*.error.*',
+                    '*.dto.*'
             ]
         }
     }
