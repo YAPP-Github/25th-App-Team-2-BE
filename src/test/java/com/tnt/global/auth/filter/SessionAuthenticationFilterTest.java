@@ -1,12 +1,10 @@
-package com.tnt.global.auth;
+package com.tnt.global.auth.filter;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.*;
 
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.List;
 
@@ -16,7 +14,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.Authentication;
@@ -25,6 +23,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import com.tnt.application.auth.SessionService;
 import com.tnt.global.error.exception.UnauthorizedException;
+import com.tnt.global.error.model.ErrorMessage;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -74,31 +73,20 @@ class SessionAuthenticationFilterTest {
 
 	@ParameterizedTest
 	@DisplayName("세션 인증 실패 시 예외 발생")
-	@ValueSource(strings = {
-		"인가 세션이 존재하지 않습니다.",
-		"세션 스토리지에 세션이 존재하지 않습니다.",
-		"세션이 만료되었습니다."
-	})
-	void session_authentication_failure_cases(String errorMessage) throws ServletException, IOException {
+	@EnumSource(
+		value = ErrorMessage.class,
+		names = {"AUTHORIZATION_HEADER_ERROR", "NO_EXIST_SESSION_IN_STORAGE"}
+	)
+	void session_authentication_failure_cases(ErrorMessage errorMessage) {
 		// given
-		StringWriter stringWriter = new StringWriter();
-
 		given(request.getRequestURI()).willReturn("/api/members/me");
-		if (errorMessage.equals("세션 스토리지에 세션이 존재하지 않습니다.")) {
-			given(sessionService.authenticate(request)).willThrow(new RuntimeException(errorMessage));
-		} else {
-			given(sessionService.authenticate(request)).willThrow(new UnauthorizedException(errorMessage));
-		}
-		given(response.getWriter()).willReturn(new PrintWriter(stringWriter));
+		given(sessionService.authenticate(request))
+			.willThrow(new UnauthorizedException(errorMessage));
 
-		// when
-		sessionAuthenticationFilter.doFilterInternal(request, response, filterChain);
-
-		// then
-		verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-		verify(response).setContentType("application/json;charset=UTF-8");
-		verify(filterChain, never()).doFilter(request, response);
-		assertThat(stringWriter.toString()).contains(errorMessage);
+		// when & then
+		assertThatThrownBy(() -> sessionAuthenticationFilter.doFilterInternal(request, response, filterChain))
+			.isInstanceOf(UnauthorizedException.class)
+			.hasMessage(errorMessage.getMessage());
 	}
 
 	@Test
