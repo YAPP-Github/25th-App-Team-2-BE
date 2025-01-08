@@ -130,6 +130,7 @@ dependencies {
     implementation 'io.hypersistence:hypersistence-utils-hibernate-63:3.9.0'
 
     // 애플 로그인 관련 라이브러리
+    implementation 'com.auth0:java-jwt:4.4.0'
     implementation 'com.auth0:jwks-rsa:0.22.1'
     implementation 'org.json:json:20231013'
     implementation 'org.bouncycastle:bcprov-jdk18on:1.79'
