@@ -1,4 +1,4 @@
-package com.tnt.global.auth;
+package com.tnt.global.auth.filter;
 
 import java.io.IOException;
 import java.util.List;
@@ -47,15 +47,7 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
 			return;
 		}
 
-		try {
-			checkSessionAndAuthentication(request);
-		} catch (RuntimeException e) {
-			log.error("인증 처리 중 에러 발생: ", e);
-
-			handleUnauthorizedException(response, e);
-			return;
-		}
-
+		checkSessionAndAuthentication(request);
 		filterChain.doFilter(request, response);
 	}
 
@@ -75,23 +67,12 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
 	}
 
 	private void checkSessionAndAuthentication(HttpServletRequest request) {
-		String sessionId = sessionService.authenticate(request);
-
-		saveAuthentication(Long.parseLong(sessionId));
+		saveAuthentication(sessionService.authenticate(request));
 	}
 
-	private void handleUnauthorizedException(HttpServletResponse response, RuntimeException exception) throws
-		IOException {
-		log.error("인증 실패: ", exception);
-
-		response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-		response.setContentType("application/json;charset=UTF-8");
-		response.getWriter().write(exception.getMessage());
-	}
-
-	private void saveAuthentication(Long sessionId) {
+	private void saveAuthentication(String sessionId) {
 		UserDetails userDetails = User.builder()
-			.username(String.valueOf(sessionId))
+			.username(sessionId)
 			.password("")
 			.roles("USER")
 			.build();
