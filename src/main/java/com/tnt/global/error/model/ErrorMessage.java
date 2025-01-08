@@ -7,7 +7,13 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum ErrorMessage {
 
+	SERVER_ERROR("서버 에러가 발생했습니다."),
+	BAD_REQUEST("잘못된 요청입니다."),
+	FAILED_TO_PROCESS_REQUEST("요청 진행에 실패했습니다."),
+	ACCESS_DENIED("접근이 거부되었습니다."),
+
 	AUTHORIZATION_HEADER_ERROR("Authorization 헤더가 존재하지 않거나 올바르지 않은 형식입니다."),
+	NO_EXIST_SESSION_IN_STORAGE("세션 스토리지에 세션이 존재하지 않습니다."),
 
 	SOCIAL_SERVICE_NOT_SUPPORT("지원하지 않는 소셜 서비스입니다."),
 	FAILED_TO_FETCH_USER_INFO("소셜 서버로부터 유저 정보 불러오기에 실패했습니다."),
