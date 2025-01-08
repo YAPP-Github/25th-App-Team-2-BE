@@ -1,4 +1,4 @@
-package com.tnt.global.entity;
+package com.tnt.global.common.entity;
 
 import java.time.LocalDateTime;
 
