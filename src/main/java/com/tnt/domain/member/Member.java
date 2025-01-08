@@ -2,7 +2,7 @@ package com.tnt.domain.member;
 
 import java.time.LocalDateTime;
 
-import com.tnt.global.entity.BaseTimeEntity;
+import com.tnt.global.common.entity.BaseTimeEntity;
 
 import io.hypersistence.utils.hibernate.id.Tsid;
 import jakarta.persistence.Column;
