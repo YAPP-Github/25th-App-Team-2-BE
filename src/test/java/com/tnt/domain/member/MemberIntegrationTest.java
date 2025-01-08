@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.tnt.domain.member.repository.MemberRepository;
+import com.tnt.infrastructure.mysql.member.repository.MemberRepository;
 
 @SpringBootTest
 @Transactional
