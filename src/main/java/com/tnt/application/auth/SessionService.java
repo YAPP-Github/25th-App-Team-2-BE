@@ -1,15 +1,13 @@
 package com.tnt.application.auth;
 
+import static com.tnt.global.error.model.ErrorMessage.*;
 import static io.micrometer.common.util.StringUtils.*;
-import static java.util.Objects.*;
 
-import java.time.LocalDateTime;
 import java.util.concurrent.TimeUnit;
 
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
-import com.tnt.domain.auth.SessionValue;
 import com.tnt.global.error.exception.UnauthorizedException;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,37 +22,37 @@ public class SessionService {
 	static final long SESSION_DURATION = 2L * 24 * 60 * 60; // 48시간
 	private static final String AUTHORIZATION_HEADER = "Authorization";
 	private static final String SESSION_ID_PREFIX = "SESSION-ID ";
-	private final RedisTemplate<String, SessionValue> redisTemplate;
+	private final StringRedisTemplate redisTemplate;
 
 	public String authenticate(HttpServletRequest request) {
 		String authHeader = request.getHeader(AUTHORIZATION_HEADER);
 
 		if (isBlank(authHeader) || !authHeader.startsWith(SESSION_ID_PREFIX)) {
-			log.error("Authorization 헤더가 존재하지 않거나 올바르지 않은 형식입니다.");
+			log.error(AUTHORIZATION_HEADER_ERROR.getMessage());
 
-			throw new UnauthorizedException("인가 세션이 존재하지 않습니다.");
+			throw new UnauthorizedException(AUTHORIZATION_HEADER_ERROR);
 		}
 
 		String sessionId = authHeader.substring(SESSION_ID_PREFIX.length());
+		String sessionValue = redisTemplate.opsForValue().get(sessionId);
 
-		requireNonNull(redisTemplate.opsForValue().get(sessionId), "세션 스토리지에 세션이 존재하지 않습니다.");
+		if (sessionValue == null) {
+			log.error(NO_EXIST_SESSION_IN_STORAGE.getMessage());
+
+			throw new UnauthorizedException(NO_EXIST_SESSION_IN_STORAGE);
+		}
+
+		createSession(sessionId, "");
 
 		return sessionId;
 	}
 
-	public void createSession(String memberId, HttpServletRequest request) {
-		SessionValue sessionValue = SessionValue.builder()
-			.lastAccessTime(LocalDateTime.now())
-			.userAgent(request.getHeader("User-Agent"))
-			.clientIp(request.getRemoteAddr())
-			.build();
-
-		redisTemplate.opsForValue().set(
-			memberId,
-			sessionValue,
-			SESSION_DURATION,
-			TimeUnit.SECONDS
-		);
+	public void createSession(String sessionId, String memberId) {
+		if (isBlank(memberId)) {
+			redisTemplate.expire(sessionId, SESSION_DURATION, TimeUnit.SECONDS);
+		} else {
+			redisTemplate.opsForValue().set(sessionId, memberId, SESSION_DURATION, TimeUnit.SECONDS);
+		}
 	}
 
 	public void removeSession(String sessionId) {
