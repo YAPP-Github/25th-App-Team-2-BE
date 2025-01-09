@@ -29,7 +29,7 @@ public class ServletExceptionFilter extends OncePerRequestFilter {
 		try {
 			filterChain.doFilter(request, response);
 		} catch (RuntimeException e) {
-			log.error(FAILED_TO_PROCESS_REQUEST.getMessage());
+			log.error(FAILED_TO_PROCESS_REQUEST.getMessage(), e);
 
 			handleException(response, e);
 		}
