@@ -1,4 +1,4 @@
-package com.tnt.infrastructure.mysql.member.repository;
+package com.tnt.infrastructure.mysql.repository.member;
 
 import java.util.Optional;
 
