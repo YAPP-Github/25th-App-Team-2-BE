@@ -37,7 +37,7 @@ import com.tnt.dto.member.response.OAuthLoginResponse;
 import com.tnt.global.error.exception.NotFoundException;
 import com.tnt.global.error.exception.OAuthException;
 import com.tnt.global.error.model.ErrorMessage;
-import com.tnt.infrastructure.mysql.member.repository.MemberRepository;
+import com.tnt.infrastructure.mysql.repository.member.MemberRepository;
 
 import io.hypersistence.tsid.TSID;
 import lombok.RequiredArgsConstructor;
@@ -97,7 +97,7 @@ public class OAuthService {
 
 	private Map<String, Object> fetchOAuthUserInfo(OAuthLoginRequest request, String socialType) {
 		return switch (socialType) {
-			case KAKAO -> fetchUserInfoWithoutApple(request.socialAccessToken());
+			case KAKAO -> handleKakaoLogin(request.socialAccessToken());
 			case APPLE -> handleAppleLogin(request);
 			default -> {
 				log.error("{}, socialType: {}", UNSUPPORTED_SOCIAL_TYPE.getMessage(), socialType);
@@ -107,7 +107,7 @@ public class OAuthService {
 		};
 	}
 
-	private Map<String, Object> fetchUserInfoWithoutApple(String socialAccessToken) {
+	private Map<String, Object> handleKakaoLogin(String socialAccessToken) {
 		return webClient
 			.get()
 			.uri(kakaoApiUrl)
@@ -153,7 +153,7 @@ public class OAuthService {
 	}
 
 	// JWT 형식의 클라이언트 시크릿 생성
-	protected String generateClientSecret() {
+	private String generateClientSecret() {
 		try {
 			// JWT 헤더 설정
 			Map<String, Object> headerClaims = new HashMap<>();
@@ -236,7 +236,7 @@ public class OAuthService {
 			.block();
 	}
 
-	protected JSONObject findMatchingKey(JSONArray keys, String kid) {
+	private JSONObject findMatchingKey(JSONArray keys, String kid) {
 		for (int i = 0; i < keys.length(); i++) {
 			JSONObject key = keys.getJSONObject(i);
 
@@ -247,7 +247,7 @@ public class OAuthService {
 		return null;
 	}
 
-	RSAPublicKey getRsaPublicKey(JSONObject key) throws NoSuchAlgorithmException, InvalidKeySpecException {
+	private RSAPublicKey getRsaPublicKey(JSONObject key) throws NoSuchAlgorithmException, InvalidKeySpecException {
 		BigInteger nInt = new BigInteger(1, Base64.getUrlDecoder().decode(key.getString("n")));
 		BigInteger eInt = new BigInteger(1, Base64.getUrlDecoder().decode(key.getString("e")));
 		RSAPublicKeySpec spec = new RSAPublicKeySpec(nInt, eInt);
@@ -265,7 +265,7 @@ public class OAuthService {
 		verifier.verify(idToken);
 	}
 
-	Map<String, Object> extractUserInfo(String payload) {
+	private Map<String, Object> extractUserInfo(String payload) {
 		JSONObject payloadJson = new JSONObject(payload);
 		Map<String, Object> userInfo = new HashMap<>();
 		String email = "email";
