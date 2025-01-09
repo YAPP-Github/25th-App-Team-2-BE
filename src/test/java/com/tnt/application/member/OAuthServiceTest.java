@@ -10,13 +10,10 @@ import java.security.KeyPairGenerator;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
-import java.security.spec.InvalidKeySpecException;
 import java.util.Base64;
 import java.util.Date;
-import java.util.Map;
 import java.util.Optional;
 
-import org.json.JSONObject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -39,7 +36,7 @@ import com.tnt.dto.member.request.OAuthLoginRequest;
 import com.tnt.dto.member.response.OAuthLoginResponse;
 import com.tnt.global.error.exception.NotFoundException;
 import com.tnt.global.error.exception.OAuthException;
-import com.tnt.infrastructure.mysql.member.repository.MemberRepository;
+import com.tnt.infrastructure.mysql.repository.member.MemberRepository;
 
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -142,37 +139,6 @@ class OAuthServiceTest {
 		assertThatThrownBy(() -> oAuthService.oauthLogin(request))
 			.isInstanceOf(OAuthException.class)
 			.hasMessage(APPLE_AUTH_ERROR.getMessage());
-	}
-
-	@Test
-	@DisplayName("클라이언트 시크릿 생성 성공")
-	void generate_client_secret_success() throws Exception {
-		// given
-		KeyPairGenerator ecKeyGen = KeyPairGenerator.getInstance("EC");
-		ecKeyGen.initialize(256);
-		KeyPair ecPair = ecKeyGen.generateKeyPair();
-		ECPrivateKey ecPrivateKey = (ECPrivateKey)ecPair.getPrivate();
-
-		ReflectionTestUtils.setField(oAuthService, "privateKey",
-			Base64.getEncoder().encodeToString(ecPrivateKey.getEncoded()));
-		ReflectionTestUtils.setField(oAuthService, "teamId", "test-team-id");
-		ReflectionTestUtils.setField(oAuthService, "clientId", "test-client-id");
-		ReflectionTestUtils.setField(oAuthService, "keyId", "test-kid");
-		ReflectionTestUtils.setField(oAuthService, "appleApiUrl", appleApiUrl);
-
-		// when
-		String clientSecret = oAuthService.generateClientSecret();
-
-		// then
-		assertThat(clientSecret).isNotNull();
-
-		// JWT 구조 검증
-		String[] parts = clientSecret.split("\\.");
-		assertThat(parts).hasSize(3);  // header, payload, signature
-
-		// header 검증
-		String header = new String(Base64.getUrlDecoder().decode(parts[0]));
-		assertThat(header).contains("\"kid\":\"test-kid\"");
 	}
 
 	@Test
@@ -309,9 +275,6 @@ class OAuthServiceTest {
 		String encodedPrivateKey = Base64.getEncoder().encodeToString(ecPrivateKey.getEncoded());
 		ReflectionTestUtils.setField(oAuthService, "privateKey", encodedPrivateKey);
 
-		OAuthService spyOAuthService = spy(oAuthService);
-		doReturn("client_secret").when(spyOAuthService).generateClientSecret();
-
 		mockWebServer.enqueue(new MockResponse()
 			.setResponseCode(200)
 			.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
@@ -330,7 +293,7 @@ class OAuthServiceTest {
 			Optional.of(mockMember));
 
 		// when
-		OAuthLoginResponse response = spyOAuthService.oauthLogin(request);
+		OAuthLoginResponse response = oAuthService.oauthLogin(request);
 
 		// then
 		assertThat(response).isNotNull();
@@ -358,54 +321,6 @@ class OAuthServiceTest {
 		assertThatThrownBy(() -> oAuthService.oauthLogin(request))
 			.isInstanceOf(OAuthException.class)
 			.hasMessage(APPLE_AUTH_ERROR.getMessage());
-	}
-
-	@Test
-	@DisplayName("사용자 정보 추출 성공")
-	void extract_user_info_success() {
-		// given
-		String payload = new JSONObject()
-			.put("sub", "test-user")
-			.put("email", "test@example.com")
-			.toString();
-
-		// when
-		Map<String, Object> userInfo = oAuthService.extractUserInfo(payload);
-
-		// then
-		assertThat(userInfo)
-			.containsEntry("sub", "test-user")
-			.containsEntry("email", "test@example.com");
-	}
-
-	@Test
-	@DisplayName("이메일이 없는 사용자 정보 추출 성공")
-	void extract_user_info_without_email_success() {
-		// given
-		String payload = new JSONObject()
-			.put("sub", "test-user")
-			.toString();
-
-		// when
-		Map<String, Object> userInfo = oAuthService.extractUserInfo(payload);
-
-		// then
-		assertThat(userInfo)
-			.containsEntry("sub", "test-user")
-			.doesNotContainKey("email");
-	}
-
-	@Test
-	@DisplayName("RSA 공개키 생성 실패 시 예외 발생")
-	void get_rsa_public_key_error() {
-		// given
-		JSONObject invalidKey = new JSONObject()
-			.put("n", "invalid")
-			.put("e", "invalid");
-
-		// when & then
-		assertThatThrownBy(() -> oAuthService.getRsaPublicKey(invalidKey))
-			.isInstanceOf(InvalidKeySpecException.class);
 	}
 
 	@Test
