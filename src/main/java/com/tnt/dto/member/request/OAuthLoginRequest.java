@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 
 @Schema(description = "소셜 로그인 요청")
 public record OAuthLoginRequest(
-	@Schema(description = "소셜 로그인 타입", example = "KAKAO", type = "string", allowableValues = {"KAKAO", "APPLE"})
+	@Schema(description = "소셜 로그인 타입", example = "kakao", type = "string", allowableValues = {"kakao", "apple"})
 	@NotBlank(message = "소셜 로그인 타입은 필수입니다.")
 	String socialType,
 
