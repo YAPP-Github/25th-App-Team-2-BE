@@ -8,16 +8,24 @@ import java.security.interfaces.ECPublicKey;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Base64;
 
+import org.springframework.stereotype.Component;
+
 import com.auth0.jwt.interfaces.ECDSAKeyProvider;
 import com.tnt.global.error.exception.OAuthException;
 
 import lombok.RequiredArgsConstructor;
 
+@Component
 @RequiredArgsConstructor
 public class AppleEcdsaKeyProvider implements ECDSAKeyProvider {
 
-	private final String privateKey;
-	private final String keyId;
+	private String privateKey;
+	private String keyId;
+
+	public AppleEcdsaKeyProvider(String privateKey, String keyId) {
+		this.privateKey = privateKey;
+		this.keyId = keyId;
+	}
 
 	@Override
 	public ECPublicKey getPublicKeyById(String keyId) {
