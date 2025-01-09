@@ -30,7 +30,7 @@ class SocialTypeTest {
 		attributes.put("properties", Map.of("nickname", "카카오닉네임"));
 
 		// when
-		OAuthUserInfo userInfo = SocialType.KAKAO.getOAuthUserInfo(attributes);
+		OAuthUserInfo userInfo = SocialType.KAKAO.extractOAuthUserInfo(attributes);
 
 		// then
 		assertThat(userInfo).isInstanceOf(KakaoUserInfo.class);
@@ -52,7 +52,7 @@ class SocialTypeTest {
 		));
 
 		// when
-		OAuthUserInfo userInfo = SocialType.APPLE.getOAuthUserInfo(attributes);
+		OAuthUserInfo userInfo = SocialType.APPLE.extractOAuthUserInfo(attributes);
 
 		// then
 		assertThat(userInfo).isInstanceOf(AppleUserInfo.class);
@@ -68,8 +68,8 @@ class SocialTypeTest {
 		Map<String, Object> attributes = new HashMap<>();
 
 		// when
-		OAuthUserInfo kakaoUserInfo = SocialType.KAKAO.getOAuthUserInfo(attributes);
-		OAuthUserInfo appleUserInfo = SocialType.APPLE.getOAuthUserInfo(attributes);
+		OAuthUserInfo kakaoUserInfo = SocialType.KAKAO.extractOAuthUserInfo(attributes);
+		OAuthUserInfo appleUserInfo = SocialType.APPLE.extractOAuthUserInfo(attributes);
 
 		// then
 		assertThat(kakaoUserInfo).isInstanceOf(KakaoUserInfo.class);

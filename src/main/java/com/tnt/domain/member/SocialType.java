@@ -12,16 +12,16 @@ import lombok.Getter;
 public enum SocialType {
 	KAKAO {
 		@Override
-		public OAuthUserInfo getOAuthUserInfo(Map<String, Object> attributes) {
+		public OAuthUserInfo extractOAuthUserInfo(Map<String, Object> attributes) {
 			return new KakaoUserInfo(attributes);
 		}
 	},
 	APPLE {
 		@Override
-		public OAuthUserInfo getOAuthUserInfo(Map<String, Object> attributes) {
+		public OAuthUserInfo extractOAuthUserInfo(Map<String, Object> attributes) {
 			return new AppleUserInfo(attributes);
 		}
 	};
 
-	public abstract OAuthUserInfo getOAuthUserInfo(Map<String, Object> attributes);
+	public abstract OAuthUserInfo extractOAuthUserInfo(Map<String, Object> attributes);
 }
