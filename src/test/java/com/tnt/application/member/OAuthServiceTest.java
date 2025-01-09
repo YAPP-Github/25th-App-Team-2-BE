@@ -48,8 +48,6 @@ import okhttp3.mockwebserver.MockWebServer;
 class OAuthServiceTest {
 
 	private MockWebServer mockWebServer;
-
-	@Mock
 	private OAuthService oAuthService;
 
 	@Mock
