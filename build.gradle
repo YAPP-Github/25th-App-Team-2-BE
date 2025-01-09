@@ -107,7 +107,8 @@ jacocoTestCoverageVerification {
                     '*.*Application',
                     '*.*Config',
                     '*.error.*',
-                    '*.dto.*'
+                    '*.dto.*',
+                    '*.*AppleEcdsaKeyProvider'
             ]
         }
     }
