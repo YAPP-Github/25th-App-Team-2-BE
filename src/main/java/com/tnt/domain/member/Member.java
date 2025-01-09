@@ -27,7 +27,7 @@ public class Member extends BaseTimeEntity {
 	@Column(name = "id", nullable = false, unique = true)
 	private Long id;
 
-	@Column(name = "social_id", nullable = false, unique = true)
+	@Column(name = "social_id", nullable = false, unique = true, length = 50)
 	private String socialId;
 
 	@Column(name = "email", nullable = false, length = 100)
@@ -55,7 +55,7 @@ public class Member extends BaseTimeEntity {
 	private LocalDateTime deletedAt;
 
 	@Enumerated(EnumType.STRING)
-	@Column(name = "social_type", nullable = false)
+	@Column(name = "social_type", nullable = false, length = 30)
 	private SocialType socialType;
 
 	@Builder
