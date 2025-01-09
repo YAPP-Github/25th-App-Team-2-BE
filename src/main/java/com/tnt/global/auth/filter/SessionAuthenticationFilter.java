@@ -41,8 +41,6 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
 			request.getMethod());
 
 		if (isAllowedUri(requestUri)) {
-			log.info("{} 허용 URI. 세션 유효성 검사 스킵.", requestUri);
-
 			filterChain.doFilter(request, response);
 			return;
 		}
@@ -60,8 +58,6 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
 				break;
 			}
 		}
-
-		log.info("URI {} is {}allowed", requestUri, allowed ? "" : "not ");
 
 		return allowed;
 	}
