@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -48,6 +49,8 @@ import okhttp3.mockwebserver.MockWebServer;
 class OAuthServiceTest {
 
 	private MockWebServer mockWebServer;
+
+	@Autowired
 	private OAuthService oAuthService;
 
 	@Mock
