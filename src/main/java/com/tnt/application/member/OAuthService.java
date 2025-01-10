@@ -31,6 +31,8 @@ import com.auth0.jwt.interfaces.JWTVerifier;
 import com.tnt.application.auth.SessionService;
 import com.tnt.domain.member.Member;
 import com.tnt.domain.member.SocialType;
+import com.tnt.dto.member.AppleUserInfo;
+import com.tnt.dto.member.KakaoUserInfo;
 import com.tnt.dto.member.OAuthUserInfo;
 import com.tnt.dto.member.request.OAuthLoginRequest;
 import com.tnt.dto.member.response.OAuthLoginResponse;
@@ -49,8 +51,8 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class OAuthService {
 
-	private static final String KAKAO = "KAKAO";
-	private static final String APPLE = "APPLE";
+	private static final String KAKAO = "kakao";
+	private static final String APPLE = "apple";
 	private final WebClient webClient;
 	private final SessionService sessionService;
 	private final MemberRepository memberRepository;
@@ -74,33 +76,24 @@ public class OAuthService {
 	private String privateKey;
 
 	public OAuthLoginResponse oauthLogin(OAuthLoginRequest request) {
-		SocialType socialType = getSocialType(request.socialType());
-		Map<String, Object> attributes = fetchOAuthUserInfo(request, request.socialType());
-		OAuthUserInfo oauthInfo = socialType.extractOAuthUserInfo(attributes);
+		OAuthUserInfo oauthInfo = extractOAuthUserInfo(request);
 		String socialId = oauthInfo.getId();
 
 		// 신규 회원이면 예외 발생
-		Member findMember = findMemberFromDB(socialId, socialType);
-
+		Member findMember = findMemberFromDB(socialId, request.socialType());
 		String sessionId = String.valueOf(TSID.Factory.getTsid());
-		sessionService.createSession(sessionId, String.valueOf(findMember.getId()));
+
+		sessionService.createData(sessionId, String.valueOf(findMember.getId()));
 
 		return OAuthLoginResponse.from(sessionId);
 	}
 
-	private SocialType getSocialType(String socialType) {
-		if (socialType.equals(APPLE)) {
-			return SocialType.APPLE;
-		}
-		return SocialType.KAKAO;
-	}
-
-	private Map<String, Object> fetchOAuthUserInfo(OAuthLoginRequest request, String socialType) {
-		return switch (socialType) {
-			case KAKAO -> handleKakaoLogin(request.socialAccessToken());
-			case APPLE -> handleAppleLogin(request);
+	private OAuthUserInfo extractOAuthUserInfo(OAuthLoginRequest request) {
+		return switch (request.socialType()) {
+			case KAKAO -> new KakaoUserInfo(handleKakaoLogin(request.socialAccessToken()));
+			case APPLE -> new AppleUserInfo(handleAppleLogin(request));
 			default -> {
-				log.error("{}, socialType: {}", UNSUPPORTED_SOCIAL_TYPE.getMessage(), socialType);
+				log.error("{}, socialType: {}", UNSUPPORTED_SOCIAL_TYPE.getMessage(), request.socialType());
 
 				throw new OAuthException(UNSUPPORTED_SOCIAL_TYPE);
 			}
@@ -277,8 +270,8 @@ public class OAuthService {
 		return userInfo;
 	}
 
-	private Member findMemberFromDB(String socialId, SocialType socialType) {
-		return memberRepository.findBySocialIdAndSocialType(socialId, socialType)
+	private Member findMemberFromDB(String socialId, String socialType) {
+		return memberRepository.findBySocialIdAndSocialType(socialId, SocialType.valueOf(socialType.toUpperCase()))
 			.orElseThrow(() -> {
 				log.error("{} socialId: {} socialType: {}", MEMBER_NOT_FOUND.getMessage(), socialId, socialType);
 

@@ -42,20 +42,28 @@ public class SessionService {
 			throw new UnauthorizedException(NO_EXIST_SESSION_IN_STORAGE);
 		}
 
-		createSession(sessionId, "");
+		createData(sessionId, "");
 
 		return sessionId;
 	}
 
-	public void createSession(String sessionId, String memberId) {
-		if (isBlank(memberId)) {
+	public void createData(String sessionId, String memberId) {
+		if (isBlank(memberId)) { // 세션 갱신
 			redisTemplate.expire(sessionId, SESSION_DURATION, TimeUnit.SECONDS);
-		} else {
+			redisTemplate.expire(memberId, SESSION_DURATION, TimeUnit.SECONDS);
+		} else { // 로그인 시 기존 로그인 상태 제거하고 새로운 세션 생성
+			String existingSessionId = redisTemplate.opsForValue().get(memberId);
+
+			if (existingSessionId != null) {
+				removeData(sessionId);
+				removeData(memberId);
+			}
 			redisTemplate.opsForValue().set(sessionId, memberId, SESSION_DURATION, TimeUnit.SECONDS);
+			redisTemplate.opsForValue().set(memberId, sessionId, SESSION_DURATION, TimeUnit.SECONDS);
 		}
 	}
 
-	public void removeSession(String sessionId) {
-		redisTemplate.delete(sessionId);
+	public void removeData(String dataKey) {
+		redisTemplate.delete(dataKey);
 	}
 }
