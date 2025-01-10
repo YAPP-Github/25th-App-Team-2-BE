@@ -7,9 +7,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum SocialType {
 
-	KAKAO("kakao"),
-
-	APPLE("apple");
-
-	private final String registrationId;
+	KAKAO,
+	APPLE;
 }
