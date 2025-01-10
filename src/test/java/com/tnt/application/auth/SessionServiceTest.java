@@ -98,12 +98,11 @@ class SessionServiceTest {
 		// given
 		String sessionId = "test-session-id";
 		String memberId = "12345";
-		String socialId = "test-social-id";
 
 		given(redisTemplate.opsForValue()).willReturn(valueOperations);
 
 		// when
-		sessionService.createData(sessionId, memberId, socialId);
+		sessionService.createData(sessionId, memberId);
 
 		// then
 		verify(valueOperations).set(
