@@ -23,16 +23,6 @@ public class AppleUserInfo extends OAuthUserInfo {
 	}
 
 	@Override
-	public String getAge() {
-		return null; // Apple에서 나이 제공 안 함
-	}
-
-	@Override
-	public String getGender() {
-		return null; // Apple에서 성별 제공 안 함
-	}
-
-	@Override
 	public String getName() {
 		String firstName = getAttributeFromAccount("name", "firstName");
 		String lastName = getAttributeFromAccount("name", "lastName");

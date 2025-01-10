@@ -14,10 +14,6 @@ public abstract class OAuthUserInfo {
 
 	public abstract String getEmail();
 
-	public abstract String getAge();
-
-	public abstract String getGender();
-
 	public abstract String getName();
 
 	protected String getAttributeFromAccount(String infoKey, String attributeKey) {

@@ -26,16 +26,6 @@ public class KakaoUserInfo extends OAuthUserInfo {
 	}
 
 	@Override
-	public String getAge() {
-		return getAttributeFromAccount(KAKAO_ACCOUNT_KEY, "age");
-	}
-
-	@Override
-	public String getGender() {
-		return getAttributeFromAccount(KAKAO_ACCOUNT_KEY, "gender");
-	}
-
-	@Override
 	public String getName() {
 		return getAttributeFromAccount(PROPERTIES_KEY, "nickname");
 	}
