@@ -44,6 +44,9 @@ import okhttp3.mockwebserver.MockWebServer;
 @ExtendWith(MockitoExtension.class)
 class OAuthServiceTest {
 
+	private static final String KAKAO = "kakao";
+	private static final String APPLE = "apple";
+
 	private MockWebServer mockWebServer;
 	private OAuthService oAuthService;
 
@@ -77,7 +80,7 @@ class OAuthServiceTest {
 	@DisplayName("존재하지 않는 회원 예외 발생")
 	void member_not_found_error() {
 		// given
-		OAuthLoginRequest request = new OAuthLoginRequest("KAKAO", "kakao-access-token", null, null);
+		OAuthLoginRequest request = new OAuthLoginRequest(KAKAO, "kakao-access-token", null, null);
 
 		mockWebServer.enqueue(new MockResponse()
 			.setResponseCode(200)  // 성공 응답으로 설정
@@ -109,7 +112,7 @@ class OAuthServiceTest {
 	@DisplayName("Kakao 로그인 실패 시 예외 발생")
 	void kakao_login_failure_error() {
 		// given
-		OAuthLoginRequest request = new OAuthLoginRequest("KAKAO", "invalid-token", null, null);
+		OAuthLoginRequest request = new OAuthLoginRequest(KAKAO, "invalid-token", null, null);
 
 		String errorResponse = "{\"msg\": \"this access token does not exist\", \"code\": -401}";
 
@@ -128,7 +131,7 @@ class OAuthServiceTest {
 	@DisplayName("Apple 클라이언트 인증 실패")
 	void apple_client_authentication_failure_error() {
 		// given
-		OAuthLoginRequest request = new OAuthLoginRequest("APPLE", null, "invalid-auth-code", null);
+		OAuthLoginRequest request = new OAuthLoginRequest(APPLE, null, "invalid-auth-code", null);
 
 		mockWebServer.enqueue(new MockResponse()
 			.setResponseCode(400)
@@ -145,7 +148,7 @@ class OAuthServiceTest {
 	@DisplayName("Apple 로그인 실패 - Android")
 	void apple_token_verification_failure_error_android() {
 		// given
-		OAuthLoginRequest request = new OAuthLoginRequest("APPLE", "asdf", null, null);
+		OAuthLoginRequest request = new OAuthLoginRequest(APPLE, "asdf", null, null);
 
 		mockWebServer.enqueue(new MockResponse().setResponseCode(401));
 
@@ -159,7 +162,7 @@ class OAuthServiceTest {
 	@DisplayName("Apple 로그인 실패 - iOS")
 	void apple_token_verification_failure_error_ios() {
 		// given
-		OAuthLoginRequest request = new OAuthLoginRequest("APPLE", null, "asdf", null);
+		OAuthLoginRequest request = new OAuthLoginRequest(APPLE, null, "asdf", null);
 
 		mockWebServer.enqueue(new MockResponse().setResponseCode(400));
 
@@ -173,7 +176,7 @@ class OAuthServiceTest {
 	@DisplayName("Kakao 로그인 성공")
 	void kakao_login_success() {
 		// given
-		OAuthLoginRequest request = new OAuthLoginRequest("KAKAO", "valid-token", null, null);
+		OAuthLoginRequest request = new OAuthLoginRequest(KAKAO, "valid-token", null, null);
 		Member member = mock(Member.class);
 		given(member.getId()).willReturn(1L);
 
@@ -189,7 +192,7 @@ class OAuthServiceTest {
 
 		// then
 		assertThat(response).isNotNull();
-		verify(sessionService).createSession(anyString(), eq("1"));
+		verify(sessionService).createData(anyString(), eq("1"), eq("12345"));
 	}
 
 	@Test
@@ -211,7 +214,7 @@ class OAuthServiceTest {
 			.withIssuedAt(new Date())
 			.sign(Algorithm.RSA256(publicKey, privateKey));
 
-		OAuthLoginRequest request = new OAuthLoginRequest("APPLE", null, null, mockIdToken);
+		OAuthLoginRequest request = new OAuthLoginRequest(APPLE, null, null, mockIdToken);
 		Member mockMember = mock(Member.class);
 		given(mockMember.getId()).willReturn(1L);
 
@@ -232,7 +235,7 @@ class OAuthServiceTest {
 
 		// then
 		assertThat(response).isNotNull();
-		verify(sessionService).createSession(anyString(), eq("1"));
+		verify(sessionService).createData(anyString(), eq("1"), eq("test-user-id"));
 	}
 
 	@Test
@@ -268,7 +271,7 @@ class OAuthServiceTest {
 			.withIssuedAt(new Date())
 			.sign(Algorithm.RSA256(rsaPublicKey, rsaPrivateKey));
 
-		OAuthLoginRequest request = new OAuthLoginRequest("APPLE", null, mockAuthCode, null);
+		OAuthLoginRequest request = new OAuthLoginRequest(APPLE, null, mockAuthCode, null);
 		Member mockMember = mock(Member.class);
 		given(mockMember.getId()).willReturn(1L);
 
@@ -297,7 +300,7 @@ class OAuthServiceTest {
 
 		// then
 		assertThat(response).isNotNull();
-		verify(sessionService).createSession(anyString(), eq("1"));
+		verify(sessionService).createData(anyString(), eq("1"), eq("test-user-id"));
 	}
 
 	@Test
@@ -315,7 +318,7 @@ class OAuthServiceTest {
 			.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
 			.setBody("{\"keys\": [{\"kid\": \"different-kid\"}]}"));
 
-		OAuthLoginRequest request = new OAuthLoginRequest("APPLE", null, null, mockIdToken);
+		OAuthLoginRequest request = new OAuthLoginRequest(APPLE, null, null, mockIdToken);
 
 		// when & then
 		assertThatThrownBy(() -> oAuthService.oauthLogin(request))
@@ -327,7 +330,7 @@ class OAuthServiceTest {
 	@DisplayName("다양한 HTTP 상태코드에 따른 에러 처리")
 	void handle_error_response_with_different_status() {
 		// given
-		OAuthLoginRequest request = new OAuthLoginRequest("KAKAO", "invalid-token", null, null);
+		OAuthLoginRequest request = new OAuthLoginRequest(KAKAO, "invalid-token", null, null);
 
 		// 401 Unauthorized
 		mockWebServer.enqueue(new MockResponse()
@@ -354,7 +357,7 @@ class OAuthServiceTest {
 			.setResponseCode(500)  // JWKS 엔드포인트 실패
 			.setBody("Server Error"));
 
-		OAuthLoginRequest request = new OAuthLoginRequest("APPLE", null, null, validToken);
+		OAuthLoginRequest request = new OAuthLoginRequest(APPLE, null, null, validToken);
 
 		// when & then
 		assertThatThrownBy(() -> oAuthService.oauthLogin(request))
@@ -376,7 +379,7 @@ class OAuthServiceTest {
 			.setResponseCode(200)
 			.setBody("invalid json"));  // 잘못된 JSON 형식
 
-		OAuthLoginRequest request = new OAuthLoginRequest("APPLE", null, null, validToken);
+		OAuthLoginRequest request = new OAuthLoginRequest(APPLE, null, null, validToken);
 
 		// when & then
 		assertThatThrownBy(() -> oAuthService.oauthLogin(request))
