@@ -1,6 +1,5 @@
 package com.tnt.application.auth;
 
-import static com.tnt.application.auth.SessionService.*;
 import static com.tnt.global.error.model.ErrorMessage.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
@@ -99,11 +98,12 @@ class SessionServiceTest {
 		// given
 		String sessionId = "test-session-id";
 		String memberId = "12345";
+		String socialId = "test-social-id";
 
 		given(redisTemplate.opsForValue()).willReturn(valueOperations);
 
 		// when
-		sessionService.createSession(sessionId, memberId);
+		sessionService.createData(sessionId, memberId, socialId);
 
 		// then
 		verify(valueOperations).set(
@@ -115,34 +115,13 @@ class SessionServiceTest {
 	}
 
 	@Test
-	@DisplayName("세션 스토리지에 저장 성공")
-	void create_session_with_request_info_success() {
-		// given
-		String sessionId = "12345";
-		String memberId = "Mozilla/5.0";
-
-		given(redisTemplate.opsForValue()).willReturn(valueOperations);
-
-		// when
-		sessionService.createSession(sessionId, memberId);
-
-		// then
-		verify(valueOperations).set(
-			sessionId,
-			memberId,
-			SESSION_DURATION,
-			TimeUnit.SECONDS
-		);
-	}
-
-	@Test
 	@DisplayName("세션 삭제 성공")
 	void remove_session_success() {
 		// given
 		String sessionId = "12345";
 
 		// when
-		sessionService.removeSession(sessionId);
+		sessionService.removeData(sessionId);
 
 		// then
 		verify(redisTemplate).delete(sessionId);
