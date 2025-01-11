@@ -45,7 +45,7 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
 			return;
 		}
 
-		checkSessionAndAuthentication(request);
+		saveAuthentication(sessionService.authenticate(request));
 		filterChain.doFilter(request, response);
 	}
 
@@ -60,10 +60,6 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
 		}
 
 		return allowed;
-	}
-
-	private void checkSessionAndAuthentication(HttpServletRequest request) {
-		saveAuthentication(sessionService.authenticate(request));
 	}
 
 	private void saveAuthentication(String sessionId) {
