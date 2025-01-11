@@ -28,14 +28,14 @@ class MemberTest {
 		@DisplayName("회원 생성 성공")
 		void create_member_success() {
 			// when
-			Member member = Member.builder()
+			Member member = Member.from(Member.CreateMember.builder()
 				.id(TSID.fast().toLong())  // TSID 직접 생성
 				.socialId("12345")
 				.email("test@example.com")
 				.name("홍길동")
 				.age(20)
 				.socialType(SocialType.KAKAO)
-				.build();
+				.build());
 
 			// then
 			assertThat(member.getId()).isNotNull();
@@ -47,14 +47,14 @@ class MemberTest {
 		void verify_tsid_duplication_success() {
 			// when
 			List<Long> ids = IntStream.range(0, 100)
-				.mapToObj(i -> Member.builder()
+				.mapToObj(i -> Member.from(Member.CreateMember.builder()
 					.id(TSID.fast().toLong())
 					.socialId("social" + i)
 					.email("test" + i + "@example.com")
 					.name("사용자" + i)
 					.age(20 + (i % 20))
 					.socialType(SocialType.KAKAO)
-					.build())
+					.build()))
 				.map(Member::getId)
 				.toList();
 
@@ -71,14 +71,14 @@ class MemberTest {
 		@DisplayName("tsid의 타임스탬프가 현재 시간과 일치하는지 검증 성공")
 		void verify_tsid_timestamp_success() {
 			// when
-			Member member = Member.builder()
+			Member member = Member.from(Member.CreateMember.builder()
 				.id(TSID.fast().toLong())  // TSID 직접 생성
 				.socialId("12345")
 				.email("test@example.com")
 				.name("홍길동")
 				.age(20)
 				.socialType(SocialType.KAKAO)
-				.build();
+				.build());
 			TSID tsid = TSID.from(member.getId());
 			Instant timestamp = tsid.getInstant();
 
