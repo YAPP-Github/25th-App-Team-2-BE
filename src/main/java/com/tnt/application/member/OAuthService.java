@@ -36,7 +36,6 @@ import com.tnt.dto.member.KakaoUserInfo;
 import com.tnt.dto.member.OAuthUserInfo;
 import com.tnt.dto.member.request.OAuthLoginRequest;
 import com.tnt.dto.member.response.OAuthLoginResponse;
-import com.tnt.global.error.exception.NotFoundException;
 import com.tnt.global.error.exception.OAuthException;
 import com.tnt.global.error.model.ErrorMessage;
 import com.tnt.infrastructure.mysql.repository.member.MemberRepository;
@@ -78,14 +77,17 @@ public class OAuthService {
 	public OAuthLoginResponse oauthLogin(OAuthLoginRequest request) {
 		OAuthUserInfo oauthInfo = extractOAuthUserInfo(request);
 		String socialId = oauthInfo.getId();
-
-		// 신규 회원이면 예외 발생
 		Member findMember = findMemberFromDB(socialId, request.socialType());
+
+		if (findMember == null) {
+			return OAuthLoginResponse.from(null, socialId, false);
+		}
+
 		String sessionId = String.valueOf(TSID.Factory.getTsid());
 
 		sessionService.createData(sessionId, String.valueOf(findMember.getId()));
 
-		return OAuthLoginResponse.from(sessionId);
+		return OAuthLoginResponse.from(sessionId, null, true);
 	}
 
 	private OAuthUserInfo extractOAuthUserInfo(OAuthLoginRequest request) {
@@ -272,10 +274,6 @@ public class OAuthService {
 
 	private Member findMemberFromDB(String socialId, String socialType) {
 		return memberRepository.findBySocialIdAndSocialType(socialId, SocialType.valueOf(socialType.toUpperCase()))
-			.orElseThrow(() -> {
-				log.error("{} socialId: {} socialType: {}", MEMBER_NOT_FOUND.getMessage(), socialId, socialType);
-
-				return new NotFoundException(MEMBER_NOT_FOUND);
-			});
+			.orElse(null);
 	}
 }

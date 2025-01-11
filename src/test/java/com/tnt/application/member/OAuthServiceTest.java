@@ -34,7 +34,6 @@ import com.tnt.domain.member.Member;
 import com.tnt.domain.member.SocialType;
 import com.tnt.dto.member.request.OAuthLoginRequest;
 import com.tnt.dto.member.response.OAuthLoginResponse;
-import com.tnt.global.error.exception.NotFoundException;
 import com.tnt.global.error.exception.OAuthException;
 import com.tnt.infrastructure.mysql.repository.member.MemberRepository;
 
@@ -90,10 +89,13 @@ class OAuthServiceTest {
 		given(memberRepository.findBySocialIdAndSocialType("12345", SocialType.KAKAO))
 			.willReturn(Optional.empty());
 
-		// when & then
-		assertThatThrownBy(() -> oAuthService.oauthLogin(request))
-			.isInstanceOf(NotFoundException.class)
-			.hasMessage(MEMBER_NOT_FOUND.getMessage());
+		// when
+		OAuthLoginResponse response = oAuthService.oauthLogin(request);
+
+		// then
+		assertThat(response.sessionId()).isNull();
+		assertThat(response.socialId()).isEqualTo("12345");
+		assertThat(response.isSignUp()).isFalse();
 	}
 
 	@Test
