@@ -21,13 +21,13 @@ class MemberIntegrationTest {
 	@DisplayName("회원 DB에 저장 시 tsid 자동 생성 성공")
 	void save_member_to_db_success() {
 		// given
-		Member member = Member.builder()
+		Member member = Member.from(Member.CreateMember.builder()
 			.socialId("12345")
 			.email("test@example.com")
 			.name("홍길동")
 			.age(20)
 			.socialType(SocialType.KAKAO)
-			.build();
+			.build());
 
 		// when
 		Member savedMember = memberRepository.save(member);
