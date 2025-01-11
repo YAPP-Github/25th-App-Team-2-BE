@@ -48,6 +48,9 @@ public class Member extends BaseTimeEntity {
 	@Column(name = "collection_agreement", nullable = false)
 	private boolean collectionAgreement;
 
+	@Column(name = "advertisement_agreement", nullable = false)
+	private boolean advertisementAgreement;
+
 	@Column(name = "push_agreement", nullable = false)
 	private boolean pushAgreement;
 
@@ -58,17 +61,34 @@ public class Member extends BaseTimeEntity {
 	@Column(name = "social_type", nullable = false, length = 30)
 	private SocialType socialType;
 
-	@Builder
-	public Member(Long id, String socialId, String email, String name, int age, SocialType socialType) {
-		this.id = id;
-		this.socialId = socialId;
-		this.email = email;
-		this.name = name;
-		this.age = age;
-		this.profile = "";
+	private Member(CreateMember create) {
+		this.id = create.id;
+		this.socialId = create.socialId;
+		this.email = create.email;
+		this.name = create.name;
+		this.age = create.age;
+		this.profile = create.profile;
 		this.serviceAgreement = true;
 		this.collectionAgreement = true;
+		this.advertisementAgreement = create.advertisementAgreement;
 		this.pushAgreement = true;
-		this.socialType = socialType;
+		this.socialType = create.socialType;
+	}
+
+	public static Member from(CreateMember create) {
+		return new Member(create);
+	}
+
+	@Builder
+	public static class CreateMember {
+
+		private Long id;
+		private String socialId;
+		private String email;
+		private String name;
+		private int age;
+		private String profile;
+		private boolean advertisementAgreement;
+		private SocialType socialType;
 	}
 }
