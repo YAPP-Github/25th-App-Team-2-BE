@@ -10,7 +10,7 @@ public class KakaoUserInfo extends OAuthUserInfo {
 	private static final String KAKAO_ACCOUNT_KEY = "kakao_account";
 	private static final String PROPERTIES_KEY = "properties";
 
-	public KakaoUserInfo(final Map<String, Object> attributes) {
+	public KakaoUserInfo(Map<String, Object> attributes) {
 		super(attributes);
 		log.info("kakao attributes: {}", attributes);
 	}

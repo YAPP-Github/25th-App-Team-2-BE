@@ -7,7 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class AppleUserInfo extends OAuthUserInfo {
 
-	public AppleUserInfo(final Map<String, Object> attributes) {
+	public AppleUserInfo(Map<String, Object> attributes) {
 		super(attributes);
 		log.info("apple attributes: {}", attributes);
 	}
