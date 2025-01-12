@@ -1,6 +1,7 @@
 package com.tnt.global.auth.filter;
 
 import static com.tnt.global.error.model.ErrorMessage.*;
+import static jakarta.servlet.http.HttpServletResponse.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
 
@@ -57,7 +58,7 @@ class ServletExceptionFilterTest {
 		servletExceptionFilter.doFilterInternal(request, response, filterChain);
 
 		// then
-		verify(response).setStatus(HttpServletResponse.SC_BAD_REQUEST);
+		verify(response).setStatus(SC_BAD_REQUEST);
 		verify(response).setContentType("application/json;charset=UTF-8");
 		assertThat(stringWriter.toString()).hasToString(BAD_REQUEST.getMessage());
 	}
@@ -74,7 +75,7 @@ class ServletExceptionFilterTest {
 		servletExceptionFilter.doFilterInternal(request, response, filterChain);
 
 		// then
-		verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+		verify(response).setStatus(SC_UNAUTHORIZED);
 		verify(response).setContentType("application/json;charset=UTF-8");
 		assertThat(stringWriter.toString()).hasToString(AUTHORIZATION_HEADER_ERROR.getMessage());
 	}
@@ -91,7 +92,7 @@ class ServletExceptionFilterTest {
 		servletExceptionFilter.doFilterInternal(request, response, filterChain);
 
 		// then
-		verify(response).setStatus(HttpServletResponse.SC_FORBIDDEN);
+		verify(response).setStatus(SC_FORBIDDEN);
 		verify(response).setContentType("application/json;charset=UTF-8");
 		assertThat(stringWriter.toString()).hasToString(ACCESS_DENIED.getMessage());
 	}
@@ -108,7 +109,7 @@ class ServletExceptionFilterTest {
 		servletExceptionFilter.doFilterInternal(request, response, filterChain);
 
 		// then
-		verify(response).setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+		verify(response).setStatus(SC_INTERNAL_SERVER_ERROR);
 		verify(response).setContentType("application/json;charset=UTF-8");
 		assertThat(stringWriter.toString()).hasToString(SERVER_ERROR.getMessage());
 	}

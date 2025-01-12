@@ -1,11 +1,11 @@
 package com.tnt.global.auth.filter;
 
 import static com.tnt.global.error.model.ErrorMessage.*;
+import static jakarta.servlet.http.HttpServletResponse.*;
 
 import java.io.IOException;
 
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.tnt.global.error.exception.UnauthorizedException;
@@ -14,12 +14,9 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@Component
-@RequiredArgsConstructor
 public class ServletExceptionFilter extends OncePerRequestFilter {
 
 	@Override
@@ -39,13 +36,13 @@ public class ServletExceptionFilter extends OncePerRequestFilter {
 		response.setContentType("application/json;charset=UTF-8");
 
 		if (exception instanceof UnauthorizedException) {
-			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+			response.setStatus(SC_UNAUTHORIZED);
 		} else if (exception instanceof AccessDeniedException) {
-			response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+			response.setStatus(SC_FORBIDDEN);
 		} else if (exception instanceof IllegalArgumentException) {
-			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			response.setStatus(SC_BAD_REQUEST);
 		} else {
-			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			response.setStatus(SC_INTERNAL_SERVER_ERROR);
 		}
 
 		response.getWriter().write(exception.getMessage());
