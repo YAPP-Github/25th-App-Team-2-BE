@@ -73,7 +73,7 @@ class SessionServiceTest {
 		String extractedSessionId = sessionService.authenticate(request);
 
 		// then
-		assertThat(extractedSessionId).isEqualTo(sessionId);
+		assertThat(extractedSessionId).isEqualTo(memberId);
 	}
 
 	@Test
@@ -102,7 +102,7 @@ class SessionServiceTest {
 		given(redisTemplate.opsForValue()).willReturn(valueOperations);
 
 		// when
-		sessionService.createData(sessionId, memberId);
+		sessionService.createOrUpdateSession(sessionId, memberId);
 
 		// then
 		verify(valueOperations).set(
@@ -120,7 +120,7 @@ class SessionServiceTest {
 		String sessionId = "12345";
 
 		// when
-		sessionService.removeData(sessionId);
+		sessionService.removeSession(sessionId);
 
 		// then
 		verify(redisTemplate).delete(sessionId);

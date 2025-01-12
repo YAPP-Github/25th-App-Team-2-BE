@@ -22,6 +22,7 @@ public class SessionService {
 	static final long SESSION_DURATION = 2L * 24 * 60 * 60; // 48시간
 	private static final String AUTHORIZATION_HEADER = "Authorization";
 	private static final String SESSION_ID_PREFIX = "SESSION-ID ";
+
 	private final StringRedisTemplate redisTemplate;
 
 	public String authenticate(HttpServletRequest request) {
@@ -42,12 +43,12 @@ public class SessionService {
 			throw new UnauthorizedException(NO_EXIST_SESSION_IN_STORAGE);
 		}
 
-		createData(sessionId, "");
+		createOrUpdateSession(sessionId, "");
 
-		return sessionId;
+		return sessionValue;
 	}
 
-	public void createData(String sessionId, String memberId) {
+	public void createOrUpdateSession(String sessionId, String memberId) {
 		if (isBlank(memberId)) { // 세션 갱신
 			redisTemplate.expire(sessionId, SESSION_DURATION, TimeUnit.SECONDS);
 			redisTemplate.expire(memberId, SESSION_DURATION, TimeUnit.SECONDS);
@@ -55,15 +56,15 @@ public class SessionService {
 			String existingSessionId = redisTemplate.opsForValue().get(memberId);
 
 			if (existingSessionId != null) {
-				removeData(sessionId);
-				removeData(memberId);
+				removeSession(sessionId);
+				removeSession(memberId);
 			}
 			redisTemplate.opsForValue().set(sessionId, memberId, SESSION_DURATION, TimeUnit.SECONDS);
 			redisTemplate.opsForValue().set(memberId, sessionId, SESSION_DURATION, TimeUnit.SECONDS);
 		}
 	}
 
-	public void removeData(String dataKey) {
+	public void removeSession(String dataKey) {
 		redisTemplate.delete(dataKey);
 	}
 }
