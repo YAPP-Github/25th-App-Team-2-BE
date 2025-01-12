@@ -1,10 +1,8 @@
 package com.tnt.dto.member.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Builder;
 
 @Schema(description = "소셜 로그인 응답")
-@Builder
 public record OAuthLoginResponse(
 	@Schema(description = "세션 ID (null / 1236543)", example = "1645365389", type = "string")
 	String sessionId,
@@ -16,7 +14,4 @@ public record OAuthLoginResponse(
 	boolean isSignUp
 ) {
 
-	public static OAuthLoginResponse from(String sessionId, String socialId, boolean isSignUp) {
-		return new OAuthLoginResponse(sessionId, socialId, isSignUp);
-	}
 }
