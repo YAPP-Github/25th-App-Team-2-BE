@@ -1,13 +1,12 @@
 package com.tnt.global.error.handler;
 
 import static com.tnt.global.error.model.ErrorMessage.*;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.*;
 
 import java.security.SecureRandom;
 import java.time.DateTimeException;
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
@@ -36,7 +35,7 @@ public class GlobalExceptionHandler {
 	private final SecureRandom secureRandom = new SecureRandom();
 
 	// 필수 파라미터 예외
-	@ResponseStatus(BAD_REQUEST)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	@ExceptionHandler(MissingServletRequestParameterException.class)
 	protected ErrorResponse handleMissingServletRequestParameter(MissingServletRequestParameterException exception) {
 		String errorMessage = String.format(MISSING_REQUIRED_PARAMETER_ERROR.getMessage(),
@@ -48,7 +47,7 @@ public class GlobalExceptionHandler {
 	}
 
 	// 파라미터 타입 예외
-	@ResponseStatus(BAD_REQUEST)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	@ExceptionHandler(MethodArgumentTypeMismatchException.class)
 	protected ErrorResponse handleMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException exception) {
 		String errorMessage = String.format(PARAMETER_FORMAT_NOT_CORRECT.getMessage(), exception.getName());
@@ -59,7 +58,7 @@ public class GlobalExceptionHandler {
 	}
 
 	// @Validated 있는 클래스에서 @RequestParam, @PathVariable 등에 적용된 제약 조건 예외
-	@ResponseStatus(BAD_REQUEST)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	@ExceptionHandler(ConstraintViolationException.class)
 	protected ErrorResponse handleConstraintViolationException(ConstraintViolationException exception) {
 		List<String> errors = exception.getConstraintViolations()
@@ -74,7 +73,7 @@ public class GlobalExceptionHandler {
 	}
 
 	// @Valid, @Validated 있는 곳에서 주로 @RequestBody dto 필드에 적용된 검증 어노테이션 유효성 검사 실패 예외
-	@ResponseStatus(BAD_REQUEST)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	protected ErrorResponse handleMethodArgumentNotValidException(MethodArgumentNotValidException exception) {
 		String errorMessage = exception.getBindingResult().getAllErrors().getFirst().getDefaultMessage();
@@ -85,7 +84,7 @@ public class GlobalExceptionHandler {
 	}
 
 	// json 파싱, 날짜/시간 형식 예외
-	@ResponseStatus(BAD_REQUEST)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	@ExceptionHandler(value = {HttpMessageNotReadableException.class, DateTimeException.class})
 	protected ErrorResponse handleDateTimeParseException(DateTimeException exception) {
 		log.error(INVALID_FORMAT_DATETIME.getMessage(), exception);
@@ -93,7 +92,7 @@ public class GlobalExceptionHandler {
 		return new ErrorResponse(INVALID_FORMAT_DATETIME.getMessage());
 	}
 
-	@ResponseStatus(UNAUTHORIZED)
+	@ResponseStatus(HttpStatus.UNAUTHORIZED)
 	@ExceptionHandler(value = {UnauthorizedException.class, OAuthException.class})
 	protected ErrorResponse handleUnauthorizedException(TnTException exception) {
 		log.error(exception.getMessage(), exception);
@@ -101,7 +100,7 @@ public class GlobalExceptionHandler {
 		return new ErrorResponse(exception.getMessage());
 	}
 
-	@ResponseStatus(NOT_FOUND)
+	@ResponseStatus(HttpStatus.NOT_FOUND)
 	@ExceptionHandler(NotFoundException.class)
 	protected ErrorResponse handleNotFoundException(TnTException exception) {
 		log.error(exception.getMessage(), exception);
@@ -110,7 +109,7 @@ public class GlobalExceptionHandler {
 	}
 
 	// 기타 500 예외
-	@ResponseStatus(INTERNAL_SERVER_ERROR)
+	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
 	@ExceptionHandler(RuntimeException.class)
 	protected ErrorResponse handleRuntimeException(TnTException exception) {
 		StringBuilder sb = new StringBuilder();
