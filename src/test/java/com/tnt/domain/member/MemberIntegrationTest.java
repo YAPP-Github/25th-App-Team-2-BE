@@ -2,6 +2,8 @@ package com.tnt.domain.member;
 
 import static org.assertj.core.api.Assertions.*;
 
+import java.time.LocalDate;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,13 +23,13 @@ class MemberIntegrationTest {
 	@DisplayName("회원 DB에 저장 시 tsid 자동 생성 성공")
 	void save_member_to_db_success() {
 		// given
-		Member member = Member.from(Member.CreateMember.builder()
+		Member member = new Member.Builder()
 			.socialId("12345")
 			.email("test@example.com")
 			.name("홍길동")
-			.age(20)
+			.birthday(LocalDate.parse("2022-01-01"))
 			.socialType(SocialType.KAKAO)
-			.build());
+			.build();
 
 		// when
 		Member savedMember = memberRepository.save(member);

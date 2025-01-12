@@ -1,5 +1,6 @@
 package com.tnt.domain.member;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import com.tnt.global.common.entity.BaseTimeEntity;
@@ -12,7 +13,6 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -36,11 +36,11 @@ public class Member extends BaseTimeEntity {
 	@Column(name = "name", nullable = false, length = 50)
 	private String name;
 
-	@Column(name = "age", nullable = false)
-	private int age;
+	@Column(name = "birthday", nullable = false)
+	private LocalDate birthday;
 
-	@Column(name = "profile", nullable = false)
-	private String profile;
+	@Column(name = "profile_image_url", nullable = false)
+	private String profileImageUrl;
 
 	@Column(name = "service_agreement", nullable = false)
 	private boolean serviceAgreement;
@@ -61,34 +61,91 @@ public class Member extends BaseTimeEntity {
 	@Column(name = "social_type", nullable = false, length = 30)
 	private SocialType socialType;
 
-	private Member(CreateMember create) {
-		this.id = create.id;
-		this.socialId = create.socialId;
-		this.email = create.email;
-		this.name = create.name;
-		this.age = create.age;
-		this.profile = create.profile;
-		this.serviceAgreement = true;
-		this.collectionAgreement = true;
-		this.advertisementAgreement = create.advertisementAgreement;
-		this.pushAgreement = true;
-		this.socialType = create.socialType;
+	private Member(Builder builder) {
+		this.id = builder.id;
+		this.socialId = builder.socialId;
+		this.email = builder.email;
+		this.name = builder.name;
+		this.birthday = builder.birthday;
+		this.profileImageUrl = builder.profileImageUrl;
+		this.serviceAgreement = builder.serviceAgreement;
+		this.collectionAgreement = builder.collectionAgreement;
+		this.advertisementAgreement = builder.advertisementAgreement;
+		this.pushAgreement = builder.pushAgreement;
+		this.socialType = builder.socialType;
 	}
 
-	public static Member from(CreateMember create) {
-		return new Member(create);
-	}
-
-	@Builder
-	public static class CreateMember {
+	public static class Builder {
 
 		private Long id;
 		private String socialId;
 		private String email;
 		private String name;
-		private int age;
-		private String profile;
-		private boolean advertisementAgreement;
+		private LocalDate birthday;
+		private String profileImageUrl = "";
+		private boolean serviceAgreement = true;
+		private boolean collectionAgreement = true;
+		private boolean advertisementAgreement = true;
+		private boolean pushAgreement = true;
 		private SocialType socialType;
+
+		public Builder id(Long id) {
+			this.id = id;
+			return this;
+		}
+
+		public Builder socialId(String socialId) {
+			this.socialId = socialId;
+			return this;
+		}
+
+		public Builder email(String email) {
+			this.email = email;
+			return this;
+		}
+
+		public Builder name(String name) {
+			this.name = name;
+			return this;
+		}
+
+		public Builder birthday(LocalDate birthday) {
+			this.birthday = birthday;
+			return this;
+		}
+
+		public Builder profileImageUrl(String profileImageUrl) {
+			this.profileImageUrl = profileImageUrl;
+			return this;
+		}
+
+		public Builder serviceAgreement(boolean serviceAgreement) {
+			this.serviceAgreement = serviceAgreement;
+			return this;
+		}
+
+		public Builder collectionAgreement(boolean collectionAgreement) {
+			this.collectionAgreement = collectionAgreement;
+			return this;
+		}
+
+		public Builder advertisementAgreement(boolean advertisementAgreement) {
+			this.advertisementAgreement = advertisementAgreement;
+			return this;
+		}
+
+		public Builder pushAgreement(boolean pushAgreement) {
+			this.pushAgreement = pushAgreement;
+			return this;
+		}
+
+		public Builder socialType(SocialType socialType) {
+			this.socialType = socialType;
+			return this;
+		}
+
+		public Member build() {
+			return new Member(this);
+		}
 	}
 }
