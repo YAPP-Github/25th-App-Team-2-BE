@@ -52,6 +52,7 @@ public class OAuthService {
 
 	private static final String KAKAO = "kakao";
 	private static final String APPLE = "apple";
+
 	private final WebClient webClient;
 	private final SessionService sessionService;
 	private final MemberRepository memberRepository;
@@ -80,14 +81,14 @@ public class OAuthService {
 		Member findMember = findMemberFromDB(socialId, request.socialType());
 
 		if (findMember == null) {
-			return OAuthLoginResponse.from(null, socialId, false);
+			return new OAuthLoginResponse(null, socialId, false);
 		}
 
 		String sessionId = String.valueOf(TSID.Factory.getTsid());
 
-		sessionService.createData(sessionId, String.valueOf(findMember.getId()));
+		sessionService.createOrUpdateSession(sessionId, String.valueOf(findMember.getId()));
 
-		return OAuthLoginResponse.from(sessionId, null, true);
+		return new OAuthLoginResponse(sessionId, null, true);
 	}
 
 	private OAuthUserInfo extractOAuthUserInfo(OAuthLoginRequest request) {
@@ -123,7 +124,40 @@ public class OAuthService {
 			idToken = getAppleIdToken(request.authorizationCode());
 		}
 
-		return verifyAndExtractUserInfo(idToken);
+		try {
+			// Apple의 공개키 가져오기
+			String jwksJson = fetchApplePublicKeys();
+			JSONObject jwks = new JSONObject(jwksJson);
+			JSONArray keys = jwks.getJSONArray("keys");
+
+			// ID 토큰 파싱
+			String[] tokenParts = idToken.split("\\.");
+			String header = new String(Base64.getUrlDecoder().decode(tokenParts[0]));
+			String payload = new String(Base64.getUrlDecoder().decode(tokenParts[1]));
+			JSONObject headerJson = new JSONObject(header);
+			String kid = headerJson.getString("kid");
+
+			// 매칭되는 키 찾기
+			JSONObject key = findMatchingKey(keys, kid);
+
+			if (key == null) {
+				log.error("{} key: {}", MATCHING_KEY_NOT_FOUND.getMessage(), kid);
+
+				throw new OAuthException(MATCHING_KEY_NOT_FOUND);
+			}
+
+			RSAPublicKey publicKey = getRsaPublicKey(key);
+
+			// 토큰 검증
+			verifyToken(idToken, publicKey);
+
+			// 페이로드에서 사용자 정보 추출
+			return extractUserInfo(payload);
+		} catch (Exception e) {
+			log.error(FAILED_TO_VERIFY_ID_TOKEN.getMessage(), e);
+
+			throw new OAuthException(APPLE_AUTH_ERROR);
+		}
 	}
 
 	// Apple 서버에 authorizationCode를 사용하여 idToken을 요청
@@ -186,43 +220,6 @@ public class OAuthService {
 			});
 	}
 
-	private Map<String, Object> verifyAndExtractUserInfo(String idToken) {
-		try {
-			// Apple의 공개키 가져오기
-			String jwksJson = fetchApplePublicKeys();
-			JSONObject jwks = new JSONObject(jwksJson);
-			JSONArray keys = jwks.getJSONArray("keys");
-
-			// ID 토큰 파싱
-			String[] tokenParts = idToken.split("\\.");
-			String header = new String(Base64.getUrlDecoder().decode(tokenParts[0]));
-			String payload = new String(Base64.getUrlDecoder().decode(tokenParts[1]));
-			JSONObject headerJson = new JSONObject(header);
-			String kid = headerJson.getString("kid");
-
-			// 매칭되는 키 찾기
-			JSONObject key = findMatchingKey(keys, kid);
-
-			if (key == null) {
-				log.error("{} key: {}", MATCHING_KEY_NOT_FOUND.getMessage(), kid);
-
-				throw new OAuthException(MATCHING_KEY_NOT_FOUND);
-			}
-
-			RSAPublicKey publicKey = getRsaPublicKey(key);
-
-			// 토큰 검증
-			verifyToken(idToken, publicKey);
-
-			// 페이로드에서 사용자 정보 추출
-			return extractUserInfo(payload);
-		} catch (Exception e) {
-			log.error(FAILED_TO_VERIFY_ID_TOKEN.getMessage(), e);
-
-			throw new OAuthException(APPLE_AUTH_ERROR);
-		}
-	}
-
 	private String fetchApplePublicKeys() {
 		return webClient.get()
 			.uri(appleApiUrl + "/auth/keys")
@@ -273,7 +270,7 @@ public class OAuthService {
 	}
 
 	private Member findMemberFromDB(String socialId, String socialType) {
-		return memberRepository.findBySocialIdAndSocialType(socialId, SocialType.valueOf(socialType.toUpperCase()))
-			.orElse(null);
+		return memberRepository.findBySocialIdAndSocialTypeAndDeletedAt(socialId,
+			SocialType.valueOf(socialType.toUpperCase()), null).orElse(null);
 	}
 }
