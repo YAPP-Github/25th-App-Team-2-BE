@@ -76,8 +76,8 @@ class OAuthServiceTest {
 	}
 
 	@Test
-	@DisplayName("존재하지 않는 회원 예외 발생")
-	void member_not_found_error() {
+	@DisplayName("존재하지 않는 회원 신규 회원으로 간주하고 리턴")
+	void member_not_found() {
 		// given
 		OAuthLoginRequest request = new OAuthLoginRequest(KAKAO, "kakao-access-token", null, null);
 
@@ -86,8 +86,8 @@ class OAuthServiceTest {
 			.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
 			.setBody("{\"id\": \"12345\", \"kakao_account\": {\"email\": \"test@example.com\"}}"));
 
-		given(memberRepository.findBySocialIdAndSocialType("12345", SocialType.KAKAO))
-			.willReturn(Optional.empty());
+		given(memberRepository.findBySocialIdAndSocialTypeAndDeletedAt("12345", SocialType.KAKAO, null)).willReturn(
+			Optional.empty());
 
 		// when
 		OAuthLoginResponse response = oAuthService.oauthLogin(request);
@@ -187,14 +187,15 @@ class OAuthServiceTest {
 			.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
 			.setBody("{\"id\": \"12345\"}"));
 
-		given(memberRepository.findBySocialIdAndSocialType("12345", SocialType.KAKAO)).willReturn(Optional.of(member));
+		given(memberRepository.findBySocialIdAndSocialTypeAndDeletedAt("12345", SocialType.KAKAO, null)).willReturn(
+			Optional.of(member));
 
 		// when
 		OAuthLoginResponse response = oAuthService.oauthLogin(request);
 
 		// then
 		assertThat(response).isNotNull();
-		verify(sessionService).createData(anyString(), eq("1"));
+		verify(sessionService).createOrUpdateSession(anyString(), eq("1"));
 	}
 
 	@Test
@@ -229,15 +230,15 @@ class OAuthServiceTest {
 			.setBody("{\"keys\": [{\"kid\": \"test-kid\", \"kty\": \"RSA\", \"n\": \"" + mockN + "\", \"e\": \"" + mockE
 				+ "\"}]}"));
 
-		given(memberRepository.findBySocialIdAndSocialType(anyString(), eq(SocialType.APPLE))).willReturn(
-			Optional.of(mockMember));
+		given(memberRepository.findBySocialIdAndSocialTypeAndDeletedAt(anyString(), eq(SocialType.APPLE),
+			eq(null))).willReturn(Optional.of(mockMember));
 
 		// when
 		OAuthLoginResponse response = oAuthService.oauthLogin(request);
 
 		// then
 		assertThat(response).isNotNull();
-		verify(sessionService).createData(anyString(), eq("1"));
+		verify(sessionService).createOrUpdateSession(anyString(), eq("1"));
 	}
 
 	@Test
@@ -294,15 +295,15 @@ class OAuthServiceTest {
 			.setBody("{\"keys\": [{\"kid\": \"test-kid\", \"kty\": \"RSA\", \"n\": \"" + mockN + "\", \"e\": \"" + mockE
 				+ "\"}]}"));
 
-		given(memberRepository.findBySocialIdAndSocialType(anyString(), eq(SocialType.APPLE))).willReturn(
-			Optional.of(mockMember));
+		given(memberRepository.findBySocialIdAndSocialTypeAndDeletedAt(anyString(), eq(SocialType.APPLE),
+			eq(null))).willReturn(Optional.of(mockMember));
 
 		// when
 		OAuthLoginResponse response = oAuthService.oauthLogin(request);
 
 		// then
 		assertThat(response).isNotNull();
-		verify(sessionService).createData(anyString(), eq("1"));
+		verify(sessionService).createOrUpdateSession(anyString(), eq("1"));
 	}
 
 	@Test
