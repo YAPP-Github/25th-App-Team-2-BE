@@ -35,6 +35,11 @@ class MemberTest {
 				.email("test@example.com")
 				.name("홍길동")
 				.birthday(LocalDate.parse("2022-01-01"))
+				.profileImageUrl("http://example.com")
+				.serviceAgreement(true)
+				.collectionAgreement(true)
+				.advertisementAgreement(true)
+				.pushAgreement(true)
 				.socialType(SocialType.KAKAO)
 				.build();
 
@@ -54,6 +59,11 @@ class MemberTest {
 					.email("test" + i + "@example.com")
 					.name("사용자" + i)
 					.birthday(LocalDate.parse("2022-01-01"))
+					.profileImageUrl("http://example.com")
+					.serviceAgreement(true)
+					.collectionAgreement(true)
+					.advertisementAgreement(true)
+					.pushAgreement(true)
 					.socialType(SocialType.KAKAO)
 					.build())
 				.map(Member::getId)
@@ -78,6 +88,11 @@ class MemberTest {
 				.email("test@example.com")
 				.name("홍길동")
 				.birthday(LocalDate.parse("2022-01-01"))
+				.profileImageUrl("http://example.com")
+				.serviceAgreement(true)
+				.collectionAgreement(true)
+				.advertisementAgreement(true)
+				.pushAgreement(true)
 				.socialType(SocialType.KAKAO)
 				.build();
 			TSID tsid = TSID.from(member.getId());

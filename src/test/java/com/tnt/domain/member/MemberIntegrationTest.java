@@ -28,6 +28,11 @@ class MemberIntegrationTest {
 			.email("test@example.com")
 			.name("홍길동")
 			.birthday(LocalDate.parse("2022-01-01"))
+			.profileImageUrl("http://example.com")
+			.serviceAgreement(true)
+			.collectionAgreement(true)
+			.advertisementAgreement(true)
+			.pushAgreement(true)
 			.socialType(SocialType.KAKAO)
 			.build();
 
