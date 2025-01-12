@@ -93,10 +93,10 @@ class SessionAuthenticationFilterTest {
 	@DisplayName("유효한 세션으로 인증 정보 저장 성공")
 	void save_authentication_success() throws ServletException, IOException {
 		// given
-		String sessionId = "12345";
+		String memberId = "12345";
 
 		given(request.getRequestURI()).willReturn("/api/members/me");
-		given(sessionService.authenticate(request)).willReturn(sessionId);
+		given(sessionService.authenticate(request)).willReturn(memberId);
 
 		// when
 		sessionAuthenticationFilter.doFilterInternal(request, response, filterChain);
@@ -106,7 +106,7 @@ class SessionAuthenticationFilterTest {
 		assertThat(authentication).isNotNull();
 		assertThat(authentication.getPrincipal()).isInstanceOf(UserDetails.class);
 		UserDetails userDetails = (UserDetails)authentication.getPrincipal();
-		assertThat(userDetails.getUsername()).isEqualTo(sessionId);
+		assertThat(userDetails.getUsername()).isEqualTo(memberId);
 		assertThat(userDetails.getAuthorities())
 			.extracting("authority")
 			.contains("ROLE_USER");
