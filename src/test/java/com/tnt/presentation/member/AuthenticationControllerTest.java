@@ -1,8 +1,12 @@
 package com.tnt.presentation.member;
 
-import static com.tnt.global.error.model.ErrorMessage.*;
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.BDDMockito.*;
+import static com.tnt.global.error.model.ErrorMessage.FAILED_TO_FETCH_USER_INFO;
+import static com.tnt.global.error.model.ErrorMessage.MEMBER_NOT_FOUND;
+import static com.tnt.global.error.model.ErrorMessage.UNSUPPORTED_SOCIAL_TYPE;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.verify;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,13 +22,13 @@ import com.tnt.global.error.exception.NotFoundException;
 import com.tnt.global.error.exception.OAuthException;
 
 @ExtendWith(MockitoExtension.class)
-class LoginControllerTest {
+class AuthenticationControllerTest {
 
 	@Mock
 	private OAuthService oauthService;
 
 	@InjectMocks
-	private LoginController loginController;
+	private AuthenticationController authenticationController;
 
 	@Test
 	@DisplayName("Kakao 로그인 성공")
@@ -40,7 +44,7 @@ class LoginControllerTest {
 		given(oauthService.oauthLogin(request)).willReturn(new OAuthLoginResponse("123456789", "", true));
 
 		// when
-		OAuthLoginResponse response = loginController.oauthLogin(request);
+		OAuthLoginResponse response = authenticationController.oauthLogin(request);
 
 		// then
 		assertThat(response.sessionId()).hasToString("123456789");
@@ -61,7 +65,7 @@ class LoginControllerTest {
 		given(oauthService.oauthLogin(request)).willReturn(new OAuthLoginResponse("123456789", "", true));
 
 		// when
-		OAuthLoginResponse response = loginController.oauthLogin(request);
+		OAuthLoginResponse response = authenticationController.oauthLogin(request);
 
 		// then
 		assertThat(response.sessionId()).isEqualTo("123456789");
@@ -82,7 +86,7 @@ class LoginControllerTest {
 		given(oauthService.oauthLogin(request)).willReturn(new OAuthLoginResponse("123456789", "", true));
 
 		// when
-		OAuthLoginResponse response = loginController.oauthLogin(request);
+		OAuthLoginResponse response = authenticationController.oauthLogin(request);
 
 		// then
 		assertThat(response.sessionId()).isEqualTo("123456789");
@@ -103,7 +107,7 @@ class LoginControllerTest {
 		given(oauthService.oauthLogin(request)).willThrow(new OAuthException(UNSUPPORTED_SOCIAL_TYPE));
 
 		// when & then
-		assertThatThrownBy(() -> loginController.oauthLogin(request))
+		assertThatThrownBy(() -> authenticationController.oauthLogin(request))
 			.isInstanceOf(OAuthException.class)
 			.hasMessage(UNSUPPORTED_SOCIAL_TYPE.getMessage());
 	}
@@ -122,7 +126,7 @@ class LoginControllerTest {
 		given(oauthService.oauthLogin(request)).willThrow(new OAuthException(FAILED_TO_FETCH_USER_INFO));
 
 		// when & then
-		assertThatThrownBy(() -> loginController.oauthLogin(request))
+		assertThatThrownBy(() -> authenticationController.oauthLogin(request))
 			.isInstanceOf(OAuthException.class)
 			.hasMessage(FAILED_TO_FETCH_USER_INFO.getMessage());
 	}
@@ -141,7 +145,7 @@ class LoginControllerTest {
 		given(oauthService.oauthLogin(request)).willThrow(new NotFoundException(MEMBER_NOT_FOUND));
 
 		// when & then
-		assertThatThrownBy(() -> loginController.oauthLogin(request))
+		assertThatThrownBy(() -> authenticationController.oauthLogin(request))
 			.isInstanceOf(NotFoundException.class)
 			.hasMessage(MEMBER_NOT_FOUND.getMessage());
 	}

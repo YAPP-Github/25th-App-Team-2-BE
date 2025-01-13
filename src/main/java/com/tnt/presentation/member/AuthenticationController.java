@@ -1,6 +1,6 @@
 package com.tnt.presentation.member;
 
-import static org.springframework.http.HttpStatus.*;
+import static org.springframework.http.HttpStatus.OK;
 
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,7 +19,7 @@ import lombok.RequiredArgsConstructor;
 @Tag(name = "로그인/로그아웃", description = "로그인/로그아웃 관련 API")
 @RestController
 @RequiredArgsConstructor
-public class LoginController {
+public class AuthenticationController {
 
 	private final OAuthService oauthService;
 
