@@ -13,6 +13,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -39,7 +40,7 @@ public class Member extends BaseTimeEntity {
 	@Column(name = "birthday", nullable = false)
 	private LocalDate birthday;
 
-	@Column(name = "profile_image_url", nullable = false)
+	@Column(name = "profile_image_url", nullable = false, length = 255)
 	private String profileImageUrl;
 
 	@Column(name = "service_agreement", nullable = false)
@@ -61,91 +62,20 @@ public class Member extends BaseTimeEntity {
 	@Column(name = "social_type", nullable = false, length = 30)
 	private SocialType socialType;
 
-	private Member(Builder builder) {
-		this.id = builder.id;
-		this.socialId = builder.socialId;
-		this.email = builder.email;
-		this.name = builder.name;
-		this.birthday = builder.birthday;
-		this.profileImageUrl = builder.profileImageUrl;
-		this.serviceAgreement = builder.serviceAgreement;
-		this.collectionAgreement = builder.collectionAgreement;
-		this.advertisementAgreement = builder.advertisementAgreement;
-		this.pushAgreement = builder.pushAgreement;
-		this.socialType = builder.socialType;
-	}
-
-	public static class Builder {
-
-		private Long id;
-		private String socialId;
-		private String email;
-		private String name;
-		private LocalDate birthday;
-		private String profileImageUrl = "";
-		private boolean serviceAgreement = true;
-		private boolean collectionAgreement = true;
-		private boolean advertisementAgreement = true;
-		private boolean pushAgreement = true;
-		private SocialType socialType;
-
-		public Builder id(Long id) {
-			this.id = id;
-			return this;
-		}
-
-		public Builder socialId(String socialId) {
-			this.socialId = socialId;
-			return this;
-		}
-
-		public Builder email(String email) {
-			this.email = email;
-			return this;
-		}
-
-		public Builder name(String name) {
-			this.name = name;
-			return this;
-		}
-
-		public Builder birthday(LocalDate birthday) {
-			this.birthday = birthday;
-			return this;
-		}
-
-		public Builder profileImageUrl(String profileImageUrl) {
-			this.profileImageUrl = profileImageUrl;
-			return this;
-		}
-
-		public Builder serviceAgreement(boolean serviceAgreement) {
-			this.serviceAgreement = serviceAgreement;
-			return this;
-		}
-
-		public Builder collectionAgreement(boolean collectionAgreement) {
-			this.collectionAgreement = collectionAgreement;
-			return this;
-		}
-
-		public Builder advertisementAgreement(boolean advertisementAgreement) {
-			this.advertisementAgreement = advertisementAgreement;
-			return this;
-		}
-
-		public Builder pushAgreement(boolean pushAgreement) {
-			this.pushAgreement = pushAgreement;
-			return this;
-		}
-
-		public Builder socialType(SocialType socialType) {
-			this.socialType = socialType;
-			return this;
-		}
-
-		public Member build() {
-			return new Member(this);
-		}
+	@Builder
+	public Member(Long id, String socialId, String email, String name, LocalDate birthday, String profileImageUrl,
+		boolean serviceAgreement, boolean collectionAgreement, boolean advertisementAgreement, boolean pushAgreement,
+		SocialType socialType) {
+		this.id = id;
+		this.socialId = socialId;
+		this.email = email;
+		this.name = name;
+		this.birthday = birthday;
+		this.profileImageUrl = profileImageUrl;
+		this.serviceAgreement = serviceAgreement;
+		this.collectionAgreement = collectionAgreement;
+		this.advertisementAgreement = advertisementAgreement;
+		this.pushAgreement = pushAgreement;
+		this.socialType = socialType;
 	}
 }
