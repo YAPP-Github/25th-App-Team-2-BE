@@ -1,7 +1,10 @@
 package com.tnt.application.member;
 
-import static com.tnt.global.error.model.ErrorMessage.*;
-import static org.assertj.core.api.Assertions.*;
+import static com.tnt.global.error.model.ErrorMessage.APPLE_AUTH_ERROR;
+import static com.tnt.global.error.model.ErrorMessage.FAILED_TO_FETCH_USER_INFO;
+import static com.tnt.global.error.model.ErrorMessage.UNSUPPORTED_SOCIAL_TYPE;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.*;
 
 import java.io.IOException;
@@ -86,7 +89,7 @@ class OAuthServiceTest {
 			.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
 			.setBody("{\"id\": \"12345\", \"kakao_account\": {\"email\": \"test@example.com\"}}"));
 
-		given(memberRepository.findBySocialIdAndSocialTypeAndDeletedAt("12345", SocialType.KAKAO, null)).willReturn(
+		given(memberRepository.findBySocialIdAndSocialTypeAndDeletedAtIsNotNull("12345", SocialType.KAKAO)).willReturn(
 			Optional.empty());
 
 		// when
@@ -187,7 +190,7 @@ class OAuthServiceTest {
 			.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
 			.setBody("{\"id\": \"12345\"}"));
 
-		given(memberRepository.findBySocialIdAndSocialTypeAndDeletedAt("12345", SocialType.KAKAO, null)).willReturn(
+		given(memberRepository.findBySocialIdAndSocialTypeAndDeletedAtIsNotNull("12345", SocialType.KAKAO)).willReturn(
 			Optional.of(member));
 
 		// when
@@ -230,8 +233,8 @@ class OAuthServiceTest {
 			.setBody("{\"keys\": [{\"kid\": \"test-kid\", \"kty\": \"RSA\", \"n\": \"" + mockN + "\", \"e\": \"" + mockE
 				+ "\"}]}"));
 
-		given(memberRepository.findBySocialIdAndSocialTypeAndDeletedAt(anyString(), eq(SocialType.APPLE),
-			eq(null))).willReturn(Optional.of(mockMember));
+		given(memberRepository.findBySocialIdAndSocialTypeAndDeletedAtIsNotNull(anyString(), eq(SocialType.APPLE)
+		)).willReturn(Optional.of(mockMember));
 
 		// when
 		OAuthLoginResponse response = oAuthService.oauthLogin(request);
@@ -295,8 +298,8 @@ class OAuthServiceTest {
 			.setBody("{\"keys\": [{\"kid\": \"test-kid\", \"kty\": \"RSA\", \"n\": \"" + mockN + "\", \"e\": \"" + mockE
 				+ "\"}]}"));
 
-		given(memberRepository.findBySocialIdAndSocialTypeAndDeletedAt(anyString(), eq(SocialType.APPLE),
-			eq(null))).willReturn(Optional.of(mockMember));
+		given(memberRepository.findBySocialIdAndSocialTypeAndDeletedAtIsNotNull(anyString(), eq(SocialType.APPLE)
+		)).willReturn(Optional.of(mockMember));
 
 		// when
 		OAuthLoginResponse response = oAuthService.oauthLogin(request);
