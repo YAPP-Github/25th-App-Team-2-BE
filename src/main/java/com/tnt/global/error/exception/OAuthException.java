@@ -2,9 +2,9 @@ package com.tnt.global.error.exception;
 
 import com.tnt.global.error.model.ErrorMessage;
 
-public class UnauthorizedException extends TnTException {
+public class OAuthException extends TnTException {
 
-	public UnauthorizedException(ErrorMessage errorMessage) {
+	public OAuthException(ErrorMessage errorMessage) {
 		super(errorMessage);
 	}
 }

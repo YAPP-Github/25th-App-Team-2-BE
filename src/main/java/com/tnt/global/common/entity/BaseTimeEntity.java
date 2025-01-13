@@ -1,4 +1,4 @@
-package com.tnt.global.entity;
+package com.tnt.global.common.entity;
 
 import java.time.LocalDateTime;
 
@@ -17,10 +17,10 @@ import lombok.Getter;
 public abstract class BaseTimeEntity {
 
 	@CreatedDate
-	@Column(name = "created_at", updatable = false, columnDefinition = "TIMESTAMP")
+	@Column(name = "created_at", updatable = false, columnDefinition = "DATETIME")
 	private LocalDateTime createdAt;
 
 	@LastModifiedDate
-	@Column(name = "updated_at", columnDefinition = "TIMESTAMP")
+	@Column(name = "updated_at", columnDefinition = "DATETIME")
 	private LocalDateTime updatedAt;
 }

@@ -1,4 +1,4 @@
-package com.tnt.global.auth;
+package com.tnt.global.auth.filter;
 
 import java.io.IOException;
 import java.util.List;
@@ -41,21 +41,11 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
 			request.getMethod());
 
 		if (isAllowedUri(requestUri)) {
-			log.info("{} 허용 URI. 세션 유효성 검사 스킵.", requestUri);
-
 			filterChain.doFilter(request, response);
 			return;
 		}
 
-		try {
-			checkSessionAndAuthentication(request);
-		} catch (RuntimeException e) {
-			log.error("인증 처리 중 에러 발생: ", e);
-
-			handleUnauthorizedException(response, e);
-			return;
-		}
-
+		saveAuthentication(sessionService.authenticate(request));
 		filterChain.doFilter(request, response);
 	}
 
@@ -69,29 +59,12 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
 			}
 		}
 
-		log.info("URI {} is {}allowed", requestUri, allowed ? "" : "not ");
-
 		return allowed;
 	}
 
-	private void checkSessionAndAuthentication(HttpServletRequest request) {
-		String sessionId = sessionService.authenticate(request);
-
-		saveAuthentication(Long.parseLong(sessionId));
-	}
-
-	private void handleUnauthorizedException(HttpServletResponse response, RuntimeException exception) throws
-		IOException {
-		log.error("인증 실패: ", exception);
-
-		response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-		response.setContentType("application/json;charset=UTF-8");
-		response.getWriter().write(exception.getMessage());
-	}
-
-	private void saveAuthentication(Long sessionId) {
+	private void saveAuthentication(String memberId) {
 		UserDetails userDetails = User.builder()
-			.username(String.valueOf(sessionId))
+			.username(memberId)
 			.password("")
 			.roles("USER")
 			.build();
@@ -101,6 +74,6 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
 
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
-		log.info("시큐리티 컨텍스트에 인증 정보 저장 완료 - SessionId: {}", sessionId);
+		log.info("시큐리티 컨텍스트에 인증 정보 저장 완료 - MemberId: {}", memberId);
 	}
 }

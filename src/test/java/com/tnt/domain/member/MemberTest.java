@@ -1,8 +1,10 @@
 package com.tnt.domain.member;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -22,7 +24,7 @@ class MemberTest {
 
 	@Nested
 	@DisplayName("회원 생성")
-	class CreateMember {
+	class Builder {
 
 		@Test
 		@DisplayName("회원 생성 성공")
@@ -33,7 +35,12 @@ class MemberTest {
 				.socialId("12345")
 				.email("test@example.com")
 				.name("홍길동")
-				.age(20)
+				.birthday(LocalDate.parse("2022-01-01"))
+				.profileImageUrl("http://example.com")
+				.serviceAgreement(true)
+				.collectionAgreement(true)
+				.advertisementAgreement(true)
+				.pushAgreement(true)
 				.socialType(SocialType.KAKAO)
 				.build();
 
@@ -52,7 +59,12 @@ class MemberTest {
 					.socialId("social" + i)
 					.email("test" + i + "@example.com")
 					.name("사용자" + i)
-					.age(20 + (i % 20))
+					.birthday(LocalDate.parse("2022-01-01"))
+					.profileImageUrl("http://example.com")
+					.serviceAgreement(true)
+					.collectionAgreement(true)
+					.advertisementAgreement(true)
+					.pushAgreement(true)
 					.socialType(SocialType.KAKAO)
 					.build())
 				.map(Member::getId)
@@ -76,7 +88,12 @@ class MemberTest {
 				.socialId("12345")
 				.email("test@example.com")
 				.name("홍길동")
-				.age(20)
+				.birthday(LocalDate.parse("2022-01-01"))
+				.profileImageUrl("http://example.com")
+				.serviceAgreement(true)
+				.collectionAgreement(true)
+				.advertisementAgreement(true)
+				.pushAgreement(true)
 				.socialType(SocialType.KAKAO)
 				.build();
 			TSID tsid = TSID.from(member.getId());

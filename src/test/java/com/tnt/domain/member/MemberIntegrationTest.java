@@ -1,6 +1,8 @@
 package com.tnt.domain.member;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.time.LocalDate;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -8,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.tnt.domain.member.repository.MemberRepository;
+import com.tnt.infrastructure.mysql.repository.member.MemberRepository;
 
 @SpringBootTest
 @Transactional
@@ -25,7 +27,12 @@ class MemberIntegrationTest {
 			.socialId("12345")
 			.email("test@example.com")
 			.name("홍길동")
-			.age(20)
+			.birthday(LocalDate.parse("2022-01-01"))
+			.profileImageUrl("http://example.com")
+			.serviceAgreement(true)
+			.collectionAgreement(true)
+			.advertisementAgreement(true)
+			.pushAgreement(true)
 			.socialType(SocialType.KAKAO)
 			.build();
 
