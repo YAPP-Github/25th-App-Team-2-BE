@@ -9,7 +9,7 @@ public enum ErrorMessage {
 
 	SERVER_ERROR("서버 에러가 발생했습니다."),
 
-	BAD_REQUEST("잘못된 요청입니다."),
+	CLIENT_BAD_REQUEST("잘못된 요청입니다."),
 	FAILED_TO_PROCESS_REQUEST("요청 진행에 실패했습니다."),
 	ACCESS_DENIED("접근이 거부되었습니다."),
 	MISSING_REQUIRED_PARAMETER_ERROR("필수 파라미터 '%s'가 누락되었습니다."),
