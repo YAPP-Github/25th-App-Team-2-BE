@@ -1,9 +1,17 @@
 package com.tnt.global.auth.filter;
 
-import static com.tnt.global.error.model.ErrorMessage.*;
-import static jakarta.servlet.http.HttpServletResponse.*;
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.BDDMockito.*;
+import static com.tnt.global.error.model.ErrorMessage.ACCESS_DENIED;
+import static com.tnt.global.error.model.ErrorMessage.AUTHORIZATION_HEADER_ERROR;
+import static com.tnt.global.error.model.ErrorMessage.CLIENT_BAD_REQUEST;
+import static com.tnt.global.error.model.ErrorMessage.SERVER_ERROR;
+import static jakarta.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
+import static jakarta.servlet.http.HttpServletResponse.SC_FORBIDDEN;
+import static jakarta.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
+import static jakarta.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.doThrow;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.verify;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -50,7 +58,7 @@ class ServletExceptionFilterTest {
 	@DisplayName("IllegalArgumentException 발생 시 400 응답 성공")
 	void handle_illegal_argument_exception_success() throws ServletException, IOException {
 		// given
-		doThrow(new IllegalArgumentException(BAD_REQUEST.getMessage()))
+		doThrow(new IllegalArgumentException(CLIENT_BAD_REQUEST.getMessage()))
 			.when(filterChain)
 			.doFilter(request, response);
 
@@ -60,7 +68,7 @@ class ServletExceptionFilterTest {
 		// then
 		verify(response).setStatus(SC_BAD_REQUEST);
 		verify(response).setContentType("application/json;charset=UTF-8");
-		assertThat(stringWriter.toString()).hasToString(BAD_REQUEST.getMessage());
+		assertThat(stringWriter.toString()).hasToString(CLIENT_BAD_REQUEST.getMessage());
 	}
 
 	@Test
