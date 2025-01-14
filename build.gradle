@@ -40,7 +40,7 @@ sonar {
         property "sonar.organization", "yapp-github"
         property "sonar.host.url", "https://sonarcloud.io"
         property "sonar.coverage.jacoco.xmlReportPaths", "build/reports/jacoco/test/jacocoTestReport.xml"
-        property "sonar.exclusions", "**/*Application*.java, **/*Config*.java, **/*GlobalExceptionHandler.java"
+        property "sonar.exclusions", "**/*Application*.java, **/*Config*.java, **/*GlobalExceptionHandler.java, **/Q*.java, **/DynamicQuery.java"
         property "sonar.java.coveragePlugin", "jacoco"
     }
 }
@@ -71,13 +71,20 @@ jacocoTestReport {
         html.required = true
     }
 
+    def Qdomains = []
+
+    for (qPattern in '**/QA'..'**/QZ') { // qPattern = '**/QA', '**/QB', ... '*.QZ'
+        Qdomains.add(qPattern + '*')
+    }
+
     afterEvaluate {
         classDirectories.setFrom(
                 files(classDirectories.files.collect {
                     fileTree(dir: it, excludes: [
-                            "**/*Application*.class",
-                            "**/*Config*.class"
-                    ])
+                            "**/*Application*",
+                            "**/*Config*",
+                            "**/*DynamicQuery*"
+                    ] + Qdomains)
                 })
         )
     }
@@ -108,7 +115,9 @@ jacocoTestCoverageVerification {
                     '*.*Config',
                     '*.error.*',
                     '*.dto.*',
-                    '*.*AppleEcdsaKeyProvider'
+                    '*.*AppleEcdsaKeyProvider',
+                    '*.Q*',
+                    '*.DynamicQuery'
             ]
         }
     }
@@ -116,6 +125,10 @@ jacocoTestCoverageVerification {
 
 editorconfig {
     excludes = ['build']
+}
+
+ext {
+    queryDslVersion = "6.10.1"
 }
 
 dependencies {
@@ -160,4 +173,11 @@ dependencies {
 
     // MockWebServer
     testImplementation 'com.squareup.okhttp3:mockwebserver:4.12.0'
+
+    // Querydsl
+    implementation("io.github.openfeign.querydsl:querydsl-core:$queryDslVersion")
+    implementation("io.github.openfeign.querydsl:querydsl-jpa:$queryDslVersion")
+    annotationProcessor("io.github.openfeign.querydsl:querydsl-apt:$queryDslVersion:jpa")
+    annotationProcessor("jakarta.annotation:jakarta.annotation-api")
+    annotationProcessor("jakarta.persistence:jakarta.persistence-api")
 }
