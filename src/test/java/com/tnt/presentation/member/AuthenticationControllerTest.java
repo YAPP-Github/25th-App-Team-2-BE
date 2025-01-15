@@ -41,7 +41,8 @@ class AuthenticationControllerTest {
 			null
 		);
 
-		given(oauthService.oauthLogin(request)).willReturn(new OAuthLoginResponse("123456789", "", true));
+		given(oauthService.oauthLogin(request)).willReturn(
+			new OAuthLoginResponse("123456789", "", "", null, true));
 
 		// when
 		OAuthLoginResponse response = authenticationController.oauthLogin(request);
@@ -62,7 +63,7 @@ class AuthenticationControllerTest {
 			"test-id-token"
 		);
 
-		given(oauthService.oauthLogin(request)).willReturn(new OAuthLoginResponse("123456789", "", true));
+		given(oauthService.oauthLogin(request)).willReturn(new OAuthLoginResponse("123456789", "", "", null, true));
 
 		// when
 		OAuthLoginResponse response = authenticationController.oauthLogin(request);
@@ -83,7 +84,8 @@ class AuthenticationControllerTest {
 			null
 		);
 
-		given(oauthService.oauthLogin(request)).willReturn(new OAuthLoginResponse("123456789", "", true));
+		given(oauthService.oauthLogin(request)).willReturn(
+			new OAuthLoginResponse("123456789", "", "", null, true));
 
 		// when
 		OAuthLoginResponse response = authenticationController.oauthLogin(request);
