@@ -39,9 +39,19 @@ Configuration:
       AppenderRef:
         ref: RollingFile_Appender
     Logger:
-      name: com.tnt
-      additivity: false
-      level: DEBUG
-      includeLocation: false
-      AppenderRef:
-        ref: RollingFile_Appender
+      - name: com.tnt
+        additivity: false
+        level: DEBUG
+        includeLocation: false
+        AppenderRef:
+          ref: RollingFile_Appender
+      - name: org.hibernate.SQL
+        level: DEBUG
+        additivity: false
+        AppenderRef:
+          ref: RollingFile_Appender
+      - name: org.hibernate.orm.jdbc.bind
+        level: TRACE
+        additivity: false
+        AppenderRef:
+          ref: RollingFile_Appender
