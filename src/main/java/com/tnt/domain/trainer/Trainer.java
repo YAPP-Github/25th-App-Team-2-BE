@@ -1,4 +1,4 @@
-package com.tnt.domain.pt;
+package com.tnt.domain.trainer;
 
 import static com.tnt.global.error.model.ErrorMessage.TRAINER_INVALID_INVITATION_CODE;
 import static com.tnt.global.error.model.ErrorMessage.TRAINER_NULL_ID;
