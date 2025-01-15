@@ -62,4 +62,31 @@ class TrainerServiceTest {
 		assertThatThrownBy(() -> trainerService.getInvitationCode(memberIdString)).isInstanceOf(
 			NotFoundException.class);
 	}
+
+	@Test
+	@DisplayName("트레이너 초대 코드 재발급 성공")
+	void reissue_invitation_code_success() {
+		// given
+		Long trainerId = 1L;
+		Long memberId = 123L;
+
+		Trainer trainer = Trainer.builder()
+			.id(trainerId)
+			.memberId(memberId)
+			.build();
+
+		String invitationCodeBefore = trainer.getInvitationCode();
+
+		given(trainerRepository.findByMemberIdAndDeletedAtIsNull(memberId)).willReturn(
+			java.util.Optional.of(trainer));
+
+		// when
+		InvitationCodeResponse response = trainerService.reissueInvitationCode(String.valueOf(memberId));
+
+		// then
+		assertThat(response.trainerId()).isEqualTo(String.valueOf(trainerId));
+		assertThat(response.invitationCode()).isNotNull();
+		assertThat(response.invitationCode()).hasSize(INVITATION_CODE_LENGTH);
+		assertThat(response.invitationCode()).isNotEqualTo(invitationCodeBefore);
+	}
 }
