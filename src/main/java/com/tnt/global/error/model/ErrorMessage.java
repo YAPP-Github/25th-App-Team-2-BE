@@ -30,7 +30,18 @@ public enum ErrorMessage {
 	MATCHING_KEY_NOT_FOUND("매칭키 찾기에 실패했습니다."),
 	FAILED_TO_VERIFY_ID_TOKEN("Apple ID 토큰 검증에 실패했습니다."),
 
-	MEMBER_NOT_FOUND("존재하지 않는 회원입니다.");
+	MEMBER_NOT_FOUND("존재하지 않는 회원입니다."),
+	MEMBER_CONFLICT("이미 존재하는 회원입니다."),
+	MEMBER_NULL_ID("회원 ID는 필수입니다."),
+	MEMBER_INVALID_SOCIAL_ID("유효하지 않는 소셜 ID입니다."),
+	MEMBER_INVALID_EMAIL("유효하지 않는 EMAIL입니다."),
+	MEMBER_INVALID_NAME("유효하지 않는 이름입니다."),
+	MEMBER_INVALID_PROFILE_IMAGE_URL("유효하지 않는 프로필입니다."),
+	MEMBER_INVALID_SOCIAL_TYPE("유효하지 않는 소셜 타입입니다."),
+
+	TRAINER_NULL_ID("트레이너 id가 null 입니다."),
+	TRAINER_NULL_MEMBER_ID("트레이너 member id가 null 입니다."),
+	TRAINER_INVALID_INVITATION_CODE("초대 코드가 올바르지 않습니다.");
 
 	private final String message;
 }
