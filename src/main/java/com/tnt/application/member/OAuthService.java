@@ -12,6 +12,8 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -50,8 +52,8 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class OAuthService {
 
-	private static final String KAKAO = "kakao";
-	private static final String APPLE = "apple";
+	private static final String KAKAO = "KAKAO";
+	private static final String APPLE = "APPLE";
 
 	private final WebClient webClient;
 	private final SessionService sessionService;
@@ -78,28 +80,25 @@ public class OAuthService {
 	public OAuthLoginResponse oauthLogin(OAuthLoginRequest request) {
 		OAuthUserInfo oauthInfo = extractOAuthUserInfo(request);
 		String socialId = oauthInfo.getId();
+		String socialEmail = oauthInfo.getEmail();
 		Member findMember = findMemberFromDB(socialId, request.socialType());
 
-		if (findMember == null) {
-			return new OAuthLoginResponse(null, socialId, false);
+		if (Objects.isNull(findMember)) {
+			return new OAuthLoginResponse(null, socialId, socialEmail, request.socialType(), false);
 		}
 
 		String sessionId = String.valueOf(TSID.Factory.getTsid());
 
 		sessionService.createOrUpdateSession(sessionId, String.valueOf(findMember.getId()));
 
-		return new OAuthLoginResponse(sessionId, null, true);
+		return new OAuthLoginResponse(sessionId, null, null, null, true);
 	}
 
 	private OAuthUserInfo extractOAuthUserInfo(OAuthLoginRequest request) {
 		return switch (request.socialType()) {
 			case KAKAO -> new KakaoUserInfo(handleKakaoLogin(request.socialAccessToken()));
 			case APPLE -> new AppleUserInfo(handleAppleLogin(request));
-			default -> {
-				log.error("{}, socialType: {}", UNSUPPORTED_SOCIAL_TYPE.getMessage(), request.socialType());
-
-				throw new OAuthException(UNSUPPORTED_SOCIAL_TYPE);
-			}
+			default -> throw new OAuthException(UNSUPPORTED_SOCIAL_TYPE);
 		};
 	}
 
@@ -116,12 +115,11 @@ public class OAuthService {
 	}
 
 	private Map<String, Object> handleAppleLogin(OAuthLoginRequest request) {
-		String idToken;
+		String idToken = Optional.ofNullable(request.idToken()) // Android
+			.orElseGet(() -> getAppleIdToken(request.authorizationCode())); // iOS
 
-		if (request.idToken() != null) { // Android
-			idToken = request.idToken();
-		} else { // iOS
-			idToken = getAppleIdToken(request.authorizationCode());
+		if (Objects.isNull(idToken)) {
+			throw new OAuthException(APPLE_AUTH_ERROR);
 		}
 
 		try {
@@ -140,9 +138,7 @@ public class OAuthService {
 			// 매칭되는 키 찾기
 			JSONObject key = findMatchingKey(keys, kid);
 
-			if (key == null) {
-				log.error("{} key: {}", MATCHING_KEY_NOT_FOUND.getMessage(), kid);
-
+			if (Objects.isNull(key)) {
 				throw new OAuthException(MATCHING_KEY_NOT_FOUND);
 			}
 
@@ -154,8 +150,6 @@ public class OAuthService {
 			// 페이로드에서 사용자 정보 추출
 			return extractUserInfo(payload);
 		} catch (Exception e) {
-			log.error(FAILED_TO_VERIFY_ID_TOKEN.getMessage(), e);
-
 			throw new OAuthException(APPLE_AUTH_ERROR);
 		}
 	}
@@ -172,11 +166,7 @@ public class OAuthService {
 			.onStatus(HttpStatusCode::is4xxClientError, response -> handleErrorResponse(response, APPLE_CLIENT_ERROR))
 			.onStatus(HttpStatusCode::is5xxServerError, response -> handleErrorResponse(response, APPLE_SERVER_ERROR))
 			.bodyToMono(Map.class)
-			.map(response -> {
-				log.info("Apple 인증 Response: {}", response);
-
-				return (String)response.get("id_token");
-			})
+			.map(response -> (String)response.get("id_token"))
 			.doOnError(error -> log.error(APPLE_AUTH_ERROR.getMessage(), error))
 			.block();
 	}
@@ -198,8 +188,6 @@ public class OAuthService {
 				.withSubject(clientId)
 				.sign(Algorithm.ECDSA256(new AppleEcdsaKeyProvider(privateKey, keyId)));
 		} catch (Exception e) {
-			log.error(APPLE_AUTH_ERROR.getMessage(), e);
-
 			throw new OAuthException(APPLE_AUTH_ERROR);
 		}
 	}
@@ -213,11 +201,7 @@ public class OAuthService {
 
 	private Mono<? extends Throwable> handleErrorResponse(ClientResponse response, ErrorMessage errorMessage) {
 		return response.bodyToMono(String.class)
-			.flatMap(body -> {
-				log.error("{} body: {}", errorMessage.getMessage(), body);
-
-				return Mono.error(new OAuthException(FAILED_TO_FETCH_USER_INFO));
-			});
+			.flatMap(body -> Mono.error(new OAuthException(errorMessage)));
 	}
 
 	private String fetchApplePublicKeys() {
@@ -236,6 +220,7 @@ public class OAuthService {
 				return key;
 			}
 		}
+
 		return null;
 	}
 
@@ -263,14 +248,16 @@ public class OAuthService {
 		String email = "email";
 
 		userInfo.put("sub", payloadJson.getString("sub"));
+
 		if (payloadJson.has(email)) {
 			userInfo.put(email, payloadJson.getString(email));
 		}
+
 		return userInfo;
 	}
 
 	private Member findMemberFromDB(String socialId, String socialType) {
 		return memberRepository.findBySocialIdAndSocialTypeAndDeletedAtIsNotNull(socialId,
-			SocialType.valueOf(socialType.toUpperCase())).orElse(null);
+			SocialType.valueOf(socialType)).orElse(null);
 	}
 }

@@ -1,6 +1,6 @@
 package com.tnt.application.member;
 
-import static com.tnt.global.error.model.ErrorMessage.*;
+import static com.tnt.global.error.model.ErrorMessage.FAILED_TO_FETCH_PRIVATE_KEY;
 
 import java.security.KeyFactory;
 import java.security.interfaces.ECPrivateKey;
@@ -40,10 +40,9 @@ public class AppleEcdsaKeyProvider implements ECDSAKeyProvider {
 			byte[] pkcs8EncodedBytes = Base64.getDecoder().decode(privateKey);
 			PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(pkcs8EncodedBytes);
 			KeyFactory kf = KeyFactory.getInstance("EC");
+
 			return (ECPrivateKey)kf.generatePrivate(keySpec);
 		} catch (Exception e) {
-			log.error(FAILED_TO_FETCH_PRIVATE_KEY.getMessage(), e);
-
 			throw new OAuthException(FAILED_TO_FETCH_PRIVATE_KEY);
 		}
 	}
