@@ -8,7 +8,7 @@ public record InvitationCodeResponse(
 	@Schema(description = "트레이너 id", example = "23984725", type = "string")
 	String trainerId,
 
-	@Schema(description = "트레이너의 초대 코드", example = "3h38g9h3", type = "string")
+	@Schema(description = "트레이너의 초대 코드", example = "2H9DG4X3", type = "string")
 	String invitationCode
 ) {
 
