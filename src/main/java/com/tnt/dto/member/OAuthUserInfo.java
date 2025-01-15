@@ -1,6 +1,7 @@
 package com.tnt.dto.member;
 
 import java.util.Map;
+import java.util.Objects;
 
 public abstract class OAuthUserInfo {
 
@@ -19,7 +20,7 @@ public abstract class OAuthUserInfo {
 	protected String getAttributeFromAccount(String infoKey, String attributeKey) {
 		Map<String, Object> attribute = getAttributeAsMap(infoKey);
 
-		if (attribute == null) {
+		if (Objects.isNull(attribute)) {
 			return null;
 		}
 
