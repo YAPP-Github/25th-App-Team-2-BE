@@ -7,4 +7,8 @@ public class NotFoundException extends TnTException {
 	public NotFoundException(ErrorMessage errorMessage) {
 		super(errorMessage);
 	}
+
+	public NotFoundException(ErrorMessage errorMessage, Throwable cause) {
+		super(errorMessage, cause);
+	}
 }

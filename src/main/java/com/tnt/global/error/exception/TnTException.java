@@ -7,4 +7,8 @@ public class TnTException extends RuntimeException {
 	public TnTException(ErrorMessage errorMessage) {
 		super(errorMessage.getMessage());
 	}
+
+	public TnTException(ErrorMessage errorMessage, Throwable cause) {
+		super(errorMessage.getMessage(), cause);
+	}
 }
