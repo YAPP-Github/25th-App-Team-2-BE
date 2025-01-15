@@ -53,11 +53,11 @@ public class Trainer extends BaseTimeEntity {
 	}
 
 	public void setNewInvitationCode() {
+		byte[] hashBytes;
 		StringBuilder sb = new StringBuilder();
 
 		String uuidString = UUID.randomUUID().toString();
 		byte[] uuidStringBytes = uuidString.getBytes(StandardCharsets.UTF_8);
-		byte[] hashBytes;
 
 		try {
 			MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
