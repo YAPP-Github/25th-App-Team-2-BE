@@ -1,10 +1,7 @@
 package com.tnt.global.error.handler;
 
 import static com.tnt.global.error.model.ErrorMessage.*;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
-import static org.springframework.http.HttpStatus.NOT_FOUND;
-import static org.springframework.http.HttpStatus.UNAUTHORIZED;
+import static org.springframework.http.HttpStatus.*;
 
 import java.security.SecureRandom;
 import java.time.DateTimeException;
@@ -18,6 +15,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
+import com.tnt.global.error.exception.ConflictException;
 import com.tnt.global.error.exception.NotFoundException;
 import com.tnt.global.error.exception.OAuthException;
 import com.tnt.global.error.exception.TnTException;
@@ -103,9 +101,25 @@ public class GlobalExceptionHandler {
 		return new ErrorResponse(exception.getMessage());
 	}
 
+	@ResponseStatus(CONFLICT)
+	@ExceptionHandler(ConflictException.class)
+	protected ErrorResponse handleConflictException(TnTException exception) {
+		log.error(exception.getMessage(), exception);
+
+		return new ErrorResponse(exception.getMessage());
+	}
+
 	@ResponseStatus(NOT_FOUND)
 	@ExceptionHandler(NotFoundException.class)
 	protected ErrorResponse handleNotFoundException(TnTException exception) {
+		log.error(exception.getMessage(), exception);
+
+		return new ErrorResponse(exception.getMessage());
+	}
+
+	@ResponseStatus(INTERNAL_SERVER_ERROR)
+	@ExceptionHandler(IllegalArgumentException.class)
+	protected ErrorResponse handleIllegalArgumentException(IllegalArgumentException exception) {
 		log.error(exception.getMessage(), exception);
 
 		return new ErrorResponse(exception.getMessage());
