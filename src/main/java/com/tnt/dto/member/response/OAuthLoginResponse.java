@@ -10,7 +10,7 @@ public record OAuthLoginResponse(
 	@Schema(description = "소셜 ID (null / 43252465)", example = "43252465")
 	String socialId,
 
-	@Schema(description = "소셜 EMAIL (null / zxc098@kakao.com)", example = "zxc098@kakao.com")
+	@Schema(description = "소셜 이메일 (null / zxc098@kakao.com)", example = "zxc098@kakao.com")
 	String socialEmail,
 
 	@Schema(description = "소셜 로그인 타입 (null / KAKAO)", example = "KAKAO")
