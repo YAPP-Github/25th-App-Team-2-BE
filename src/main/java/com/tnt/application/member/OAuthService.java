@@ -257,7 +257,7 @@ public class OAuthService {
 	}
 
 	private Member findMemberFromDB(String socialId, String socialType) {
-		return memberRepository.findBySocialIdAndSocialTypeAndDeletedAtIsNotNull(socialId,
+		return memberRepository.findBySocialIdAndSocialTypeAndDeletedAtIsNull(socialId,
 			SocialType.valueOf(socialType)).orElse(null);
 	}
 }

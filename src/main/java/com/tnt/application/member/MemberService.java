@@ -29,7 +29,7 @@ public class MemberService {
 	}
 
 	private void validateMemberNotExists(String socialId, String socialType) {
-		memberRepository.findBySocialIdAndSocialTypeAndDeletedAtIsNotNull(socialId, SocialType.valueOf(socialType))
+		memberRepository.findBySocialIdAndSocialTypeAndDeletedAtIsNull(socialId, SocialType.valueOf(socialType))
 			.ifPresent(member -> {
 				throw new ConflictException(MEMBER_CONFLICT);
 			});

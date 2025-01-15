@@ -11,5 +11,5 @@ import com.tnt.domain.member.SocialType;
 @Repository
 public interface MemberRepository extends JpaRepository<Member, Long> {
 
-	Optional<Member> findBySocialIdAndSocialTypeAndDeletedAtIsNotNull(String socialId, SocialType socialType);
+	Optional<Member> findBySocialIdAndSocialTypeAndDeletedAtIsNull(String socialId, SocialType socialType);
 }
