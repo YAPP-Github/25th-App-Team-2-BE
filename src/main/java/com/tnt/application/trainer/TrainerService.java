@@ -34,7 +34,7 @@ public class TrainerService {
 	}
 
 	public Trainer getTrainer(String memberId) {
-		return trainerRepository.findByMemberIdAndDeletedAtIsNotNull(Long.valueOf(memberId))
+		return trainerRepository.findByMemberIdAndDeletedAtIsNull(Long.valueOf(memberId))
 			.orElseThrow(() -> new NotFoundException(TRAINER_NOT_FOUND));
 	}
 }

@@ -8,5 +8,5 @@ import com.tnt.domain.trainer.Trainer;
 
 public interface TrainerRepository extends JpaRepository<Trainer, Long> {
 
-	Optional<Trainer> findByMemberIdAndDeletedAtIsNotNull(Long memberId);
+	Optional<Trainer> findByMemberIdAndDeletedAtIsNull(Long memberId);
 }
