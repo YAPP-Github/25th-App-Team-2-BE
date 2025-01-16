@@ -47,11 +47,11 @@ public class Member extends BaseTimeEntity {
 	@Column(name = "name", nullable = false, length = NAME_LENGTH)
 	private String name;
 
-	@Column(name = "birthday")
-	private LocalDate birthday;
-
 	@Column(name = "profile_image_url", nullable = false, length = PROFILE_IMAGE_URL_LENGTH)
 	private String profileImageUrl;
+
+	@Column(name = "birthday")
+	private LocalDate birthday;
 
 	@Column(name = "service_agreement", nullable = false)
 	private boolean serviceAgreement;
@@ -73,15 +73,15 @@ public class Member extends BaseTimeEntity {
 	private SocialType socialType;
 
 	@Builder
-	public Member(Long id, String socialId, String email, String name, LocalDate birthday, String profileImageUrl,
+	public Member(Long id, String socialId, String email, String name, String profileImageUrl, LocalDate birthday,
 		boolean serviceAgreement, boolean collectionAgreement, boolean advertisementAgreement, boolean pushAgreement,
 		SocialType socialType) {
-		this.id = Objects.requireNonNull(id, MEMBER_NULL_ID.getMessage());
+		this.id = id;
 		this.socialId = validateSocialId(socialId);
 		this.email = validateEmail(email);
 		this.name = validateName(name);
-		this.birthday = birthday;
 		this.profileImageUrl = validateProfileImageUrl(profileImageUrl);
+		this.birthday = birthday;
 		this.serviceAgreement = serviceAgreement;
 		this.collectionAgreement = collectionAgreement;
 		this.advertisementAgreement = advertisementAgreement;
