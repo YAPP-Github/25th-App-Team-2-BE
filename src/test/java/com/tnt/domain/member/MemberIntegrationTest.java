@@ -1,6 +1,6 @@
 package com.tnt.domain.member;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 
 import java.time.LocalDate;
 

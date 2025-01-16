@@ -1,7 +1,6 @@
 package com.tnt.domain.member;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.within;
+import static org.assertj.core.api.Assertions.*;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -101,6 +100,34 @@ class MemberTest {
 
 			// then
 			assertThat(timestamp).isCloseTo(Instant.now(), within(1, ChronoUnit.SECONDS));
+		}
+
+		@Test
+		@DisplayName("FCM 토큰 갱신 성공")
+		void update_fcm_token_success() {
+			// given
+			Member member = Member.builder()
+				.id(TSID.fast().toLong())  // TSID 직접 생성
+				.socialId("12345")
+				.fcmToken("old-fcm-token")
+				.email("test@example.com")
+				.name("홍길동")
+				.birthday(LocalDate.parse("2022-01-01"))
+				.profileImageUrl("http://example.com")
+				.serviceAgreement(true)
+				.collectionAgreement(true)
+				.advertisementAgreement(true)
+				.pushAgreement(true)
+				.socialType(SocialType.KAKAO)
+				.build();
+
+			String newFcmToken = "new-fcm-token";
+
+			// when
+			member.updateFcmTokenIfExpired(newFcmToken);
+
+			// then
+			assertThat(member.getFcmToken()).isEqualTo(newFcmToken);
 		}
 	}
 }
