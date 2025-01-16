@@ -4,6 +4,8 @@ import static com.querydsl.core.types.PathMetadataFactory.*;
 
 import com.querydsl.core.types.dsl.*;
 
+import com.querydsl.core.types.dsl.StringTemplate;
+
 import com.querydsl.core.types.PathMetadata;
 import javax.annotation.processing.Generated;
 import com.querydsl.core.types.Path;
@@ -16,7 +18,7 @@ import com.querydsl.core.types.Path;
 @Generated("com.querydsl.codegen.DefaultEntitySerializer")
 public class QTrainer extends EntityPathBase<Trainer> {
 
-    private static final long serialVersionUID = -818593356L;
+    private static final long serialVersionUID = -1889491213L;
 
     public static final QTrainer trainer = new QTrainer("trainer");
 
