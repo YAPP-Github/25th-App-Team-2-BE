@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 public enum ErrorMessage {
 
 	SERVER_ERROR("서버 에러가 발생했습니다."),
+	FCM_FAILED("FCM 전송에 실패했습니다."),
 
 	CLIENT_BAD_REQUEST("잘못된 요청입니다."),
 	FAILED_TO_PROCESS_REQUEST("요청 진행에 실패했습니다."),
