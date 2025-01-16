@@ -1,9 +1,11 @@
 package com.tnt.dto.member.request;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 
 @Schema(description = "회원가입 API 요청")
 public record SignUpRequest(
@@ -39,11 +41,12 @@ public record SignUpRequest(
 	@Schema(description = "몸무게", example = "255.5")
 	Double weight,
 
-	@Schema(description = "PT 목적", example = "체중 감량")
-	String goalContent,
-
 	@Schema(description = "주의사항", example = "가냘퍼요")
-	String cautionNote
+	String cautionNote,
+
+	@Schema(description = "PT 목적들", example = "[\"체중 감량\", \"근력 향상\"]")
+	@NotEmpty(message = "PT 목적은 필수입니다.")
+	List<String> goalContents
 ) {
 
 }
