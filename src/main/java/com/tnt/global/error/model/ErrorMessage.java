@@ -8,6 +8,9 @@ import lombok.RequiredArgsConstructor;
 public enum ErrorMessage {
 
 	SERVER_ERROR("서버 에러가 발생했습니다."),
+	IMAGE_PROCESSING_ERROR("이미지 처리 중 오류가 발생했습니다."),
+	IMAGE_LOAD_ERROR("이미지를 읽을 수 없습니다."),
+	S3_UPLOAD_ERROR("S3로 이미지 업로드 중 오류가 발생했습니다."),
 
 	CLIENT_BAD_REQUEST("잘못된 요청입니다."),
 	FAILED_TO_PROCESS_REQUEST("요청 진행에 실패했습니다."),
@@ -32,18 +35,25 @@ public enum ErrorMessage {
 
 	MEMBER_NOT_FOUND("존재하지 않는 회원입니다."),
 	MEMBER_CONFLICT("이미 존재하는 회원입니다."),
-	MEMBER_NULL_ID("회원 ID는 필수입니다."),
-	MEMBER_INVALID_SOCIAL_ID("유효하지 않는 소셜 ID입니다."),
-	MEMBER_INVALID_EMAIL("유효하지 않는 EMAIL입니다."),
+	MEMBER_INVALID_SOCIAL_ID("유효하지 않는 소셜 ID 입니다."),
+	MEMBER_INVALID_EMAIL("유효하지 않는 EMAIL 입니다."),
 	MEMBER_INVALID_NAME("유효하지 않는 이름입니다."),
 	MEMBER_INVALID_PROFILE_IMAGE_URL("유효하지 않는 프로필입니다."),
 	MEMBER_INVALID_SOCIAL_TYPE("유효하지 않는 소셜 타입입니다."),
+	UNSUPPORTED_MEMBER_TYPE("지원하지 않는 회원 타입입니다."),
 
 	TRAINER_NULL_ID("트레이너 id가 null 입니다."),
 	TRAINER_NULL_MEMBER_ID("트레이너 member id가 null 입니다."),
 	TRAINER_INVALID_INVITATION_CODE("초대 코드가 올바르지 않습니다."),
 	TRAINER_NOT_FOUND("존재하지 않는 트레이너입니다."),
-	TRAINER_INVITATION_CODE_GENERATE_FAILED("트레이너 초대 코드 생성에 실패했습니다.");
+	TRAINER_INVITATION_CODE_GENERATE_FAILED("트레이너 초대 코드 생성에 실패했습니다."),
+
+	TRAINEE_NULL_MEMBER_ID("트레이니 member id가 null 입니다."),
+	TRAINEE_INVALID_CAUTION_NOTE("주의사항이 올바르지 않습니다."),
+	TRAINEE_NOT_FOUND("존재하지 않는 트레이니입니다."),
+
+	PT_GOAL_NULL_TRAINEE_ID("PT 목적 트레이니 id가 null 입니다."),
+	PT_GOAL_INVALID_CONTENT("목적 내용이 올바르지 않습니다.");
 
 	private final String message;
 }
