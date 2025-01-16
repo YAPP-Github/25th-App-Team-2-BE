@@ -1,10 +1,7 @@
 package com.tnt.global.error.handler;
 
 import static com.tnt.global.error.model.ErrorMessage.*;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
-import static org.springframework.http.HttpStatus.NOT_FOUND;
-import static org.springframework.http.HttpStatus.UNAUTHORIZED;
+import static org.springframework.http.HttpStatus.*;
 
 import java.security.SecureRandom;
 import java.time.DateTimeException;
@@ -111,6 +108,14 @@ public class GlobalExceptionHandler {
 		return new ErrorResponse(exception.getMessage());
 	}
 
+	@ResponseStatus(INTERNAL_SERVER_ERROR)
+	@ExceptionHandler(IllegalArgumentException.class)
+	protected ErrorResponse handleIllegalArgumentException(IllegalArgumentException exception) {
+		log.error(exception.getMessage(), exception);
+
+		return new ErrorResponse(exception.getMessage());
+	}
+
 	// 기타 500 예외
 	@ResponseStatus(INTERNAL_SERVER_ERROR)
 	@ExceptionHandler(RuntimeException.class)
@@ -124,7 +129,7 @@ public class GlobalExceptionHandler {
 		String errorKeyInfo = String.format(ERROR_KEY_FORMAT, sb);
 		String exceptionTypeInfo = String.format(EXCEPTION_CLASS_TYPE_MESSAGE_FORMANT, exception.getClass());
 
-		log.error("{}{}{}", exception.getMessage(), errorKeyInfo, exceptionTypeInfo, exception);
+		log.error("{} {} {}", exception.getMessage(), errorKeyInfo, exceptionTypeInfo, exception);
 
 		return new ErrorResponse(SERVER_ERROR + errorKeyInfo);
 	}
