@@ -7,4 +7,8 @@ public class ConflictException extends TnTException {
 	public ConflictException(ErrorMessage errorMessage) {
 		super(errorMessage);
 	}
+
+	public ConflictException(ErrorMessage errorMessage, Throwable cause) {
+		super(errorMessage, cause);
+	}
 }
