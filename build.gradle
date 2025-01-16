@@ -41,7 +41,7 @@ sonar {
         property "sonar.host.url", "https://sonarcloud.io"
         property "sonar.coverage.jacoco.xmlReportPaths", "build/reports/jacoco/test/jacocoTestReport.xml"
         property "sonar.exclusions", "**/*Application*.java, **/*Config*.java, **/*GlobalExceptionHandler.java, **/Q*.java, **/DynamicQuery.java, " +
-                "**/*Exception.java"
+                "**/*Exception.java", "**/*Adapter.java"
         property "sonar.java.coveragePlugin", "jacoco"
     }
 }
@@ -84,7 +84,8 @@ jacocoTestReport {
                     fileTree(dir: it, excludes: [
                             "**/*Application*",
                             "**/*Config*",
-                            "**/*DynamicQuery*"
+                            "**/*DynamicQuery*",
+                            "**/*error*"
                     ] + Qdomains)
                 })
         )
@@ -118,7 +119,8 @@ jacocoTestCoverageVerification {
                     '*.dto.*',
                     '*.*AppleEcdsaKeyProvider',
                     '*.Q*',
-                    '*.DynamicQuery'
+                    '*.DynamicQuery',
+                    '*.*Adapter'
             ]
         }
     }
@@ -182,4 +184,7 @@ dependencies {
     annotationProcessor("io.github.openfeign.querydsl:querydsl-apt:$queryDslVersion:jpa")
     annotationProcessor("jakarta.annotation:jakarta.annotation-api")
     annotationProcessor("jakarta.persistence:jakarta.persistence-api")
+
+    // Firebase
+    implementation 'com.google.firebase:firebase-admin:9.4.3'
 }
