@@ -23,6 +23,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -44,11 +45,10 @@ import com.tnt.infrastructure.mysql.repository.member.MemberRepository;
 
 import io.hypersistence.tsid.TSID;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
-@Slf4j
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class OAuthService {
 
@@ -167,7 +167,6 @@ public class OAuthService {
 			.onStatus(HttpStatusCode::is5xxServerError, response -> handleErrorResponse(response, APPLE_SERVER_ERROR))
 			.bodyToMono(Map.class)
 			.map(response -> (String)response.get("id_token"))
-			.doOnError(error -> log.error(APPLE_AUTH_ERROR.getMessage(), error))
 			.block();
 	}
 
