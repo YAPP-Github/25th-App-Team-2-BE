@@ -138,7 +138,7 @@ public class GlobalExceptionHandler {
 		String errorKeyInfo = String.format(ERROR_KEY_FORMAT, sb);
 		String exceptionTypeInfo = String.format(EXCEPTION_CLASS_TYPE_MESSAGE_FORMANT, exception.getClass());
 
-		log.error("{}{}{}", exception.getMessage(), errorKeyInfo, exceptionTypeInfo, exception);
+		log.error("{} {} {}", exception.getMessage(), errorKeyInfo, exceptionTypeInfo, exception);
 
 		return new ErrorResponse(SERVER_ERROR + errorKeyInfo);
 	}

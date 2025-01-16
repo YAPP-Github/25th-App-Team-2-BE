@@ -41,7 +41,9 @@ public enum ErrorMessage {
 
 	TRAINER_NULL_ID("트레이너 id가 null 입니다."),
 	TRAINER_NULL_MEMBER_ID("트레이너 member id가 null 입니다."),
-	TRAINER_INVALID_INVITATION_CODE("초대 코드가 올바르지 않습니다.");
+	TRAINER_INVALID_INVITATION_CODE("초대 코드가 올바르지 않습니다."),
+	TRAINER_NOT_FOUND("존재하지 않는 트레이너입니다."),
+	TRAINER_INVITATION_CODE_GENERATE_FAILED("트레이너 초대 코드 생성에 실패했습니다.");
 
 	private final String message;
 }

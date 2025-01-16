@@ -24,8 +24,18 @@ Configuration:
       AppenderRef:
         ref: Console_Appender
     Logger:
-      name: com.tnt
-      additivity: false
-      level: DEBUG
-      AppenderRef:
-        ref: Console_Appender
+      - name: com.tnt
+        additivity: false
+        level: DEBUG
+        AppenderRef:
+          ref: Console_Appender
+      - name: org.hibernate.SQL
+        level: DEBUG
+        additivity: false
+        AppenderRef:
+          ref: Console_Appender
+      - name: org.hibernate.orm.jdbc.bind
+        level: TRACE
+        additivity: false
+        AppenderRef:
+          ref: Console_Appender

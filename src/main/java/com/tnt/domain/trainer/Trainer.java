@@ -1,14 +1,17 @@
 package com.tnt.domain.trainer;
 
-import static com.tnt.global.error.model.ErrorMessage.TRAINER_INVALID_INVITATION_CODE;
-import static com.tnt.global.error.model.ErrorMessage.TRAINER_NULL_ID;
-import static com.tnt.global.error.model.ErrorMessage.TRAINER_NULL_MEMBER_ID;
-import static io.micrometer.common.util.StringUtils.isBlank;
+import static com.tnt.global.error.model.ErrorMessage.*;
+import static io.micrometer.common.util.StringUtils.*;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.UUID;
 
 import com.tnt.global.common.entity.BaseTimeEntity;
+import com.tnt.global.error.exception.TnTException;
 
 import io.hypersistence.utils.hibernate.id.Tsid;
 import jakarta.persistence.Column;
@@ -26,7 +29,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Trainer extends BaseTimeEntity {
 
-	private static final int INVITATION_CODE_LENGTH = 8;
+	public static final int INVITATION_CODE_LENGTH = 8;
 
 	@Id
 	@Tsid
@@ -43,10 +46,31 @@ public class Trainer extends BaseTimeEntity {
 	private LocalDateTime deletedAt;
 
 	@Builder
-	public Trainer(Long id, Long memberId, String invitationCode) {
-		this.id = Objects.requireNonNull(id, TRAINER_NULL_ID.getMessage());
+	public Trainer(Long id, Long memberId) {
+		this.id = id;
 		this.memberId = Objects.requireNonNull(memberId, TRAINER_NULL_MEMBER_ID.getMessage());
-		this.invitationCode = validateInvitationCode(invitationCode);
+		setNewInvitationCode();
+	}
+
+	public void setNewInvitationCode() {
+		byte[] hashBytes;
+		StringBuilder sb = new StringBuilder();
+
+		String uuidString = UUID.randomUUID().toString();
+		byte[] uuidStringBytes = uuidString.getBytes(StandardCharsets.UTF_8);
+
+		try {
+			MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
+			hashBytes = messageDigest.digest(uuidStringBytes);
+		} catch (NoSuchAlgorithmException e) {
+			throw new TnTException(TRAINER_INVITATION_CODE_GENERATE_FAILED, e);
+		}
+
+		for (int j = 0; j < 4; j++) {
+			sb.append(String.format("%02x", hashBytes[j]));
+		}
+
+		this.invitationCode = validateInvitationCode(sb.toString().toUpperCase());
 	}
 
 	private String validateInvitationCode(String invitationCode) {

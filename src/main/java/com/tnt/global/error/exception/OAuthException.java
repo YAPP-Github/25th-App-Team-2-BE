@@ -7,4 +7,8 @@ public class OAuthException extends TnTException {
 	public OAuthException(ErrorMessage errorMessage) {
 		super(errorMessage);
 	}
+
+	public OAuthException(ErrorMessage errorMessage, Throwable cause) {
+		super(errorMessage, cause);
+	}
 }
