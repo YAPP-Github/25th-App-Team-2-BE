@@ -2,6 +2,7 @@ package com.tnt.application.member;
 
 import static com.tnt.global.error.model.ErrorMessage.MEMBER_CONFLICT;
 import static com.tnt.global.error.model.ErrorMessage.UNSUPPORTED_MEMBER_TYPE;
+import static io.micrometer.common.util.StringUtils.isBlank;
 import static io.micrometer.common.util.StringUtils.isNotBlank;
 
 import java.util.List;
@@ -34,6 +35,10 @@ public class MemberService {
 
 	private static final String TRAINER = "trainer";
 	private static final String TRAINEE = "trainee";
+	private static final String TRAINER_PROFILE_PATH = "profiles/trainers";
+	private static final String TRAINEE_PROFILE_PATH = "profiles/trainees";
+	private static final String TRAINER_DEFAULT_IMAGE = "your-trainer-default-image-url";
+	private static final String TRAINEE_DEFAULT_IMAGE = "your-trainee-default-image-url";
 
 	private final MemberRepository memberRepository;
 	private final TrainerRepository trainerRepository;
@@ -42,7 +47,6 @@ public class MemberService {
 	private final S3Service s3Service;
 	private final SessionService sessionService;
 
-	@Transactional
 	public SignUpResponse signUp(SignUpRequest request) {
 		validateMemberNotExists(request.socialId(), request.socialType());
 
@@ -73,7 +77,7 @@ public class MemberService {
 			.socialId(request.socialId())
 			.email(request.socialEmail())
 			.name(request.name())
-			.profileImageUrl(uploadProfileImage(request.profileImageUrl()))
+			.profileImageUrl(uploadProfileImage(request.profileImageUrl(), request.memberType()))
 			.serviceAgreement(true)
 			.collectionAgreement(true)
 			.advertisementAgreement(true)
@@ -116,16 +120,33 @@ public class MemberService {
 		});
 	}
 
-	private String uploadProfileImage(String profileImageUrl) {
-		if (!isNotBlank(profileImageUrl)) {
-			return ""; // 디폴트 이미지 URL
+	private String uploadProfileImage(String profileImageUrl, String memberType) {
+		if (isBlank(profileImageUrl)) {
+			return getDefaultImageUrl(memberType);
 		}
 
 		try {
-			// 기존 URL에서 이미지를 다운로드하고 S3에 업로드
-			return s3Service.uploadFromUrl(profileImageUrl, "profiles");  // 프로필 이미지를 저장할 S3 폴더 경로
+			String folderPath = getFolderPath(memberType);
+
+			return s3Service.uploadFromUrl(profileImageUrl, folderPath);
 		} catch (Exception e) {
-			return ""; // 디폴트 이미지 URL
+			return getDefaultImageUrl(memberType);
 		}
+	}
+
+	private String getDefaultImageUrl(String memberType) {
+		return switch (memberType) {
+			case TRAINER -> TRAINER_DEFAULT_IMAGE;
+			case TRAINEE -> TRAINEE_DEFAULT_IMAGE;
+			default -> throw new IllegalArgumentException(UNSUPPORTED_MEMBER_TYPE.getMessage());
+		};
+	}
+
+	private String getFolderPath(String memberType) {
+		return switch (memberType) {
+			case TRAINER -> TRAINER_PROFILE_PATH;
+			case TRAINEE -> TRAINEE_PROFILE_PATH;
+			default -> throw new IllegalArgumentException(UNSUPPORTED_MEMBER_TYPE.getMessage());
+		};
 	}
 }
