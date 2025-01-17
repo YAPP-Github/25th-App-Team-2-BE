@@ -9,6 +9,10 @@ import jakarta.validation.constraints.NotEmpty;
 
 @Schema(description = "회원가입 API 요청")
 public record SignUpRequest(
+	@Schema(description = "FCM 토큰", example = "dsl5f7iho-28yg2g290u2fj0-23348-23r05")
+	@NotBlank(message = "FCM 토큰은 필수입니다.")
+	String fcmToken,
+
 	@Schema(description = "회원 타입 (trainer / trainee)", example = "trainer")
 	@NotBlank(message = "회원 타입은 필수입니다.")
 	String memberType,
@@ -28,9 +32,6 @@ public record SignUpRequest(
 	@Schema(description = "회원 이름", example = "홍길동")
 	@NotBlank(message = "회원 이름은 필수입니다.")
 	String name,
-
-	@Schema(description = "프로필 사진 URL", example = "asdf.png")
-	String profileImageUrl,
 
 	@Schema(description = "생년월일", example = "2025-01-01")
 	LocalDate birthday,

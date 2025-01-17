@@ -2,11 +2,13 @@ package com.tnt.presentation.member;
 
 import static org.springframework.http.HttpStatus.OK;
 
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.tnt.application.member.MemberService;
 import com.tnt.dto.member.request.SignUpRequest;
@@ -26,9 +28,10 @@ public class MemberController {
 	private final MemberService memberService;
 
 	@Operation(summary = "회원가입 API")
-	@PostMapping
+	@PostMapping(value = "/sign-up", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	@ResponseStatus(value = OK)
-	public SignUpResponse signUp(@RequestBody @Valid SignUpRequest request) {
-		return memberService.signUp(request);
+	public SignUpResponse signUp(@RequestPart(value = "request") @Valid SignUpRequest request,
+		@RequestPart(value = "profileImage", required = false) MultipartFile profileImage) {
+		return memberService.signUp(request, profileImage);
 	}
 }

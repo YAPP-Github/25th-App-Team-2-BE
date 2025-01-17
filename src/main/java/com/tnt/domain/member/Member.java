@@ -94,7 +94,7 @@ public class Member extends BaseTimeEntity {
 	}
 
 	private String validateSocialId(String socialId) {
-		if (isBlank(socialId) || socialId.length() != SOCIAL_ID_LENGTH) {
+		if (isBlank(socialId) || socialId.length() > SOCIAL_ID_LENGTH) {
 			throw new IllegalArgumentException(MEMBER_INVALID_SOCIAL_ID.getMessage());
 		}
 
@@ -102,7 +102,7 @@ public class Member extends BaseTimeEntity {
 	}
 
 	private String validateEmail(String email) {
-		if (isBlank(email) || email.length() != EMAIL_LENGTH) {
+		if (isBlank(email) || email.length() > EMAIL_LENGTH) {
 			throw new IllegalArgumentException(MEMBER_INVALID_EMAIL.getMessage());
 		}
 
@@ -110,7 +110,7 @@ public class Member extends BaseTimeEntity {
 	}
 
 	private String validateName(String name) {
-		if (isBlank(name) || name.length() != NAME_LENGTH) {
+		if (isBlank(name) || name.length() > NAME_LENGTH) {
 			throw new IllegalArgumentException(MEMBER_INVALID_NAME.getMessage());
 		}
 
@@ -118,7 +118,7 @@ public class Member extends BaseTimeEntity {
 	}
 
 	private String validateProfileImageUrl(String profileImageUrl) {
-		if (isBlank(profileImageUrl) || profileImageUrl.length() != PROFILE_IMAGE_URL_LENGTH) {
+		if (isBlank(profileImageUrl) || profileImageUrl.length() > PROFILE_IMAGE_URL_LENGTH) {
 			throw new IllegalArgumentException(MEMBER_INVALID_PROFILE_IMAGE_URL.getMessage());
 		}
 
@@ -126,7 +126,7 @@ public class Member extends BaseTimeEntity {
 	}
 
 	private SocialType validateSocialType(SocialType socialType) {
-		if (Objects.isNull(socialType) || socialType.toString().length() != SOCIAL_ID_LENGTH) {
+		if (Objects.isNull(socialType) || socialType.toString().length() > SOCIAL_ID_LENGTH) {
 			throw new IllegalArgumentException(MEMBER_INVALID_SOCIAL_TYPE.getMessage());
 		}
 

@@ -1,6 +1,6 @@
 package com.tnt.domain.member;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
 
@@ -25,6 +25,7 @@ class MemberIntegrationTest {
 		// given
 		Member member = Member.builder()
 			.socialId("12345")
+			.fcmToken("token")
 			.email("test@example.com")
 			.name("홍길동")
 			.birthday(LocalDate.parse("2022-01-01"))

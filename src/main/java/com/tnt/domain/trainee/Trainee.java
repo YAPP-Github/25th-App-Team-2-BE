@@ -57,7 +57,7 @@ public class Trainee extends BaseTimeEntity {
 	}
 
 	private String validateCautionNote(String cautionNote) {
-		if (isBlank(cautionNote) || cautionNote.length() != CAUTION_NOTE_LENGTH) {
+		if (isBlank(cautionNote) || cautionNote.length() > CAUTION_NOTE_LENGTH) {
 			throw new IllegalArgumentException(TRAINEE_INVALID_CAUTION_NOTE.getMessage());
 		}
 

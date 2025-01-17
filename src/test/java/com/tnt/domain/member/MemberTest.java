@@ -1,6 +1,7 @@
 package com.tnt.domain.member;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -56,10 +57,11 @@ class MemberTest {
 				.mapToObj(i -> Member.builder()
 					.id(TSID.fast().toLong())
 					.socialId("social" + i)
+					.fcmToken("token")
 					.email("test" + i + "@example.com")
 					.name("사용자" + i)
 					.birthday(LocalDate.parse("2022-01-01"))
-					.profileImageUrl("http://example.com")
+					.profileImageUrl("https://example.com")
 					.serviceAgreement(true)
 					.collectionAgreement(true)
 					.advertisementAgreement(true)
@@ -85,10 +87,11 @@ class MemberTest {
 			Member member = Member.builder()
 				.id(TSID.fast().toLong())  // TSID 직접 생성
 				.socialId("12345")
+				.fcmToken("token")
 				.email("test@example.com")
 				.name("홍길동")
 				.birthday(LocalDate.parse("2022-01-01"))
-				.profileImageUrl("http://example.com")
+				.profileImageUrl("https://example.com")
 				.serviceAgreement(true)
 				.collectionAgreement(true)
 				.advertisementAgreement(true)

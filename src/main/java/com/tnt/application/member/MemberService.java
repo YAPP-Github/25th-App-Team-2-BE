@@ -2,13 +2,14 @@ package com.tnt.application.member;
 
 import static com.tnt.global.error.model.ErrorMessage.MEMBER_CONFLICT;
 import static com.tnt.global.error.model.ErrorMessage.UNSUPPORTED_MEMBER_TYPE;
-import static io.micrometer.common.util.StringUtils.isBlank;
 import static io.micrometer.common.util.StringUtils.isNotBlank;
 
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.tnt.application.auth.SessionService;
 import com.tnt.application.s3.S3Service;
@@ -35,10 +36,10 @@ public class MemberService {
 
 	private static final String TRAINER = "trainer";
 	private static final String TRAINEE = "trainee";
-	private static final String TRAINER_PROFILE_PATH = "profiles/trainers";
-	private static final String TRAINEE_PROFILE_PATH = "profiles/trainees";
-	private static final String TRAINER_DEFAULT_IMAGE = "your-trainer-default-image-url";
-	private static final String TRAINEE_DEFAULT_IMAGE = "your-trainee-default-image-url";
+	private static final String TRAINER_S3_PROFILE_PATH = "profiles/trainers";
+	private static final String TRAINEE_S3_PROFILE_PATH = "profiles/trainees";
+	private static final String TRAINER_DEFAULT_IMAGE = "https://tntapp-bucket.s3.ap-northeast-2.amazonaws.com/profiles/trainers/basic_profile_trainer.svg";
+	private static final String TRAINEE_DEFAULT_IMAGE = "https://tntapp-bucket.s3.ap-northeast-2.amazonaws.com/profiles/trainees/basic_profile_trainee.svg";
 
 	private final MemberRepository memberRepository;
 	private final TrainerRepository trainerRepository;
@@ -47,10 +48,10 @@ public class MemberService {
 	private final S3Service s3Service;
 	private final SessionService sessionService;
 
-	public SignUpResponse signUp(SignUpRequest request) {
+	public SignUpResponse signUp(SignUpRequest request, MultipartFile profileImage) {
 		validateMemberNotExists(request.socialId(), request.socialType());
 
-		Member member = createMember(request);
+		Member member = createMember(request, profileImage);
 
 		switch (request.memberType()) {
 			case TRAINER -> createTrainer(member);
@@ -72,12 +73,13 @@ public class MemberService {
 			});
 	}
 
-	private Member createMember(SignUpRequest request) {
+	private Member createMember(SignUpRequest request, MultipartFile profileImage) {
 		Member member = Member.builder()
 			.socialId(request.socialId())
+			.fcmToken(request.fcmToken())
 			.email(request.socialEmail())
 			.name(request.name())
-			.profileImageUrl(uploadProfileImage(request.profileImageUrl(), request.memberType()))
+			.profileImageUrl(uploadProfileImage(profileImage, request.memberType()))
 			.serviceAgreement(true)
 			.collectionAgreement(true)
 			.advertisementAgreement(true)
@@ -120,33 +122,30 @@ public class MemberService {
 		});
 	}
 
-	private String uploadProfileImage(String profileImageUrl, String memberType) {
-		if (isBlank(profileImageUrl)) {
-			return getDefaultImageUrl(memberType);
+	private String uploadProfileImage(MultipartFile profileImage, String memberType) {
+		String defaultImage;
+		String folderPath;
+
+		switch (memberType) {
+			case TRAINER -> {
+				defaultImage = TRAINER_DEFAULT_IMAGE;
+				folderPath = TRAINER_S3_PROFILE_PATH;
+			}
+			case TRAINEE -> {
+				defaultImage = TRAINEE_DEFAULT_IMAGE;
+				folderPath = TRAINEE_S3_PROFILE_PATH;
+			}
+			default -> throw new IllegalArgumentException(UNSUPPORTED_MEMBER_TYPE.getMessage());
+		}
+
+		if (Objects.isNull(profileImage)) {
+			return defaultImage;
 		}
 
 		try {
-			String folderPath = getFolderPath(memberType);
-
-			return s3Service.uploadFromUrl(profileImageUrl, folderPath);
+			return s3Service.uploadFile(profileImage, folderPath);
 		} catch (Exception e) {
-			return getDefaultImageUrl(memberType);
+			return defaultImage;
 		}
-	}
-
-	private String getDefaultImageUrl(String memberType) {
-		return switch (memberType) {
-			case TRAINER -> TRAINER_DEFAULT_IMAGE;
-			case TRAINEE -> TRAINEE_DEFAULT_IMAGE;
-			default -> throw new IllegalArgumentException(UNSUPPORTED_MEMBER_TYPE.getMessage());
-		};
-	}
-
-	private String getFolderPath(String memberType) {
-		return switch (memberType) {
-			case TRAINER -> TRAINER_PROFILE_PATH;
-			case TRAINEE -> TRAINEE_PROFILE_PATH;
-			default -> throw new IllegalArgumentException(UNSUPPORTED_MEMBER_TYPE.getMessage());
-		};
 	}
 }

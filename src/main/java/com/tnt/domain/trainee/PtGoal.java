@@ -45,7 +45,7 @@ public class PtGoal extends BaseTimeEntity {
 	}
 
 	private String validateContent(String content) {
-		if (isBlank(content) || content.length() != CONTENT_LENGTH) {
+		if (isBlank(content) || content.length() > CONTENT_LENGTH) {
 			throw new IllegalArgumentException(PT_GOAL_INVALID_CONTENT.getMessage());
 		}
 

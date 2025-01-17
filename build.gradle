@@ -191,11 +191,6 @@ dependencies {
     // AWS S3 SDK
     implementation 'software.amazon.awssdk:s3:2.30.0'
 
-    // TwelveMonkeys - 다양한 이미지 포맷 지원
-    implementation 'com.twelvemonkeys.imageio:imageio-core:3.12.0'
-    implementation 'com.twelvemonkeys.imageio:imageio-jpeg:3.12.0'  // JPEG 지원
-    implementation 'com.twelvemonkeys.imageio:imageio-webp:3.12.0'  // WebP 지원 (Android)
-
     // Thumbnailator - 이미지 리사이징과 포맷 변환
     implementation 'net.coobird:thumbnailator:0.4.20'
 }

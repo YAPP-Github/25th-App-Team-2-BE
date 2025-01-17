@@ -3,24 +3,23 @@ package com.tnt.application.s3;
 import static com.tnt.global.error.model.ErrorMessage.*;
 
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
 
 import javax.imageio.ImageIO;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.multipart.MultipartFile;
 
 import net.coobird.thumbnailator.Thumbnails;
 
 import com.tnt.global.error.exception.ImageException;
 
+import io.hypersistence.tsid.TSID;
 import lombok.RequiredArgsConstructor;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -36,78 +35,77 @@ public class S3Service {
 	private static final int MAX_WIDTH = 1200;
 	private static final int MAX_HEIGHT = 1200;
 	private static final double IMAGE_QUALITY = 0.85;
-	private static final String OUTPUT_FORMAT = "jpg";
 
 	private final S3Client s3Client;
-	private final WebClient webClient;
 
 	@Value("${aws.s3.bucket-name}")
 	private String bucketName;
 
-	public String uploadFromUrl(String sourceUrl, String folderPath) {
-		validateImageFormat(sourceUrl);
+	public String uploadFile(MultipartFile image, String folderPath) {
+		validateImageFormat(image);
+
+		String extension = getExtension(Objects.requireNonNull(image.getOriginalFilename())).toLowerCase();
 
 		try {
-			byte[] processedImage = downloadAndProcessImage(sourceUrl);
+			byte[] processedImage = processImage(image, extension);
 
-			return uploadToS3(processedImage, folderPath);
+			return uploadToS3(processedImage, folderPath, extension);
 		} catch (IOException e) {
 			throw new ImageException(IMAGE_PROCESSING_ERROR, e);
 		}
 	}
 
-	private void validateImageFormat(String sourceUrl) {
-		String extension = getExtensionFromUrl(sourceUrl).toLowerCase();
+	private void validateImageFormat(MultipartFile image) {
+		String originalFilename = image.getOriginalFilename();
+		if (originalFilename == null) {
+			throw new ImageException(IMAGE_NOT_FOUND);
+		}
 
+		String extension = getExtension(originalFilename).toLowerCase();
 		if (!SUPPORTED_FORMATS.contains(extension)) {
 			throw new ImageException(IMAGE_NOT_SUPPORT);
 		}
 	}
 
-	private String getExtensionFromUrl(String url) {
-		String[] parts = url.split("\\.");
-
-		if (parts.length == 0) {
+	private String getExtension(String filename) {
+		int lastDotIndex = filename.lastIndexOf('.');
+		if (lastDotIndex == -1) {
 			throw new ImageException(IMAGE_NOT_FOUND);
 		}
-
-		return parts[parts.length - 1].split("\\?")[0];
+		return filename.substring(lastDotIndex + 1);
 	}
 
-	private byte[] downloadAndProcessImage(String sourceUrl) throws IOException {
-		byte[] imageBytes = webClient.get()
-			.uri(sourceUrl)
-			.retrieve()
-			.bodyToMono(byte[].class)
-			.block();
+	private byte[] processImage(MultipartFile image, String extension) throws IOException {
+		if ("svg".equals(extension)) {
+			return image.getBytes();
+		}
 
-		BufferedImage originalImage = ImageIO.read(new ByteArrayInputStream(Objects.requireNonNull(imageBytes)));
+		BufferedImage originalImage = ImageIO.read(image.getInputStream());
 
 		if (Objects.isNull(originalImage)) {
 			throw new ImageException(IMAGE_LOAD_ERROR);
 		}
 
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-
 		Thumbnails.of(originalImage)
 			.size(MAX_WIDTH, MAX_HEIGHT)
 			.keepAspectRatio(true)
 			.outputQuality(IMAGE_QUALITY)
-			.outputFormat(OUTPUT_FORMAT)
+			.outputFormat(extension)
 			.toOutputStream(outputStream);
 
 		return outputStream.toByteArray();
 	}
 
-	private String uploadToS3(byte[] imageData, String folderPath) {
-		String fileName = UUID.randomUUID() + "." + OUTPUT_FORMAT;
+	private String uploadToS3(byte[] imageData, String folderPath, String extension) {
+		String fileName = TSID.Factory.getTsid() + "." + extension;
 		String s3Key = folderPath + "/" + fileName;
 
 		try {
 			PutObjectRequest request = PutObjectRequest.builder()
 				.bucket(bucketName)
 				.key(s3Key)
-				.contentType("image/" + OUTPUT_FORMAT)
+				.contentType("image/" + extension)
 				.build();
 
 			s3Client.putObject(request, RequestBody.fromBytes(imageData));
