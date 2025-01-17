@@ -76,8 +76,8 @@ public class Member extends BaseTimeEntity {
 	private SocialType socialType;
 
 	@Builder
-	public Member(Long id, String socialId, String fcmToken, String email, String name, String profileImageUrl,LocalDate birthday,
-		boolean serviceAgreement, boolean collectionAgreement, boolean advertisementAgreement,
+	public Member(Long id, String socialId, String fcmToken, String email, String name, String profileImageUrl,
+		LocalDate birthday, boolean serviceAgreement, boolean collectionAgreement, boolean advertisementAgreement,
 		boolean pushAgreement, SocialType socialType) {
 		this.id = id;
 		this.socialId = validateSocialId(socialId);
