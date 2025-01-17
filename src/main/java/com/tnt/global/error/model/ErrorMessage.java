@@ -11,6 +11,8 @@ public enum ErrorMessage {
 	IMAGE_PROCESSING_ERROR("이미지 처리 중 오류가 발생했습니다."),
 	IMAGE_LOAD_ERROR("이미지를 읽을 수 없습니다."),
 	S3_UPLOAD_ERROR("S3로 이미지 업로드 중 오류가 발생했습니다."),
+	IMAGE_NOT_FOUND("이미지가 존재하지 않습니다."),
+	IMAGE_NOT_SUPPORT("지원하지 않는 이미지 형식입니다. jpg, jpeg, png, svg만 가능합니다."),
 
 	CLIENT_BAD_REQUEST("잘못된 요청입니다."),
 	FAILED_TO_PROCESS_REQUEST("요청 진행에 실패했습니다."),
