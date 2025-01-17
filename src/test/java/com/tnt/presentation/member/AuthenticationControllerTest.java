@@ -1,12 +1,8 @@
 package com.tnt.presentation.member;
 
-import static com.tnt.global.error.model.ErrorMessage.FAILED_TO_FETCH_USER_INFO;
-import static com.tnt.global.error.model.ErrorMessage.MEMBER_NOT_FOUND;
-import static com.tnt.global.error.model.ErrorMessage.UNSUPPORTED_SOCIAL_TYPE;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.verify;
+import static com.tnt.global.error.model.ErrorMessage.*;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.BDDMockito.*;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -34,12 +30,7 @@ class AuthenticationControllerTest {
 	@DisplayName("Kakao 로그인 성공")
 	void kakao_login_success() {
 		// given
-		OAuthLoginRequest request = new OAuthLoginRequest(
-			"KAKAO",
-			"test-kakao-access-token",
-			null,
-			null
-		);
+		OAuthLoginRequest request = new OAuthLoginRequest("KAKAO", "fcm", "test-kakao-access-token", null, null);
 
 		given(oauthService.oauthLogin(request)).willReturn(new OAuthLoginResponse("123456789", "", true));
 
@@ -55,12 +46,7 @@ class AuthenticationControllerTest {
 	@DisplayName("ANDROID - Apple 로그인 성공")
 	void apple_login_with_android_success() {
 		// given
-		OAuthLoginRequest request = new OAuthLoginRequest(
-			"APPLE",
-			null,
-			null,
-			"test-id-token"
-		);
+		OAuthLoginRequest request = new OAuthLoginRequest("APPLE", "fcm", null, null, "test-id-token");
 
 		given(oauthService.oauthLogin(request)).willReturn(new OAuthLoginResponse("123456789", "", true));
 
@@ -76,12 +62,7 @@ class AuthenticationControllerTest {
 	@DisplayName("iOS - Apple 로그인 성공")
 	void apple_login_with_ios_success() {
 		// given
-		OAuthLoginRequest request = new OAuthLoginRequest(
-			"APPLE",
-			null,
-			"test-authorization-code",
-			null
-		);
+		OAuthLoginRequest request = new OAuthLoginRequest("APPLE", "fcm", null, "test-authorization-code", null);
 
 		given(oauthService.oauthLogin(request)).willReturn(new OAuthLoginResponse("123456789", "", true));
 
@@ -97,12 +78,7 @@ class AuthenticationControllerTest {
 	@DisplayName("지원하지 않는 소셜 타입일 경우 예외 발생")
 	void unsupported_social_type_error() {
 		// given
-		OAuthLoginRequest request = new OAuthLoginRequest(
-			"NAVER",
-			"test-access-token",
-			null,
-			null
-		);
+		OAuthLoginRequest request = new OAuthLoginRequest("NAVER", "fcm", "test-access-token", null, null);
 
 		given(oauthService.oauthLogin(request)).willThrow(new OAuthException(UNSUPPORTED_SOCIAL_TYPE));
 
@@ -116,12 +92,7 @@ class AuthenticationControllerTest {
 	@DisplayName("OAuth 서버 에러 시 예외 발생")
 	void oauth_server_error() {
 		// given
-		OAuthLoginRequest request = new OAuthLoginRequest(
-			"KAKAO",
-			"invalid-token",
-			null,
-			null
-		);
+		OAuthLoginRequest request = new OAuthLoginRequest("KAKAO", "fcm", "invalid-token", null, null);
 
 		given(oauthService.oauthLogin(request)).willThrow(new OAuthException(FAILED_TO_FETCH_USER_INFO));
 
@@ -135,12 +106,7 @@ class AuthenticationControllerTest {
 	@DisplayName("신규 회원일 때 예외 발생")
 	void member_not_found_error() {
 		// given
-		OAuthLoginRequest request = new OAuthLoginRequest(
-			"KAKAO",
-			"test-token",
-			null,
-			null
-		);
+		OAuthLoginRequest request = new OAuthLoginRequest("KAKAO", "fcm", "test-token", null, null);
 
 		given(oauthService.oauthLogin(request)).willThrow(new NotFoundException(MEMBER_NOT_FOUND));
 
