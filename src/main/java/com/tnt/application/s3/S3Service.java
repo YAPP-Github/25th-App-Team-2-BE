@@ -1,13 +1,13 @@
 package com.tnt.application.s3;
 
-import static com.tnt.global.error.model.ErrorMessage.IMAGE_LOAD_ERROR;
-import static com.tnt.global.error.model.ErrorMessage.IMAGE_PROCESSING_ERROR;
-import static com.tnt.global.error.model.ErrorMessage.S3_UPLOAD_ERROR;
+import static com.tnt.global.error.model.ErrorMessage.*;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -32,6 +32,7 @@ import software.amazon.awssdk.services.s3.model.S3Exception;
 @RequiredArgsConstructor
 public class S3Service {
 
+	private static final List<String> SUPPORTED_FORMATS = Arrays.asList("jpg", "jpeg", "png", "svg");
 	private static final int MAX_WIDTH = 1200;
 	private static final int MAX_HEIGHT = 1200;
 	private static final double IMAGE_QUALITY = 0.85;
@@ -44,6 +45,8 @@ public class S3Service {
 	private String bucketName;
 
 	public String uploadFromUrl(String sourceUrl, String folderPath) {
+		validateImageFormat(sourceUrl);
+
 		try {
 			byte[] processedImage = downloadAndProcessImage(sourceUrl);
 
@@ -51,6 +54,24 @@ public class S3Service {
 		} catch (IOException e) {
 			throw new ImageException(IMAGE_PROCESSING_ERROR, e);
 		}
+	}
+
+	private void validateImageFormat(String sourceUrl) {
+		String extension = getExtensionFromUrl(sourceUrl).toLowerCase();
+
+		if (!SUPPORTED_FORMATS.contains(extension)) {
+			throw new ImageException(IMAGE_NOT_SUPPORT);
+		}
+	}
+
+	private String getExtensionFromUrl(String url) {
+		String[] parts = url.split("\\.");
+
+		if (parts.length == 0) {
+			throw new ImageException(IMAGE_NOT_FOUND);
+		}
+
+		return parts[parts.length - 1].split("\\?")[0];
 	}
 
 	private byte[] downloadAndProcessImage(String sourceUrl) throws IOException {
@@ -67,6 +88,7 @@ public class S3Service {
 		}
 
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+
 		Thumbnails.of(originalImage)
 			.size(MAX_WIDTH, MAX_HEIGHT)
 			.keepAspectRatio(true)
