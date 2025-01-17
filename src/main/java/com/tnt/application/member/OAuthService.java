@@ -87,6 +87,9 @@ public class OAuthService {
 			return new OAuthLoginResponse(null, socialId, socialEmail, request.socialType(), false);
 		}
 
+		findMember.updateFcmTokenIfExpired(request.fcmToken());
+		memberRepository.save(findMember);
+
 		String sessionId = String.valueOf(TSID.Factory.getTsid());
 
 		sessionService.createOrUpdateSession(sessionId, String.valueOf(findMember.getId()));

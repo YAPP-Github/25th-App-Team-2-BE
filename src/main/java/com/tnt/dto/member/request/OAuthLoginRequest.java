@@ -9,6 +9,10 @@ public record OAuthLoginRequest(
 	@NotBlank(message = "소셜 로그인 타입은 필수입니다.")
 	String socialType,
 
+	@Schema(description = "FCM 토큰", example = "dsl5f7iho-28yg2g290u2fj0-23348-23r05")
+	@NotBlank(message = "FCM 토큰은 필수입니다.")
+	String fcmToken,
+
 	@Schema(description = "소셜 액세스 토큰 (카카오 로그인 시)", example = "atweroiuhoresihsgfkn")
 	String socialAccessToken,
 

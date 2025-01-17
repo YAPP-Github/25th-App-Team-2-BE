@@ -41,6 +41,9 @@ public class Member extends BaseTimeEntity {
 	@Column(name = "social_id", nullable = false, unique = true, length = SOCIAL_ID_LENGTH)
 	private String socialId;
 
+	@Column(name = "fcm_token", nullable = false, length = 255)
+	private String fcmToken;
+
 	@Column(name = "email", nullable = false, length = EMAIL_LENGTH)
 	private String email;
 
@@ -73,11 +76,12 @@ public class Member extends BaseTimeEntity {
 	private SocialType socialType;
 
 	@Builder
-	public Member(Long id, String socialId, String email, String name, String profileImageUrl, LocalDate birthday,
-		boolean serviceAgreement, boolean collectionAgreement, boolean advertisementAgreement, boolean pushAgreement,
-		SocialType socialType) {
+	public Member(Long id, String socialId, String fcmToken, String email, String name, String profileImageUrl,LocalDate birthday,
+		boolean serviceAgreement, boolean collectionAgreement, boolean advertisementAgreement,
+		boolean pushAgreement, SocialType socialType) {
 		this.id = id;
 		this.socialId = validateSocialId(socialId);
+		this.fcmToken = fcmToken;
 		this.email = validateEmail(email);
 		this.name = validateName(name);
 		this.profileImageUrl = validateProfileImageUrl(profileImageUrl);
@@ -127,5 +131,11 @@ public class Member extends BaseTimeEntity {
 		}
 
 		return socialType;
+	}
+
+	public void updateFcmTokenIfExpired(String fcmToken) {
+		if (!this.fcmToken.equals(fcmToken)) {
+			this.fcmToken = fcmToken;
+		}
 	}
 }

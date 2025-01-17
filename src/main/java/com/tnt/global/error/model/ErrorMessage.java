@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 public enum ErrorMessage {
 
 	SERVER_ERROR("서버 에러가 발생했습니다."),
+	FCM_FAILED("FCM 전송에 실패했습니다."),
 	IMAGE_PROCESSING_ERROR("이미지 처리 중 오류가 발생했습니다."),
 	IMAGE_LOAD_ERROR("이미지를 읽을 수 없습니다."),
 	S3_UPLOAD_ERROR("S3로 이미지 업로드 중 오류가 발생했습니다."),
