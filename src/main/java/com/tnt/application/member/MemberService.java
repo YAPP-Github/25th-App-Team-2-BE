@@ -1,8 +1,7 @@
 package com.tnt.application.member;
 
-import static com.tnt.global.error.model.ErrorMessage.MEMBER_CONFLICT;
-import static com.tnt.global.error.model.ErrorMessage.UNSUPPORTED_MEMBER_TYPE;
-import static io.micrometer.common.util.StringUtils.isNotBlank;
+import static com.tnt.global.error.model.ErrorMessage.*;
+import static io.micrometer.common.util.StringUtils.*;
 
 import java.util.List;
 import java.util.Objects;
@@ -38,8 +37,8 @@ public class MemberService {
 	private static final String TRAINEE = "trainee";
 	private static final String TRAINER_S3_PROFILE_PATH = "profiles/trainers";
 	private static final String TRAINEE_S3_PROFILE_PATH = "profiles/trainees";
-	private static final String TRAINER_DEFAULT_IMAGE = "https://tntapp-bucket.s3.ap-northeast-2.amazonaws.com/profiles/trainers/basic_profile_trainer.svg";
-	private static final String TRAINEE_DEFAULT_IMAGE = "https://tntapp-bucket.s3.ap-northeast-2.amazonaws.com/profiles/trainees/basic_profile_trainee.svg";
+	private static final String TRAINER_DEFAULT_IMAGE = "https://images.tntapp.co.kr/profiles/trainers/basic_profile_trainer.svg";
+	private static final String TRAINEE_DEFAULT_IMAGE = "https://images.tntapp.co.kr/profiles/trainees/basic_profile_trainee.svg";
 
 	private final MemberRepository memberRepository;
 	private final TrainerRepository trainerRepository;
