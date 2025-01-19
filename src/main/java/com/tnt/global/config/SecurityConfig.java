@@ -33,6 +33,7 @@ public class SecurityConfig {
 		"/v3/api-docs/**",
 		"/swagger-ui/**",
 		"/login/**",
+		"/member/sign-up"
 	};
 	private final SessionService sessionService;
 
