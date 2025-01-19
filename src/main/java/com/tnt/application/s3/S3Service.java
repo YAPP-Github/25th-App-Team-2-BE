@@ -57,11 +57,13 @@ public class S3Service {
 
 	private void validateImageFormat(MultipartFile image) {
 		String originalFilename = image.getOriginalFilename();
+
 		if (originalFilename == null) {
 			throw new ImageException(IMAGE_NOT_FOUND);
 		}
 
 		String extension = getExtension(originalFilename).toLowerCase();
+
 		if (!SUPPORTED_FORMATS.contains(extension)) {
 			throw new ImageException(IMAGE_NOT_SUPPORT);
 		}
@@ -69,9 +71,11 @@ public class S3Service {
 
 	private String getExtension(String filename) {
 		int lastDotIndex = filename.lastIndexOf('.');
+
 		if (lastDotIndex == -1) {
 			throw new ImageException(IMAGE_NOT_FOUND);
 		}
+
 		return filename.substring(lastDotIndex + 1);
 	}
 

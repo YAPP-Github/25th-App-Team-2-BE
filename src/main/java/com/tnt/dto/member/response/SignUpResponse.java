@@ -7,7 +7,7 @@ public record SignUpResponse(
 	@Schema(description = "회원 타입 (trainer / trainee)", example = "trainer")
 	String memberType,
 
-	@Schema(description = "세션 ID (1645365389)", example = "1645365389")
+	@Schema(description = "세션 ID", example = "1645365389")
 	String sessionId,
 
 	@Schema(description = "회원 이름", example = "홍길동")
