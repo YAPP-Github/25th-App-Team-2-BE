@@ -58,7 +58,7 @@ class S3ServiceTest {
 
 	@Test
 	@DisplayName("이미지 업로드 성공 - JPG")
-	void uploadFile_success_jpg() throws Exception {
+	void upload_jpg_success() throws Exception {
 		// given
 		String folderPath = "test/folder";
 		MockMultipartFile image = new MockMultipartFile("image", "test.jpg", MediaType.IMAGE_JPEG_VALUE,
@@ -78,7 +78,7 @@ class S3ServiceTest {
 
 	@Test
 	@DisplayName("이미지 업로드 성공 - PNG")
-	void uploadFile_success_png() throws Exception {
+	void upload_png_success() throws Exception {
 		// given
 		String folderPath = "test/folder";
 		MockMultipartFile image = new MockMultipartFile("image", "test.jpg", MediaType.IMAGE_JPEG_VALUE,
@@ -98,7 +98,7 @@ class S3ServiceTest {
 
 	@Test
 	@DisplayName("지원하지 않는 이미지 형식으로 업로드 실패")
-	void uploadFile_fail_unsupported_format() throws IOException {
+	void upload_unsupported_format_fail() throws IOException {
 		// given
 		String folderPath = "test/folder";
 		MockMultipartFile image = new MockMultipartFile("image", "test.gif", "image/gif", createDummyImageData());
@@ -109,7 +109,7 @@ class S3ServiceTest {
 
 	@Test
 	@DisplayName("파일명이 없는 경우 업로드 실패")
-	void uploadFile_fail_no_filename() throws IOException {
+	void upload_no_filename_fail() throws IOException {
 		// given
 		String folderPath = "test/folder";
 		MockMultipartFile image = new MockMultipartFile("image", "", MediaType.IMAGE_JPEG_VALUE,
@@ -121,7 +121,7 @@ class S3ServiceTest {
 
 	@Test
 	@DisplayName("S3 업로드 실패")
-	void uploadFile_fail_s3_error() throws Exception {
+	void upload_s3_fail() throws Exception {
 		// given
 		String folderPath = "test/folder";
 		MockMultipartFile image = new MockMultipartFile("image", "test.jpg", MediaType.IMAGE_JPEG_VALUE,
@@ -136,7 +136,7 @@ class S3ServiceTest {
 
 	@Test
 	@DisplayName("이미지 처리 실패")
-	void uploadFile_fail_image_processing() {
+	void image_processing_fail() {
 		// given
 		String folderPath = "test/folder";
 		MockMultipartFile image = new MockMultipartFile("image", "test.jpg", MediaType.IMAGE_JPEG_VALUE,

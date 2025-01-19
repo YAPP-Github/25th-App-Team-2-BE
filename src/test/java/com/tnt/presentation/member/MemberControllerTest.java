@@ -21,7 +21,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tnt.dto.member.request.SignUpRequest;
 
@@ -51,12 +50,6 @@ class MemberControllerTest {
 		return new MockMultipartFile("profileImage", "test.jpg", IMAGE_JPEG_VALUE, "test image content".getBytes());
 	}
 
-	private MockMultipartFile createSignUpRequest(SignUpRequest request) throws
-		JsonProcessingException {
-		return new MockMultipartFile("request", "", APPLICATION_JSON_VALUE,
-			objectMapper.writeValueAsString(request).getBytes());
-	}
-
 	private SignUpRequest createDefaultSignUpRequest(String memberType) {
 		return new SignUpRequest("fcm-token-test", memberType, "KAKAO", "12345", "test@kakao.com", "홍길동",
 			LocalDate.of(1990, 1, 1), 175.0, 70.0, "테스트 주의사항", List.of("체중 감량", "근력 향상"));
@@ -64,7 +57,8 @@ class MemberControllerTest {
 
 	private ResultActions performSignUpRequest(SignUpRequest request, MockMultipartFile profileImage) throws Exception {
 		return mockMvc.perform(multipart("/member/sign-up")
-			.file(createSignUpRequest(request))
+			.file(new MockMultipartFile("request", "", APPLICATION_JSON_VALUE,
+				objectMapper.writeValueAsString(request).getBytes()))
 			.file(profileImage)
 			.contentType(MULTIPART_FORM_DATA_VALUE));
 	}
@@ -97,7 +91,7 @@ class MemberControllerTest {
 
 	@Test
 	@DisplayName("통합 테스트 - 필수 필드 누락으로 회원가입 실패")
-	void sign_up_fail_missing_required_field() throws Exception {
+	void sign_up_missing_required_field_fail() throws Exception {
 		// given
 		SignUpRequest request = new SignUpRequest(
 			"",
@@ -122,7 +116,7 @@ class MemberControllerTest {
 
 	@Test
 	@DisplayName("통합 테스트 - 잘못된 회원 타입으로 회원가입 실패")
-	void sign_up_fail_invalid_member_type() throws Exception {
+	void sign_up_invalid_member_type_fail() throws Exception {
 		// given
 		SignUpRequest request = createDefaultSignUpRequest("invalid_type");
 
