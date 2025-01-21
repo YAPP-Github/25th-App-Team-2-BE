@@ -14,9 +14,7 @@ import com.auth0.jwt.interfaces.ECDSAKeyProvider;
 import com.tnt.global.error.exception.OAuthException;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @Component
 @RequiredArgsConstructor
 public class AppleEcdsaKeyProvider implements ECDSAKeyProvider {
