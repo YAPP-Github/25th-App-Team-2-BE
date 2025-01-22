@@ -1,31 +1,28 @@
 package com.tnt.application.s3;
 
-import static com.tnt.global.error.model.ErrorMessage.*;
+import static com.tnt.global.error.model.ErrorMessage.IMAGE_NOT_FOUND;
+import static com.tnt.global.error.model.ErrorMessage.IMAGE_NOT_SUPPORT;
+import static com.tnt.global.error.model.ErrorMessage.UNSUPPORTED_MEMBER_TYPE;
+import static java.util.Objects.isNull;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 import javax.imageio.ImageIO;
 
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import net.coobird.thumbnailator.Thumbnails;
 
 import com.tnt.global.error.exception.ImageException;
+import com.tnt.infrastructure.s3.S3Adapter;
 
-import io.hypersistence.tsid.TSID;
 import lombok.RequiredArgsConstructor;
-import software.amazon.awssdk.core.sync.RequestBody;
-import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.GetUrlRequest;
-import software.amazon.awssdk.services.s3.model.PutObjectRequest;
-import software.amazon.awssdk.services.s3.model.S3Exception;
 
 @Service
 @RequiredArgsConstructor
@@ -35,30 +32,50 @@ public class S3Service {
 	private static final int MAX_WIDTH = 1200;
 	private static final int MAX_HEIGHT = 1200;
 	private static final double IMAGE_QUALITY = 0.85;
+	private static final String TRAINER = "trainer";
+	private static final String TRAINEE = "trainee";
+	private static final String TRAINER_S3_PROFILE_PATH = "profiles/trainers";
+	private static final String TRAINEE_S3_PROFILE_PATH = "profiles/trainees";
+	private static final String TRAINER_DEFAULT_IMAGE = "https://images.tntapp.co.kr/profiles/trainers/basic_profile_trainer.svg";
+	private static final String TRAINEE_DEFAULT_IMAGE = "https://images.tntapp.co.kr/profiles/trainees/basic_profile_trainee.svg";
 
-	private final S3Client s3Client;
+	private final S3Adapter s3Adapter;
 
-	@Value("${aws.s3.bucket-name}")
-	private String bucketName;
+	public String uploadProfileImage(@Nullable MultipartFile profileImage, String memberType) {
+		String defaultImage;
+		String folderPath;
 
-	public String uploadFile(MultipartFile image, String folderPath) {
-		validateImageFormat(image);
+		switch (memberType) {
+			case TRAINER -> {
+				defaultImage = TRAINER_DEFAULT_IMAGE;
+				folderPath = TRAINER_S3_PROFILE_PATH;
+			}
+			case TRAINEE -> {
+				defaultImage = TRAINEE_DEFAULT_IMAGE;
+				folderPath = TRAINEE_S3_PROFILE_PATH;
+			}
+			default -> throw new IllegalArgumentException(UNSUPPORTED_MEMBER_TYPE.getMessage());
+		}
 
-		String extension = getExtension(Objects.requireNonNull(image.getOriginalFilename())).toLowerCase();
+		if (isNull(profileImage)) {
+			return defaultImage;
+		}
+
+		String extension = validateImageFormat(profileImage);
 
 		try {
-			byte[] processedImage = processImage(image, extension);
+			byte[] processedImage = processImage(profileImage, extension);
 
-			return uploadToS3(processedImage, folderPath, extension);
-		} catch (IOException e) {
-			throw new ImageException(IMAGE_PROCESSING_ERROR, e);
+			return s3Adapter.uploadFile(processedImage, folderPath, extension);
+		} catch (Exception e) {
+			return defaultImage;
 		}
 	}
 
-	private void validateImageFormat(MultipartFile image) {
+	private String validateImageFormat(MultipartFile image) {
 		String originalFilename = image.getOriginalFilename();
 
-		if (originalFilename == null) {
+		if (isNull(originalFilename)) {
 			throw new ImageException(IMAGE_NOT_FOUND);
 		}
 
@@ -67,6 +84,8 @@ public class S3Service {
 		if (!SUPPORTED_FORMATS.contains(extension)) {
 			throw new ImageException(IMAGE_NOT_SUPPORT);
 		}
+
+		return extension;
 	}
 
 	private String getExtension(String filename) {
@@ -85,12 +104,8 @@ public class S3Service {
 		}
 
 		BufferedImage originalImage = ImageIO.read(image.getInputStream());
-
-		if (Objects.isNull(originalImage)) {
-			throw new ImageException(IMAGE_LOAD_ERROR);
-		}
-
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+
 		Thumbnails.of(originalImage)
 			.size(MAX_WIDTH, MAX_HEIGHT)
 			.keepAspectRatio(true)
@@ -99,29 +114,5 @@ public class S3Service {
 			.toOutputStream(outputStream);
 
 		return outputStream.toByteArray();
-	}
-
-	private String uploadToS3(byte[] imageData, String folderPath, String extension) {
-		String fileName = TSID.Factory.getTsid() + "." + extension;
-		String s3Key = folderPath + "/" + fileName;
-
-		try {
-			PutObjectRequest request = PutObjectRequest.builder()
-				.bucket(bucketName)
-				.key(s3Key)
-				.contentType("image/" + extension)
-				.build();
-
-			s3Client.putObject(request, RequestBody.fromBytes(imageData));
-
-			GetUrlRequest urlRequest = GetUrlRequest.builder()
-				.bucket(bucketName)
-				.key(s3Key)
-				.build();
-
-			return s3Client.utilities().getUrl(urlRequest).toString();
-		} catch (S3Exception e) {
-			throw new ImageException(S3_UPLOAD_ERROR, e);
-		}
 	}
 }

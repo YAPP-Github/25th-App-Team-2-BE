@@ -1,11 +1,12 @@
 package com.tnt.application.member;
 
-import static com.tnt.global.error.model.ErrorMessage.*;
-import static io.micrometer.common.util.StringUtils.*;
+import static com.tnt.global.error.model.ErrorMessage.MEMBER_CONFLICT;
+import static com.tnt.global.error.model.ErrorMessage.UNSUPPORTED_MEMBER_TYPE;
+import static io.micrometer.common.util.StringUtils.isNotBlank;
 
 import java.util.List;
-import java.util.Objects;
 
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -35,10 +36,6 @@ public class MemberService {
 
 	private static final String TRAINER = "trainer";
 	private static final String TRAINEE = "trainee";
-	private static final String TRAINER_S3_PROFILE_PATH = "profiles/trainers";
-	private static final String TRAINEE_S3_PROFILE_PATH = "profiles/trainees";
-	private static final String TRAINER_DEFAULT_IMAGE = "https://images.tntapp.co.kr/profiles/trainers/basic_profile_trainer.svg";
-	private static final String TRAINEE_DEFAULT_IMAGE = "https://images.tntapp.co.kr/profiles/trainees/basic_profile_trainee.svg";
 
 	private final MemberRepository memberRepository;
 	private final TrainerRepository trainerRepository;
@@ -47,7 +44,8 @@ public class MemberService {
 	private final S3Service s3Service;
 	private final SessionService sessionService;
 
-	public SignUpResponse signUp(SignUpRequest request, MultipartFile profileImage) {
+	@Transactional
+	public SignUpResponse signUp(SignUpRequest request, @Nullable MultipartFile profileImage) {
 		validateMemberNotExists(request.socialId(), request.socialType());
 
 		Member member = createMember(request, profileImage);
@@ -72,13 +70,13 @@ public class MemberService {
 			});
 	}
 
-	private Member createMember(SignUpRequest request, MultipartFile profileImage) {
+	private Member createMember(SignUpRequest request, @Nullable MultipartFile profileImage) {
 		Member member = Member.builder()
 			.socialId(request.socialId())
 			.fcmToken(request.fcmToken())
 			.email(request.socialEmail())
 			.name(request.name())
-			.profileImageUrl(uploadProfileImage(profileImage, request.memberType()))
+			.profileImageUrl(s3Service.uploadProfileImage(profileImage, request.memberType()))
 			.serviceAgreement(true)
 			.collectionAgreement(true)
 			.advertisementAgreement(true)
@@ -111,40 +109,13 @@ public class MemberService {
 	}
 
 	private void createPtGoals(Trainee trainee, List<String> goalContents) {
-		goalContents.forEach(content -> {
-			PtGoal ptGoal = PtGoal.builder()
+		List<PtGoal> ptGoals = goalContents.stream()
+			.map(content -> PtGoal.builder()
 				.traineeId(trainee.getId())
 				.content(content)
-				.build();
+				.build())
+			.toList();
 
-			ptGoalRepository.save(ptGoal);
-		});
-	}
-
-	private String uploadProfileImage(MultipartFile profileImage, String memberType) {
-		String defaultImage;
-		String folderPath;
-
-		switch (memberType) {
-			case TRAINER -> {
-				defaultImage = TRAINER_DEFAULT_IMAGE;
-				folderPath = TRAINER_S3_PROFILE_PATH;
-			}
-			case TRAINEE -> {
-				defaultImage = TRAINEE_DEFAULT_IMAGE;
-				folderPath = TRAINEE_S3_PROFILE_PATH;
-			}
-			default -> throw new IllegalArgumentException(UNSUPPORTED_MEMBER_TYPE.getMessage());
-		}
-
-		if (Objects.isNull(profileImage)) {
-			return defaultImage;
-		}
-
-		try {
-			return s3Service.uploadFile(profileImage, folderPath);
-		} catch (Exception e) {
-			return defaultImage;
-		}
+		ptGoalRepository.saveAll(ptGoals);
 	}
 }
