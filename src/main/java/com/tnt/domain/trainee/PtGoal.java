@@ -7,9 +7,10 @@ import static java.util.Objects.requireNonNull;
 
 import com.tnt.global.common.entity.BaseTimeEntity;
 
-import io.hypersistence.utils.hibernate.id.Tsid;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
@@ -26,7 +27,7 @@ public class PtGoal extends BaseTimeEntity {
 	public static final int CONTENT_LENGTH = 100;
 
 	@Id
-	@Tsid
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id", nullable = false, unique = true)
 	private Long id;
 
