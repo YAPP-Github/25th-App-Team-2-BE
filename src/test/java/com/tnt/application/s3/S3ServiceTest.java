@@ -1,35 +1,30 @@
 package com.tnt.application.s3;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.BDDMockito.*;
+import static com.tnt.domain.constant.Constant.TRAINEE_DEFAULT_IMAGE;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.BDDMockito.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
+import static org.springframework.http.MediaType.IMAGE_JPEG_VALUE;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.net.URI;
 
 import javax.imageio.ImageIO;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import com.tnt.global.error.exception.ImageException;
-
-import software.amazon.awssdk.core.sync.RequestBody;
-import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.S3Utilities;
-import software.amazon.awssdk.services.s3.model.GetUrlRequest;
-import software.amazon.awssdk.services.s3.model.PutObjectRequest;
-import software.amazon.awssdk.services.s3.model.S3Exception;
+import com.tnt.infrastructure.s3.S3Adapter;
 
 @ExtendWith(MockitoExtension.class)
 class S3ServiceTest {
@@ -38,10 +33,7 @@ class S3ServiceTest {
 	private S3Service s3Service;
 
 	@Mock
-	private S3Client s3Client;
-
-	@Mock
-	private S3Utilities s3Utilities;
+	private S3Adapter s3Adapter;
 
 	private byte[] createDummyImageData() throws IOException {
 		BufferedImage image = new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB);
@@ -51,98 +43,49 @@ class S3ServiceTest {
 		return baos.toByteArray();
 	}
 
-	@BeforeEach
-	void setUp() {
-		ReflectionTestUtils.setField(s3Service, "bucketName", "test-bucket");
+	@Test
+	@DisplayName("트레이너 프로필 이미지 업로드 성공")
+	void upload_trainer_profile_image_success() throws Exception {
+		// given
+		MockMultipartFile image = new MockMultipartFile("image", "test.jpg", IMAGE_JPEG_VALUE, createDummyImageData());
+		String expectedUrl = "https://bucket.s3.amazonaws.com/trainer/profile/123.jpg";
+		given(s3Adapter.uploadFile(any(byte[].class), anyString(), anyString())).willReturn(expectedUrl);
+
+		// when
+		String result = s3Service.uploadProfileImage(image, "trainer");
+
+		// then
+		assertThat(result).isEqualTo(expectedUrl);
+		verify(s3Adapter).uploadFile(any(byte[].class), any(), any());
 	}
 
 	@Test
-	@DisplayName("이미지 업로드 성공 - JPG")
-	void upload_jpg_success() throws Exception {
-		// given
-		String folderPath = "test/folder";
-		MockMultipartFile image = new MockMultipartFile("image", "test.jpg", MediaType.IMAGE_JPEG_VALUE,
-			createDummyImageData());
-		URI mockUri = URI.create("https://test-bucket.s3.amazonaws.com/test/folder/123.jpg");
-
-		given(s3Client.utilities()).willReturn(s3Utilities);
-		given(s3Utilities.getUrl(any(GetUrlRequest.class))).willReturn(mockUri.toURL());
-		given(s3Client.putObject(any(PutObjectRequest.class), any(RequestBody.class))).willReturn(null);
-
+	@DisplayName("트레이니 프로필 이미지가 null일 경우 기본 이미지 반환 성공")
+	void return_trainee_default_image_success() {
 		// when
-		String result = s3Service.uploadFile(image, folderPath);
+		String result = s3Service.uploadProfileImage(null, "trainee");
 
 		// then
-		assertThat(result).startsWith("https://test-bucket.s3.amazonaws.com/test/folder/").endsWith(".jpg");
-	}
-
-	@Test
-	@DisplayName("이미지 업로드 성공 - PNG")
-	void upload_png_success() throws Exception {
-		// given
-		String folderPath = "test/folder";
-		MockMultipartFile image = new MockMultipartFile("image", "test.jpg", MediaType.IMAGE_JPEG_VALUE,
-			createDummyImageData());
-		URI mockUri = URI.create("https://test-bucket.s3.amazonaws.com/test/folder/123.png");
-
-		given(s3Client.utilities()).willReturn(s3Utilities);
-		given(s3Utilities.getUrl(any(GetUrlRequest.class))).willReturn(mockUri.toURL());
-		given(s3Client.putObject(any(PutObjectRequest.class), any(RequestBody.class))).willReturn(null);
-
-		// when
-		String result = s3Service.uploadFile(image, folderPath);
-
-		// then
-		assertThat(result).startsWith("https://test-bucket.s3.amazonaws.com/test/folder/").endsWith(".png");
+		assertThat(result).isEqualTo(TRAINEE_DEFAULT_IMAGE);
 	}
 
 	@Test
 	@DisplayName("지원하지 않는 이미지 형식으로 업로드 실패")
-	void upload_unsupported_format_fail() throws IOException {
+	void upload_profile_image_unsupported_format_error() throws IOException {
 		// given
-		String folderPath = "test/folder";
 		MockMultipartFile image = new MockMultipartFile("image", "test.gif", "image/gif", createDummyImageData());
 
 		// when & then
-		assertThrows(ImageException.class, () -> s3Service.uploadFile(image, folderPath));
+		assertThrows(ImageException.class, () -> s3Service.uploadProfileImage(image, "trainer"));
 	}
 
 	@Test
-	@DisplayName("파일명이 없는 경우 업로드 실패")
-	void upload_no_filename_fail() throws IOException {
+	@DisplayName("잘못된 회원 타입으로 업로드 시도 시 실패")
+	void upload_profile_image_invalid_member_type_error() throws IOException {
 		// given
-		String folderPath = "test/folder";
-		MockMultipartFile image = new MockMultipartFile("image", "", MediaType.IMAGE_JPEG_VALUE,
-			createDummyImageData());
+		MockMultipartFile image = new MockMultipartFile("image", "test.jpg", IMAGE_JPEG_VALUE, createDummyImageData());
 
 		// when & then
-		assertThrows(ImageException.class, () -> s3Service.uploadFile(image, folderPath));
-	}
-
-	@Test
-	@DisplayName("S3 업로드 실패")
-	void upload_s3_fail() throws Exception {
-		// given
-		String folderPath = "test/folder";
-		MockMultipartFile image = new MockMultipartFile("image", "test.jpg", MediaType.IMAGE_JPEG_VALUE,
-			createDummyImageData());
-
-		given(s3Client.putObject(any(PutObjectRequest.class), any(RequestBody.class)))
-			.willThrow(S3Exception.builder().build());
-
-		// when & then
-		assertThrows(ImageException.class, () -> s3Service.uploadFile(image, folderPath));
-	}
-
-	@Test
-	@DisplayName("이미지 처리 실패")
-	void image_processing_fail() {
-		// given
-		String folderPath = "test/folder";
-		MockMultipartFile image = new MockMultipartFile("image", "test.jpg", MediaType.IMAGE_JPEG_VALUE,
-			"invalid image data".getBytes());
-
-		// when & then
-		assertThrows(ImageException.class, () -> s3Service.uploadFile(image, folderPath));
+		assertThrows(IllegalArgumentException.class, () -> s3Service.uploadProfileImage(image, "invalid_type"));
 	}
 }
