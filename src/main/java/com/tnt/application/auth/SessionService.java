@@ -3,8 +3,8 @@ package com.tnt.application.auth;
 import static com.tnt.global.error.model.ErrorMessage.AUTHORIZATION_HEADER_ERROR;
 import static com.tnt.global.error.model.ErrorMessage.NO_EXIST_SESSION_IN_STORAGE;
 import static io.micrometer.common.util.StringUtils.isBlank;
+import static java.util.Objects.isNull;
 
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -35,7 +35,7 @@ public class SessionService {
 		String sessionId = authHeader.substring(SESSION_ID_PREFIX.length());
 		String sessionValue = redisTemplate.opsForValue().get(sessionId);
 
-		if (Objects.isNull(sessionValue)) {
+		if (isNull(sessionValue)) {
 			throw new UnauthorizedException(NO_EXIST_SESSION_IN_STORAGE);
 		}
 
@@ -51,7 +51,7 @@ public class SessionService {
 		} else { // 로그인 시 기존 로그인 상태 제거하고 새로운 세션 생성
 			String existingSessionId = redisTemplate.opsForValue().get(memberId);
 
-			if (!Objects.isNull(existingSessionId)) {
+			if (!isNull(existingSessionId)) {
 				removeSession(sessionId);
 				removeSession(memberId);
 			}
