@@ -9,7 +9,6 @@ import jakarta.validation.constraints.Pattern;
 public record OAuthLoginRequest(
 	@Schema(description = "소셜 로그인 타입 (KAKAO / APPLE)", example = "KAKAO", allowableValues = {"KAKAO",
 		"APPLE"}, nullable = false)
-	@NotBlank(message = "소셜 로그인 타입은 필수입니다.")
 	@Pattern(regexp = "^(KAKAO|APPLE)$", message = "소셜 로그인 타입은 KAKAO 또는 APPLE만 가능합니다.")
 	String socialType,
 

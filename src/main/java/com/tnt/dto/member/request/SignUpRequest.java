@@ -18,13 +18,11 @@ public record SignUpRequest(
 	String fcmToken,
 
 	@Schema(description = "회원 타입 (trainer / trainee)", example = "trainer", nullable = false)
-	@NotBlank(message = "회원 타입은 필수입니다.")
 	@Pattern(regexp = "^(trainer|trainee)$", message = "회원 타입은 trainer 또는 trainee만 가능합니다.")
 	String memberType,
 
 	@Schema(description = "소셜 로그인 타입 (KAKAO / APPLE)", example = "KAKAO", allowableValues = {"KAKAO",
 		"APPLE"}, nullable = false)
-	@NotBlank(message = "소셜 로그인 타입은 필수입니다.")
 	@Pattern(regexp = "^(KAKAO|APPLE)$", message = "소셜 로그인 타입은 KAKAO 또는 APPLE만 가능합니다.")
 	String socialType,
 
@@ -33,7 +31,6 @@ public record SignUpRequest(
 	String socialId,
 
 	@Schema(description = "소셜 이메일", example = "zxc098@kakao.com", nullable = false)
-	@NotBlank(message = "소셜 이메일은 필수입니다.")
 	@Email(message = "올바른 이메일 형식이 아닙니다.")
 	String socialEmail,
 
