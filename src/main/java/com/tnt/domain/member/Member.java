@@ -2,10 +2,12 @@ package com.tnt.domain.member;
 
 import static com.tnt.global.error.model.ErrorMessage.*;
 import static io.micrometer.common.util.StringUtils.isBlank;
+import static java.lang.Boolean.FALSE;
+import static java.util.Objects.isNull;
+import static java.util.Objects.requireNonNull;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Objects;
 
 import com.tnt.global.common.entity.BaseTimeEntity;
 
@@ -53,22 +55,22 @@ public class Member extends BaseTimeEntity {
 	@Column(name = "profile_image_url", nullable = false, length = PROFILE_IMAGE_URL_LENGTH)
 	private String profileImageUrl;
 
-	@Column(name = "birthday")
+	@Column(name = "birthday", nullable = true)
 	private LocalDate birthday;
 
 	@Column(name = "service_agreement", nullable = false)
-	private boolean serviceAgreement;
+	private Boolean serviceAgreement;
 
 	@Column(name = "collection_agreement", nullable = false)
-	private boolean collectionAgreement;
+	private Boolean collectionAgreement;
 
 	@Column(name = "advertisement_agreement", nullable = false)
-	private boolean advertisementAgreement;
+	private Boolean advertisementAgreement;
 
 	@Column(name = "push_agreement", nullable = false)
-	private boolean pushAgreement;
+	private Boolean pushAgreement;
 
-	@Column(name = "deleted_at")
+	@Column(name = "deleted_at", nullable = true)
 	private LocalDateTime deletedAt;
 
 	@Enumerated(EnumType.STRING)
@@ -77,8 +79,8 @@ public class Member extends BaseTimeEntity {
 
 	@Builder
 	public Member(Long id, String socialId, String fcmToken, String email, String name, String profileImageUrl,
-		LocalDate birthday, boolean serviceAgreement, boolean collectionAgreement, boolean advertisementAgreement,
-		boolean pushAgreement, SocialType socialType) {
+		LocalDate birthday, Boolean serviceAgreement, Boolean collectionAgreement, Boolean advertisementAgreement,
+		Boolean pushAgreement, SocialType socialType) {
 		this.id = id;
 		this.socialId = validateSocialId(socialId);
 		this.fcmToken = fcmToken;
@@ -86,11 +88,18 @@ public class Member extends BaseTimeEntity {
 		this.name = validateName(name);
 		this.profileImageUrl = validateProfileImageUrl(profileImageUrl);
 		this.birthday = birthday;
-		this.serviceAgreement = serviceAgreement;
-		this.collectionAgreement = collectionAgreement;
-		this.advertisementAgreement = advertisementAgreement;
-		this.pushAgreement = pushAgreement;
+		this.serviceAgreement = validateServiceAgreement(serviceAgreement);
+		this.collectionAgreement = validateCollectionAgreement(collectionAgreement);
+		this.advertisementAgreement = requireNonNull(advertisementAgreement,
+			MEMBER_NULL_ADVERTISEMENT_AGREEMENT.getMessage());
+		this.pushAgreement = requireNonNull(pushAgreement, MEMBER_NULL_PUSH_AGREEMENT.getMessage());
 		this.socialType = validateSocialType(socialType);
+	}
+
+	public void updateFcmTokenIfExpired(String fcmToken) {
+		if (!this.fcmToken.equals(fcmToken)) {
+			this.fcmToken = fcmToken;
+		}
 	}
 
 	private String validateSocialId(String socialId) {
@@ -125,17 +134,27 @@ public class Member extends BaseTimeEntity {
 		return profileImageUrl;
 	}
 
+	private Boolean validateServiceAgreement(Boolean serviceAgreement) {
+		if (isNull(serviceAgreement) || FALSE.equals(serviceAgreement)) {
+			throw new IllegalArgumentException(MEMBER_INVALID_SERVICE_AGREEMENT.getMessage());
+		}
+
+		return serviceAgreement;
+	}
+
+	private Boolean validateCollectionAgreement(Boolean collectionAgreement) {
+		if (isNull(collectionAgreement) || FALSE.equals(collectionAgreement)) {
+			throw new IllegalArgumentException(MEMBER_INVALID_COLLECTION_AGREEMENT.getMessage());
+		}
+
+		return collectionAgreement;
+	}
+
 	private SocialType validateSocialType(SocialType socialType) {
-		if (Objects.isNull(socialType) || socialType.toString().length() > SOCIAL_ID_LENGTH) {
+		if (isNull(socialType) || socialType.toString().length() > SOCIAL_ID_LENGTH) {
 			throw new IllegalArgumentException(MEMBER_INVALID_SOCIAL_TYPE.getMessage());
 		}
 
 		return socialType;
-	}
-
-	public void updateFcmTokenIfExpired(String fcmToken) {
-		if (!this.fcmToken.equals(fcmToken)) {
-			this.fcmToken = fcmToken;
-		}
 	}
 }

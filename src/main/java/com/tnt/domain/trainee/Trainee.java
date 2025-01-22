@@ -1,11 +1,13 @@
 package com.tnt.domain.trainee;
 
 import static com.tnt.global.error.model.ErrorMessage.TRAINEE_INVALID_CAUTION_NOTE;
+import static com.tnt.global.error.model.ErrorMessage.TRAINEE_NULL_HEIGHT;
 import static com.tnt.global.error.model.ErrorMessage.TRAINEE_NULL_MEMBER_ID;
+import static com.tnt.global.error.model.ErrorMessage.TRAINEE_NULL_WEIGHT;
 import static io.micrometer.common.util.StringUtils.isBlank;
+import static java.util.Objects.requireNonNull;
 
 import java.time.LocalDateTime;
-import java.util.Objects;
 
 import com.tnt.global.common.entity.BaseTimeEntity;
 
@@ -36,23 +38,23 @@ public class Trainee extends BaseTimeEntity {
 	private Long memberId;
 
 	@Column(name = "height", nullable = false)
-	private double height;
+	private Double height;
 
 	@Column(name = "weight", nullable = false)
-	private double weight;
+	private Double weight;
 
 	@Column(name = "caution_note", nullable = false, length = CAUTION_NOTE_LENGTH)
 	private String cautionNote;
 
-	@Column(name = "deleted_at")
+	@Column(name = "deleted_at", nullable = true)
 	private LocalDateTime deletedAt;
 
 	@Builder
-	public Trainee(Long id, Long memberId, double height, double weight, String cautionNote) {
+	public Trainee(Long id, Long memberId, Double height, Double weight, String cautionNote) {
 		this.id = id;
-		this.memberId = Objects.requireNonNull(memberId, TRAINEE_NULL_MEMBER_ID.getMessage());
-		this.height = height;
-		this.weight = weight;
+		this.memberId = requireNonNull(memberId, TRAINEE_NULL_MEMBER_ID.getMessage());
+		this.height = requireNonNull(height, TRAINEE_NULL_HEIGHT.getMessage());
+		this.weight = requireNonNull(weight, TRAINEE_NULL_WEIGHT.getMessage());
 		this.cautionNote = validateCautionNote(cautionNote);
 	}
 
