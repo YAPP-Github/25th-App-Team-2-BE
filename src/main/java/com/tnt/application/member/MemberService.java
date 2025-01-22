@@ -56,7 +56,8 @@ public class MemberService {
 
 	@Transactional
 	public SignUpResponse finishSignUpWithImage(String profileImageUrl, Long memberId, String memberType) {
-		Member member = memberRepository.findById(memberId).orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
+		Member member = memberRepository.findByIdAndDeletedAtIsNull(memberId)
+			.orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
 
 		member.updateProfileImageUrl(profileImageUrl);
 
