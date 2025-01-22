@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
+import com.tnt.global.error.exception.ConflictException;
+import com.tnt.global.error.exception.ImageException;
 import com.tnt.global.error.exception.NotFoundException;
 import com.tnt.global.error.exception.OAuthException;
 import com.tnt.global.error.exception.TnTException;
@@ -92,9 +94,25 @@ public class GlobalExceptionHandler {
 		return new ErrorResponse(INVALID_FORMAT_DATETIME.getMessage());
 	}
 
+	@ResponseStatus(BAD_REQUEST)
+	@ExceptionHandler(ImageException.class)
+	protected ErrorResponse handleImageException(TnTException exception) {
+		log.error(exception.getMessage(), exception);
+
+		return new ErrorResponse(exception.getMessage());
+	}
+
 	@ResponseStatus(UNAUTHORIZED)
 	@ExceptionHandler(value = {UnauthorizedException.class, OAuthException.class})
 	protected ErrorResponse handleUnauthorizedException(TnTException exception) {
+		log.error(exception.getMessage(), exception);
+
+		return new ErrorResponse(exception.getMessage());
+	}
+
+	@ResponseStatus(CONFLICT)
+	@ExceptionHandler(ConflictException.class)
+	protected ErrorResponse handleConflictException(TnTException exception) {
 		log.error(exception.getMessage(), exception);
 
 		return new ErrorResponse(exception.getMessage());

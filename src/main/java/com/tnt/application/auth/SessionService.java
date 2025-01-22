@@ -1,7 +1,9 @@
 package com.tnt.application.auth;
 
-import static com.tnt.global.error.model.ErrorMessage.*;
-import static io.micrometer.common.util.StringUtils.*;
+import static com.tnt.global.error.model.ErrorMessage.AUTHORIZATION_HEADER_ERROR;
+import static com.tnt.global.error.model.ErrorMessage.NO_EXIST_SESSION_IN_STORAGE;
+import static io.micrometer.common.util.StringUtils.isBlank;
+import static java.util.Objects.isNull;
 
 import java.util.concurrent.TimeUnit;
 
@@ -12,9 +14,7 @@ import com.tnt.global.error.exception.UnauthorizedException;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class SessionService {
@@ -29,17 +29,13 @@ public class SessionService {
 		String authHeader = request.getHeader(AUTHORIZATION_HEADER);
 
 		if (isBlank(authHeader) || !authHeader.startsWith(SESSION_ID_PREFIX)) {
-			log.error(AUTHORIZATION_HEADER_ERROR.getMessage());
-
 			throw new UnauthorizedException(AUTHORIZATION_HEADER_ERROR);
 		}
 
 		String sessionId = authHeader.substring(SESSION_ID_PREFIX.length());
 		String sessionValue = redisTemplate.opsForValue().get(sessionId);
 
-		if (sessionValue == null) {
-			log.error(NO_EXIST_SESSION_IN_STORAGE.getMessage());
-
+		if (isNull(sessionValue)) {
 			throw new UnauthorizedException(NO_EXIST_SESSION_IN_STORAGE);
 		}
 
@@ -55,7 +51,7 @@ public class SessionService {
 		} else { // 로그인 시 기존 로그인 상태 제거하고 새로운 세션 생성
 			String existingSessionId = redisTemplate.opsForValue().get(memberId);
 
-			if (existingSessionId != null) {
+			if (!isNull(existingSessionId)) {
 				removeSession(sessionId);
 				removeSession(memberId);
 			}

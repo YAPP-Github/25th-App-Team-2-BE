@@ -9,7 +9,6 @@ public class WebClientConfig {
 
 	@Bean
 	public WebClient webClient() {
-		return WebClient.builder()
-			.build();
+		return WebClient.builder().build();
 	}
 }

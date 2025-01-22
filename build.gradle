@@ -175,6 +175,11 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
 
+    // Testcontainer
+    testImplementation "org.junit.jupiter:junit-jupiter:5.8.1"
+    testImplementation "org.testcontainers:testcontainers:1.20.4"
+    testImplementation "org.testcontainers:junit-jupiter:1.20.4"
+
     // MockWebServer
     testImplementation 'com.squareup.okhttp3:mockwebserver:4.12.0'
 
@@ -187,4 +192,10 @@ dependencies {
 
     // Firebase
     implementation 'com.google.firebase:firebase-admin:9.4.3'
+
+    // AWS S3 SDK
+    implementation 'software.amazon.awssdk:s3:2.30.0'
+
+    // Thumbnailator - 이미지 리사이징과 포맷 변환
+    implementation 'net.coobird:thumbnailator:0.4.20'
 }

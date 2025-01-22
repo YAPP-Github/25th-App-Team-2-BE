@@ -29,6 +29,7 @@ application.yml
 application-local.yml
 application-dev.yml
 application-prod.yml
+/src/main/generated/
 
 ### NetBeans ###
 /nbproject/private/
