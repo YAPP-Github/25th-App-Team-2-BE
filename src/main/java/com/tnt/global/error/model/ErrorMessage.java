@@ -44,6 +44,10 @@ public enum ErrorMessage {
 	MEMBER_INVALID_PROFILE_IMAGE_URL("유효하지 않는 프로필입니다."),
 	MEMBER_INVALID_SOCIAL_TYPE("유효하지 않는 소셜 타입입니다."),
 	UNSUPPORTED_MEMBER_TYPE("지원하지 않는 회원 타입입니다."),
+	MEMBER_INVALID_SERVICE_AGREEMENT("서비스 이용 약관 동의 여부는 true 여야 합니다."),
+	MEMBER_INVALID_COLLECTION_AGREEMENT("개인 정보 수집 동의 여부는 true 여야 합니다."),
+	MEMBER_NULL_ADVERTISEMENT_AGREEMENT("회원 광고성 알림 수신 동의 여부가 null 입니다."),
+	MEMBER_NULL_PUSH_AGREEMENT("회원 푸쉬 알림 수신 동의 여부가 null 입니다."),
 
 	TRAINER_NULL_ID("트레이너 id가 null 입니다."),
 	TRAINER_NULL_MEMBER_ID("트레이너 member id가 null 입니다."),
@@ -52,6 +56,8 @@ public enum ErrorMessage {
 	TRAINER_INVITATION_CODE_GENERATE_FAILED("트레이너 초대 코드 생성에 실패했습니다."),
 
 	TRAINEE_NULL_MEMBER_ID("트레이니 member id가 null 입니다."),
+	TRAINEE_NULL_HEIGHT("트레이니 height가 null 입니다."),
+	TRAINEE_NULL_WEIGHT("트레이니 weight가 null 입니다."),
 	TRAINEE_INVALID_CAUTION_NOTE("주의사항이 올바르지 않습니다."),
 	TRAINEE_NOT_FOUND("존재하지 않는 트레이니입니다."),
 
