@@ -1,18 +1,20 @@
 package com.tnt.application.member;
 
+import static com.tnt.domain.constant.Constant.TRAINEE;
+import static com.tnt.domain.constant.Constant.TRAINEE_DEFAULT_IMAGE;
+import static com.tnt.domain.constant.Constant.TRAINER;
+import static com.tnt.domain.constant.Constant.TRAINER_DEFAULT_IMAGE;
 import static com.tnt.global.error.model.ErrorMessage.MEMBER_CONFLICT;
 import static com.tnt.global.error.model.ErrorMessage.UNSUPPORTED_MEMBER_TYPE;
+import static io.hypersistence.tsid.TSID.Factory.getTsid;
 import static io.micrometer.common.util.StringUtils.isNotBlank;
 
 import java.util.List;
 
-import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.tnt.application.auth.SessionService;
-import com.tnt.application.s3.S3Service;
 import com.tnt.domain.member.Member;
 import com.tnt.domain.member.SocialType;
 import com.tnt.domain.trainee.PtGoal;
@@ -26,7 +28,6 @@ import com.tnt.infrastructure.mysql.repository.trainee.PtGoalRepository;
 import com.tnt.infrastructure.mysql.repository.trainee.TraineeRepository;
 import com.tnt.infrastructure.mysql.repository.trainer.TrainerRepository;
 
-import io.hypersistence.tsid.TSID;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -34,33 +35,32 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class MemberService {
 
-	private static final String TRAINER = "trainer";
-	private static final String TRAINEE = "trainee";
-
 	private final MemberRepository memberRepository;
 	private final TrainerRepository trainerRepository;
 	private final TraineeRepository traineeRepository;
 	private final PtGoalRepository ptGoalRepository;
-	private final S3Service s3Service;
 	private final SessionService sessionService;
 
 	@Transactional
-	public SignUpResponse signUp(SignUpRequest request, @Nullable MultipartFile profileImage) {
+	public Member saveMember(SignUpRequest request) {
 		validateMemberNotExists(request.socialId(), request.socialType());
 
-		Member member = createMember(request, profileImage);
-
-		switch (request.memberType()) {
-			case TRAINER -> createTrainer(member);
-			case TRAINEE -> createTrainee(member, request);
+		return switch (request.memberType()) {
+			case TRAINER -> createTrainer(request);
+			case TRAINEE -> createTrainee(request);
 			default -> throw new IllegalArgumentException(UNSUPPORTED_MEMBER_TYPE.getMessage());
-		}
+		};
+	}
 
-		String sessionId = String.valueOf(TSID.Factory.getTsid());
+	@Transactional
+	public SignUpResponse signUp(String profileImageUrl, Member member, String memberType) {
+		member.updateProfileImageUrl(profileImageUrl);
+
+		String sessionId = String.valueOf(getTsid());
 
 		sessionService.createOrUpdateSession(sessionId, String.valueOf(member.getId()));
 
-		return new SignUpResponse(sessionId, member.getName(), member.getProfileImageUrl(), request.memberType());
+		return new SignUpResponse(memberType, sessionId, member.getName(), member.getProfileImageUrl());
 	}
 
 	private void validateMemberNotExists(String socialId, String socialType) {
@@ -70,13 +70,13 @@ public class MemberService {
 			});
 	}
 
-	private Member createMember(SignUpRequest request, @Nullable MultipartFile profileImage) {
+	private Member createMember(SignUpRequest request, String defaultImageUrl) {
 		Member member = Member.builder()
 			.socialId(request.socialId())
 			.fcmToken(request.fcmToken())
 			.email(request.socialEmail())
 			.name(request.name())
-			.profileImageUrl(s3Service.uploadProfileImage(profileImage, request.memberType()))
+			.profileImageUrl(defaultImageUrl)
 			.serviceAgreement(true)
 			.collectionAgreement(true)
 			.advertisementAgreement(true)
@@ -87,15 +87,19 @@ public class MemberService {
 		return memberRepository.save(member);
 	}
 
-	private void createTrainer(Member member) {
+	private Member createTrainer(SignUpRequest request) {
+		Member member = createMember(request, TRAINER_DEFAULT_IMAGE);
 		Trainer trainer = Trainer.builder()
 			.memberId(member.getId())
 			.build();
 
 		trainerRepository.save(trainer);
+
+		return member;
 	}
 
-	private void createTrainee(Member member, SignUpRequest request) {
+	private Member createTrainee(SignUpRequest request) {
+		Member member = createMember(request, TRAINEE_DEFAULT_IMAGE);
 		Trainee trainee = Trainee.builder()
 			.memberId(member.getId())
 			.height(request.height())
@@ -106,6 +110,8 @@ public class MemberService {
 		trainee = traineeRepository.save(trainee);
 
 		createPtGoals(trainee, request.goalContents());
+
+		return member;
 	}
 
 	private void createPtGoals(Trainee trainee, List<String> goalContents) {

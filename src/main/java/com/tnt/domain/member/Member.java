@@ -102,6 +102,12 @@ public class Member extends BaseTimeEntity {
 		}
 	}
 
+	public void updateProfileImageUrl(String profileImageUrl) {
+		if (!this.profileImageUrl.equals(profileImageUrl)) {
+			this.profileImageUrl = profileImageUrl;
+		}
+	}
+
 	private String validateSocialId(String socialId) {
 		if (isBlank(socialId) || socialId.length() > SOCIAL_ID_LENGTH) {
 			throw new IllegalArgumentException(MEMBER_INVALID_SOCIAL_ID.getMessage());
