@@ -16,8 +16,8 @@ public record OAuthLoginResponse(
 	@Schema(description = "소셜 로그인 타입", example = "KAKAO", nullable = true)
 	String socialType,
 
-	@Schema(description = "가입 여부", example = "false")
-	boolean isSignUp
+	@Schema(description = "가입 여부", example = "false", nullable = false)
+	Boolean isSignUp
 ) {
 
 }
