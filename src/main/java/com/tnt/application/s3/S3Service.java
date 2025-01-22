@@ -1,5 +1,6 @@
 package com.tnt.application.s3;
 
+import static com.tnt.domain.constant.Constant.*;
 import static com.tnt.global.error.model.ErrorMessage.IMAGE_NOT_FOUND;
 import static com.tnt.global.error.model.ErrorMessage.IMAGE_NOT_SUPPORT;
 import static com.tnt.global.error.model.ErrorMessage.UNSUPPORTED_MEMBER_TYPE;
@@ -32,12 +33,6 @@ public class S3Service {
 	private static final int MAX_WIDTH = 1200;
 	private static final int MAX_HEIGHT = 1200;
 	private static final double IMAGE_QUALITY = 0.85;
-	private static final String TRAINER = "trainer";
-	private static final String TRAINEE = "trainee";
-	private static final String TRAINER_S3_PROFILE_PATH = "profiles/trainers";
-	private static final String TRAINEE_S3_PROFILE_PATH = "profiles/trainees";
-	private static final String TRAINER_DEFAULT_IMAGE = "https://images.tntapp.co.kr/profiles/trainers/basic_profile_trainer.svg";
-	private static final String TRAINEE_DEFAULT_IMAGE = "https://images.tntapp.co.kr/profiles/trainees/basic_profile_trainee.svg";
 
 	private final S3Adapter s3Adapter;
 
