@@ -12,7 +12,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.tnt.application.member.MemberService;
 import com.tnt.application.s3.S3Service;
-import com.tnt.domain.member.Member;
 import com.tnt.dto.member.request.SignUpRequest;
 import com.tnt.dto.member.response.SignUpResponse;
 
@@ -35,9 +34,9 @@ public class MemberController {
 	@ResponseStatus(value = OK)
 	public SignUpResponse signUp(@RequestPart(value = "request") @Valid SignUpRequest request,
 		@RequestPart(value = "profileImage", required = false) MultipartFile profileImage) {
-		Member member = memberService.saveMember(request);
+		Long memberId = memberService.signUp(request);
 		String profileImageUrl = s3Service.uploadProfileImage(profileImage, request.memberType());
 
-		return memberService.signUp(profileImageUrl, member, request.memberType());
+		return memberService.finishSignUpWithImage(profileImageUrl, memberId, request.memberType());
 	}
 }

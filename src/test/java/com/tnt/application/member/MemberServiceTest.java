@@ -124,11 +124,10 @@ class MemberServiceTest {
 				Trainer.builder().memberId(mockTrainerMember.getId()).build());
 
 			// when
-			Member result = memberService.saveMember(trainerRequest);
+			Long result = memberService.signUp(trainerRequest);
 
 			// then
-			assertThat(result).isNotNull();
-			assertThat(result.getId()).isEqualTo(mockTrainerMember.getId());
+			assertThat(result).isNotNull().isEqualTo(mockTrainerMember.getId());
 			verify(memberRepository).save(any(Member.class));
 			verify(trainerRepository).save(any(Trainer.class));
 		}
@@ -144,11 +143,10 @@ class MemberServiceTest {
 			given(ptGoalRepository.saveAll(any())).willReturn(mockPtGoals);
 
 			// when
-			Member result = memberService.saveMember(traineeRequest);
+			Long result = memberService.signUp(traineeRequest);
 
 			// then
-			assertThat(result).isNotNull();
-			assertThat(result.getId()).isEqualTo(mockTraineeMember.getId());
+			assertThat(result).isNotNull().isEqualTo(mockTraineeMember.getId());
 			verify(memberRepository).save(any(Member.class));
 			verify(traineeRepository).save(any(Trainee.class));
 			verify(ptGoalRepository).saveAll(any());
@@ -162,7 +160,7 @@ class MemberServiceTest {
 				Optional.of(mockTrainerMember));
 
 			// when & then
-			assertThrows(ConflictException.class, () -> memberService.saveMember(trainerRequest));
+			assertThrows(ConflictException.class, () -> memberService.signUp(trainerRequest));
 		}
 
 		@Test
@@ -173,7 +171,7 @@ class MemberServiceTest {
 				MOCK_EMAIL, true, true, true, true, MOCK_NAME, null, null, null, null, null);
 
 			// when & then
-			assertThrows(IllegalArgumentException.class, () -> memberService.saveMember(invalidRequest));
+			assertThrows(IllegalArgumentException.class, () -> memberService.signUp(invalidRequest));
 		}
 	}
 
@@ -184,8 +182,12 @@ class MemberServiceTest {
 		@Test
 		@DisplayName("회원가입 완료 성공")
 		void sign_up_success() {
+			// given
+			given(memberRepository.findById(any())).willReturn(Optional.of(mockTrainerMember));
+
 			// when
-			SignUpResponse response = memberService.signUp(TRAINER_DEFAULT_IMAGE, mockTrainerMember, "trainer");
+			SignUpResponse response = memberService.finishSignUpWithImage(TRAINER_DEFAULT_IMAGE,
+				mockTrainerMember.getId(), TRAINER);
 
 			// then
 			assertThat(response).isNotNull();
@@ -209,10 +211,12 @@ class MemberServiceTest {
 			given(memberRepository.save(any(Member.class))).willReturn(mockTrainerMember);
 			given(trainerRepository.save(any(Trainer.class))).willReturn(
 				Trainer.builder().memberId(mockTrainerMember.getId()).build());
+			given(memberRepository.findById(any())).willReturn(Optional.of(mockTrainerMember));
 
 			// when
-			Member savedMember = memberService.saveMember(trainerRequest);
-			SignUpResponse response = memberService.signUp(TRAINER_DEFAULT_IMAGE, savedMember, "trainer");
+			Long savedMemberId = memberService.signUp(trainerRequest);
+			SignUpResponse response = memberService.finishSignUpWithImage(TRAINER_DEFAULT_IMAGE, savedMemberId,
+				TRAINER);
 
 			// then
 			assertThat(response).isNotNull();
@@ -231,10 +235,12 @@ class MemberServiceTest {
 			given(memberRepository.save(any(Member.class))).willReturn(mockTraineeMember);
 			given(traineeRepository.save(any(Trainee.class))).willReturn(mockTrainee);
 			given(ptGoalRepository.saveAll(any())).willReturn(mockPtGoals);
+			given(memberRepository.findById(any())).willReturn(Optional.of(mockTrainerMember));
 
 			// when
-			Member savedMember = memberService.saveMember(traineeRequest);
-			SignUpResponse response = memberService.signUp(TRAINEE_DEFAULT_IMAGE, savedMember, "trainee");
+			Long savedMemberId = memberService.signUp(traineeRequest);
+			SignUpResponse response = memberService.finishSignUpWithImage(TRAINEE_DEFAULT_IMAGE, savedMemberId,
+				TRAINEE);
 
 			// then
 			assertThat(response).isNotNull();
@@ -253,16 +259,17 @@ class MemberServiceTest {
 			given(memberRepository.save(any(Member.class))).willReturn(mockTrainerMember);
 			given(trainerRepository.save(any(Trainer.class))).willReturn(
 				Trainer.builder().memberId(mockTrainerMember.getId()).build());
+			given(memberRepository.findById(any())).willReturn(Optional.of(mockTrainerMember));
 			doThrow(new RuntimeException("세션 생성 실패")).when(sessionService)
 				.createOrUpdateSession(any(), eq(String.valueOf(mockTrainerMember.getId())));
 
 			// when
-			Member savedMember = memberService.saveMember(trainerRequest);
+			Long savedMemberId = memberService.signUp(trainerRequest);
 
 			// then
-			assertThat(savedMember).isNotNull();
+			assertThat(savedMemberId).isNotNull();
 			assertThrows(RuntimeException.class,
-				() -> memberService.signUp(TRAINER_DEFAULT_IMAGE, savedMember, TRAINER));
+				() -> memberService.finishSignUpWithImage(TRAINER_DEFAULT_IMAGE, savedMemberId, TRAINER));
 			verify(sessionService).createOrUpdateSession(any(), eq(String.valueOf(mockTrainerMember.getId())));
 		}
 	}

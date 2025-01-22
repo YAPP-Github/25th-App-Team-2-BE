@@ -5,6 +5,7 @@ import static com.tnt.domain.constant.Constant.TRAINEE_DEFAULT_IMAGE;
 import static com.tnt.domain.constant.Constant.TRAINER;
 import static com.tnt.domain.constant.Constant.TRAINER_DEFAULT_IMAGE;
 import static com.tnt.global.error.model.ErrorMessage.MEMBER_CONFLICT;
+import static com.tnt.global.error.model.ErrorMessage.MEMBER_NOT_FOUND;
 import static com.tnt.global.error.model.ErrorMessage.UNSUPPORTED_MEMBER_TYPE;
 import static io.hypersistence.tsid.TSID.Factory.getTsid;
 import static io.micrometer.common.util.StringUtils.isNotBlank;
@@ -23,6 +24,7 @@ import com.tnt.domain.trainer.Trainer;
 import com.tnt.dto.member.request.SignUpRequest;
 import com.tnt.dto.member.response.SignUpResponse;
 import com.tnt.global.error.exception.ConflictException;
+import com.tnt.global.error.exception.NotFoundException;
 import com.tnt.infrastructure.mysql.repository.member.MemberRepository;
 import com.tnt.infrastructure.mysql.repository.trainee.PtGoalRepository;
 import com.tnt.infrastructure.mysql.repository.trainee.TraineeRepository;
@@ -42,7 +44,7 @@ public class MemberService {
 	private final SessionService sessionService;
 
 	@Transactional
-	public Member saveMember(SignUpRequest request) {
+	public Long signUp(SignUpRequest request) {
 		validateMemberNotExists(request.socialId(), request.socialType());
 
 		return switch (request.memberType()) {
@@ -53,7 +55,9 @@ public class MemberService {
 	}
 
 	@Transactional
-	public SignUpResponse signUp(String profileImageUrl, Member member, String memberType) {
+	public SignUpResponse finishSignUpWithImage(String profileImageUrl, Long memberId, String memberType) {
+		Member member = memberRepository.findById(memberId).orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
+
 		member.updateProfileImageUrl(profileImageUrl);
 
 		String sessionId = String.valueOf(getTsid());
@@ -77,17 +81,17 @@ public class MemberService {
 			.email(request.socialEmail())
 			.name(request.name())
 			.profileImageUrl(defaultImageUrl)
-			.serviceAgreement(true)
-			.collectionAgreement(true)
-			.advertisementAgreement(true)
-			.pushAgreement(true)
+			.serviceAgreement(request.serviceAgreement())
+			.collectionAgreement(request.collectionAgreement())
+			.advertisementAgreement(request.advertisementAgreement())
+			.pushAgreement(request.pushAgreement())
 			.socialType(SocialType.valueOf(request.socialType()))
 			.build();
 
 		return memberRepository.save(member);
 	}
 
-	private Member createTrainer(SignUpRequest request) {
+	private Long createTrainer(SignUpRequest request) {
 		Member member = createMember(request, TRAINER_DEFAULT_IMAGE);
 		Trainer trainer = Trainer.builder()
 			.memberId(member.getId())
@@ -95,10 +99,10 @@ public class MemberService {
 
 		trainerRepository.save(trainer);
 
-		return member;
+		return member.getId();
 	}
 
-	private Member createTrainee(SignUpRequest request) {
+	private Long createTrainee(SignUpRequest request) {
 		Member member = createMember(request, TRAINEE_DEFAULT_IMAGE);
 		Trainee trainee = Trainee.builder()
 			.memberId(member.getId())
@@ -111,7 +115,7 @@ public class MemberService {
 
 		createPtGoals(trainee, request.goalContents());
 
-		return member;
+		return member.getId();
 	}
 
 	private void createPtGoals(Trainee trainee, List<String> goalContents) {
