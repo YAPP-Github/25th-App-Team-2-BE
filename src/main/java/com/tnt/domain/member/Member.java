@@ -81,6 +81,8 @@ public class Member extends BaseTimeEntity {
 	public Member(Long id, String socialId, String fcmToken, String email, String name, String profileImageUrl,
 		LocalDate birthday, Boolean serviceAgreement, Boolean collectionAgreement, Boolean advertisementAgreement,
 		Boolean pushAgreement, SocialType socialType) {
+		validateRequiredAgreements(serviceAgreement, collectionAgreement);
+
 		this.id = id;
 		this.socialId = validateSocialId(socialId);
 		this.fcmToken = fcmToken;
@@ -88,8 +90,8 @@ public class Member extends BaseTimeEntity {
 		this.name = validateName(name);
 		this.profileImageUrl = validateProfileImageUrl(profileImageUrl);
 		this.birthday = birthday;
-		this.serviceAgreement = validateServiceAgreement(serviceAgreement);
-		this.collectionAgreement = validateCollectionAgreement(collectionAgreement);
+		this.serviceAgreement = serviceAgreement;
+		this.collectionAgreement = collectionAgreement;
 		this.advertisementAgreement = requireNonNull(advertisementAgreement,
 			MEMBER_NULL_ADVERTISEMENT_AGREEMENT.getMessage());
 		this.pushAgreement = requireNonNull(pushAgreement, MEMBER_NULL_PUSH_AGREEMENT.getMessage());
@@ -140,20 +142,13 @@ public class Member extends BaseTimeEntity {
 		return profileImageUrl;
 	}
 
-	private Boolean validateServiceAgreement(Boolean serviceAgreement) {
+	private void validateRequiredAgreements(Boolean serviceAgreement, Boolean collectionAgreement) {
 		if (isNull(serviceAgreement) || FALSE.equals(serviceAgreement)) {
 			throw new IllegalArgumentException(MEMBER_INVALID_SERVICE_AGREEMENT.getMessage());
 		}
-
-		return serviceAgreement;
-	}
-
-	private Boolean validateCollectionAgreement(Boolean collectionAgreement) {
 		if (isNull(collectionAgreement) || FALSE.equals(collectionAgreement)) {
 			throw new IllegalArgumentException(MEMBER_INVALID_COLLECTION_AGREEMENT.getMessage());
 		}
-
-		return collectionAgreement;
 	}
 
 	private SocialType validateSocialType(SocialType socialType) {
