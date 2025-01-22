@@ -183,7 +183,7 @@ class MemberServiceTest {
 		@DisplayName("회원가입 완료 성공")
 		void sign_up_success() {
 			// given
-			given(memberRepository.findById(any())).willReturn(Optional.of(mockTrainerMember));
+			given(memberRepository.findByIdAndDeletedAtIsNull(any())).willReturn(Optional.of(mockTrainerMember));
 
 			// when
 			SignUpResponse response = memberService.finishSignUpWithImage(TRAINER_DEFAULT_IMAGE,
@@ -211,7 +211,7 @@ class MemberServiceTest {
 			given(memberRepository.save(any(Member.class))).willReturn(mockTrainerMember);
 			given(trainerRepository.save(any(Trainer.class))).willReturn(
 				Trainer.builder().memberId(mockTrainerMember.getId()).build());
-			given(memberRepository.findById(any())).willReturn(Optional.of(mockTrainerMember));
+			given(memberRepository.findByIdAndDeletedAtIsNull(any())).willReturn(Optional.of(mockTrainerMember));
 
 			// when
 			Long savedMemberId = memberService.signUp(trainerRequest);
@@ -235,7 +235,7 @@ class MemberServiceTest {
 			given(memberRepository.save(any(Member.class))).willReturn(mockTraineeMember);
 			given(traineeRepository.save(any(Trainee.class))).willReturn(mockTrainee);
 			given(ptGoalRepository.saveAll(any())).willReturn(mockPtGoals);
-			given(memberRepository.findById(any())).willReturn(Optional.of(mockTrainerMember));
+			given(memberRepository.findByIdAndDeletedAtIsNull(any())).willReturn(Optional.of(mockTrainerMember));
 
 			// when
 			Long savedMemberId = memberService.signUp(traineeRequest);
@@ -259,7 +259,7 @@ class MemberServiceTest {
 			given(memberRepository.save(any(Member.class))).willReturn(mockTrainerMember);
 			given(trainerRepository.save(any(Trainer.class))).willReturn(
 				Trainer.builder().memberId(mockTrainerMember.getId()).build());
-			given(memberRepository.findById(any())).willReturn(Optional.of(mockTrainerMember));
+			given(memberRepository.findByIdAndDeletedAtIsNull(any())).willReturn(Optional.of(mockTrainerMember));
 			doThrow(new RuntimeException("세션 생성 실패")).when(sessionService)
 				.createOrUpdateSession(any(), eq(String.valueOf(mockTrainerMember.getId())));
 
