@@ -1,10 +1,15 @@
 package com.tnt.presentation.member;
 
-import static com.tnt.global.error.model.ErrorMessage.*;
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.BDDMockito.*;
+import static com.tnt.global.error.model.ErrorMessage.FAILED_TO_FETCH_USER_INFO;
+import static com.tnt.global.error.model.ErrorMessage.MEMBER_NOT_FOUND;
+import static com.tnt.global.error.model.ErrorMessage.UNSUPPORTED_SOCIAL_TYPE;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.verify;
 
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -116,5 +121,91 @@ class AuthenticationControllerTest {
 		assertThatThrownBy(() -> authenticationController.oauthLogin(request))
 			.isInstanceOf(NotFoundException.class)
 			.hasMessage(MEMBER_NOT_FOUND.getMessage());
+	}
+
+	@Nested
+	@DisplayName("OAuthLoginRequest Validation 테스트")
+	class OAuthLoginRequestValidationTest {
+
+		@Test
+		@DisplayName("카카오 로그인 시 socialAccessToken이 없으면 실패")
+		void kakao_login_without_access_token_fail() {
+			// given
+			OAuthLoginRequest request = new OAuthLoginRequest("KAKAO", "fcm-token", null, null, null);
+
+			// when & then
+			assertThat(request.validateKakaoLogin()).isFalse();
+		}
+
+		@Test
+		@DisplayName("카카오 로그인 시 socialAccessToken이 blank이면 실패")
+		void kakao_login_with_blank_access_token_fail() {
+			// given
+			OAuthLoginRequest request = new OAuthLoginRequest("KAKAO", "fcm-token", " ", null, null);
+
+			// when & then
+			assertThat(request.validateKakaoLogin()).isFalse();
+		}
+
+		@Test
+		@DisplayName("카카오 로그인 시 socialAccessToken이 있으면 성공")
+		void kakao_login_with_access_token_success() {
+			// given
+			OAuthLoginRequest request = new OAuthLoginRequest("KAKAO", "fcm-token", "valid-token", null, null);
+
+			// when & then
+			assertThat(request.validateKakaoLogin()).isTrue();
+		}
+
+		@Test
+		@DisplayName("애플 로그인 시 authorizationCode와 idToken이 모두 없으면 실패")
+		void apple_login_without_code_and_token_fail() {
+			// given
+			OAuthLoginRequest request = new OAuthLoginRequest("APPLE", "fcm-token", null, null, null);
+
+			// when & then
+			assertThat(request.validateAppleLogin()).isFalse();
+		}
+
+		@Test
+		@DisplayName("애플 로그인 시 authorizationCode만 있어도 성공")
+		void apple_login_with_authorization_code_success() {
+			// given
+			OAuthLoginRequest request = new OAuthLoginRequest("APPLE", "fcm-token", null, "valid-auth-code", null);
+
+			// when & then
+			assertThat(request.validateAppleLogin()).isTrue();
+		}
+
+		@Test
+		@DisplayName("애플 로그인 시 idToken만 있어도 성공")
+		void apple_login_with_id_token_success() {
+			// given
+			OAuthLoginRequest request = new OAuthLoginRequest("APPLE", "fcm-token", null, null, "valid-id-token");
+
+			// when & then
+			assertThat(request.validateAppleLogin()).isTrue();
+		}
+
+		@Test
+		@DisplayName("애플 로그인 시 authorizationCode와 idToken이 모두 있어도 성공")
+		void apple_login_with_code_and_token_success() {
+			// given
+			OAuthLoginRequest request = new OAuthLoginRequest("APPLE", "fcm-token", null, "valid-auth-code",
+				"valid-id-token");
+
+			// when & then
+			assertThat(request.validateAppleLogin()).isTrue();
+		}
+
+		@Test
+		@DisplayName("애플 로그인 시 blank 토큰은 실패")
+		void apple_login_with_blank_token_fail() {
+			// given
+			OAuthLoginRequest request = new OAuthLoginRequest("APPLE", "fcm-token", null, " ", " ");
+
+			// when & then
+			assertThat(request.validateAppleLogin()).isFalse();
+		}
 	}
 }

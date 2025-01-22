@@ -27,12 +27,9 @@ public record OAuthLoginRequest(
 	String idToken
 ) {
 
-	private static final String KAKAO = "KAKAO";
-	private static final String APPLE = "APPLE";
-
 	@AssertTrue(message = "카카오 로그인 시 소셜 액세스 토큰은 필수입니다.")
-	private boolean isValidKakaoLogin() {
-		if (KAKAO.equals(socialType)) {
+	public boolean validateKakaoLogin() {
+		if ("KAKAO".equals(socialType)) {
 			return socialAccessToken != null && !socialAccessToken.isBlank();
 		}
 
@@ -40,8 +37,8 @@ public record OAuthLoginRequest(
 	}
 
 	@AssertTrue(message = "애플 로그인 시 인가 코드 또는 ID 토큰 중 하나는 필수입니다.")
-	private boolean isValidAppleLogin() {
-		if (APPLE.equals(socialType)) {
+	public boolean validateAppleLogin() {
+		if ("APPLE".equals(socialType)) {
 			return (authorizationCode != null && !authorizationCode.isBlank()) || (idToken != null
 				&& !idToken.isBlank());
 		}
