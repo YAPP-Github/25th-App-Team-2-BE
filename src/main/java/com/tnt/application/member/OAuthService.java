@@ -1,6 +1,7 @@
 package com.tnt.application.member;
 
 import static com.tnt.global.error.model.ErrorMessage.*;
+import static java.util.Objects.isNull;
 
 import java.math.BigInteger;
 import java.security.KeyFactory;
@@ -12,7 +13,6 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 
 import org.json.JSONArray;
@@ -81,7 +81,7 @@ public class OAuthService {
 		String socialEmail = oauthInfo.getEmail();
 		Member findMember = findMemberFromDB(socialId, request.socialType());
 
-		if (Objects.isNull(findMember)) {
+		if (isNull(findMember)) {
 			return new OAuthLoginResponse(null, socialId, socialEmail, request.socialType(), false);
 		}
 
@@ -119,7 +119,7 @@ public class OAuthService {
 		String idToken = Optional.ofNullable(request.idToken()) // Android
 			.orElseGet(() -> getAppleIdToken(request.authorizationCode())); // iOS
 
-		if (Objects.isNull(idToken)) {
+		if (isNull(idToken)) {
 			throw new OAuthException(APPLE_AUTH_ERROR);
 		}
 
@@ -139,7 +139,7 @@ public class OAuthService {
 			// 매칭되는 키 찾기
 			JSONObject key = findMatchingKey(keys, kid);
 
-			if (Objects.isNull(key)) {
+			if (isNull(key)) {
 				throw new OAuthException(MATCHING_KEY_NOT_FOUND);
 			}
 
