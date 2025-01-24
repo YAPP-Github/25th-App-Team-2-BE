@@ -1,5 +1,8 @@
 package com.tnt.dto.member.request;
 
+import static com.tnt.domain.constant.Constant.APPLE;
+import static com.tnt.domain.constant.Constant.KAKAO;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotBlank;
@@ -28,7 +31,7 @@ public record OAuthLoginRequest(
 
 	@AssertTrue(message = "카카오 로그인 시 소셜 액세스 토큰은 필수입니다.")
 	public boolean validateKakaoLogin() {
-		if ("KAKAO".equals(socialType)) {
+		if (KAKAO.equals(socialType)) {
 			return socialAccessToken != null && !socialAccessToken.isBlank();
 		}
 
@@ -37,7 +40,7 @@ public record OAuthLoginRequest(
 
 	@AssertTrue(message = "애플 로그인 시 인가 코드 또는 ID 토큰 중 하나는 필수입니다.")
 	public boolean validateAppleLogin() {
-		if ("APPLE".equals(socialType)) {
+		if (APPLE.equals(socialType)) {
 			return (authorizationCode != null && !authorizationCode.isBlank()) || (idToken != null
 				&& !idToken.isBlank());
 		}
