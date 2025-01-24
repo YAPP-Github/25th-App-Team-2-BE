@@ -14,6 +14,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
 
+import com.tnt.application.auth.CustomOAuth2UserService;
 import com.tnt.application.auth.SessionService;
 import com.tnt.global.auth.filter.ServletExceptionFilter;
 import com.tnt.global.auth.filter.SessionAuthenticationFilter;
@@ -28,12 +29,14 @@ public class SecurityConfig {
 
 	private static final String[] ALLOWED_URIS = {
 		"/",
+		"/oauth2/**",
+		"/login/**",
 		"/api",
 		"/v3/api-docs/**",
 		"/swagger-ui/**",
-		"/login/**",
 		"/members/sign-up"
 	};
+	private final CustomOAuth2UserService customOAuth2UserService;
 	private final SessionService sessionService;
 
 	@Bean
@@ -43,14 +46,12 @@ public class SecurityConfig {
 			.formLogin(AbstractHttpConfigurer::disable)
 			.httpBasic(AbstractHttpConfigurer::disable)
 			.csrf(AbstractHttpConfigurer::disable)
-			.headers(headers ->
-				headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
-			.sessionManagement(sessionManagement ->
-				sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-			)
-			.authorizeHttpRequests(request ->
-				request.requestMatchers(ALLOWED_URIS).permitAll()
-					.anyRequest().authenticated())
+			.headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
+			.sessionManagement(sessionManagement -> sessionManagement
+				.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+			.oauth2Login(oauth2 -> oauth2.userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService)))
+			.authorizeHttpRequests(request -> request
+				.requestMatchers(ALLOWED_URIS).permitAll().anyRequest().authenticated())
 			.addFilterBefore(servletExceptionFilter(), LogoutFilter.class)
 			.addFilterAfter(sessionAuthenticationFilter(), LogoutFilter.class);
 
