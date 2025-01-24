@@ -24,7 +24,7 @@ public class AuthenticationController {
 	private final OAuthService oauthService;
 
 	@Operation(summary = "소셜 로그인 API")
-	@PostMapping("/login/oauth")
+	@PostMapping("/oauth/login")
 	@ResponseStatus(value = OK)
 	public OAuthLoginResponse oauthLogin(@RequestBody @Valid OAuthLoginRequest request) {
 		return oauthService.oauthLogin(request);

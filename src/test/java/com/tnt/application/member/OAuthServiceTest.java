@@ -1,5 +1,7 @@
 package com.tnt.application.member;
 
+import static com.tnt.domain.constant.Constant.APPLE;
+import static com.tnt.domain.constant.Constant.KAKAO;
 import static com.tnt.global.error.model.ErrorMessage.APPLE_AUTH_ERROR;
 import static com.tnt.global.error.model.ErrorMessage.FAILED_TO_FETCH_USER_INFO;
 import static com.tnt.global.error.model.ErrorMessage.UNSUPPORTED_SOCIAL_TYPE;
@@ -46,15 +48,10 @@ import okhttp3.mockwebserver.MockWebServer;
 @ExtendWith(MockitoExtension.class)
 class OAuthServiceTest {
 
-	private static final String KAKAO = "KAKAO";
-	private static final String APPLE = "APPLE";
-
 	private MockWebServer mockWebServer;
 	private OAuthService oAuthService;
-
 	@Mock
 	private SessionService sessionService;
-
 	@Mock
 	private MemberRepository memberRepository;
 

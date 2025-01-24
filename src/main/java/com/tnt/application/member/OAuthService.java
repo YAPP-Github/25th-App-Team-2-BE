@@ -1,5 +1,7 @@
 package com.tnt.application.member;
 
+import static com.tnt.domain.constant.Constant.APPLE;
+import static com.tnt.domain.constant.Constant.KAKAO;
 import static com.tnt.global.error.model.ErrorMessage.*;
 import static java.util.Objects.isNull;
 
@@ -50,9 +52,6 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class OAuthService {
 
-	private static final String KAKAO = "KAKAO";
-	private static final String APPLE = "APPLE";
-
 	private final WebClient webClient;
 	private final SessionService sessionService;
 	private final MemberRepository memberRepository;
@@ -65,13 +64,10 @@ public class OAuthService {
 
 	@Value("${social-login.provider.apple.team-id}")
 	private String teamId;
-
 	@Value("${social-login.provider.apple.client-id}")
 	private String clientId;
-
 	@Value("${social-login.provider.apple.key-id}")
 	private String keyId;
-
 	@Value("${social-login.provider.apple.private-key}")
 	private String privateKey;
 

@@ -117,10 +117,11 @@ jacocoTestCoverageVerification {
                     '*.*Config',
                     '*.error.*',
                     '*.dto.*',
-                    '*.*AppleEcdsaKeyProvider',
+                    '*.CustomOAuth2UserService',
+                    '*.AppleEcdsaKeyProvider',
                     '*.Q*',
                     '*.DynamicQuery',
-                    '*.*Adapter'
+                    '*.*Adapter',
             ]
         }
     }
@@ -142,6 +143,9 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
     implementation 'org.springframework.boot:spring-boot-starter-aop'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
+
+    // OAuth2
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 
     // TSID
     implementation 'io.hypersistence:hypersistence-utils-hibernate-63:3.9.0'
