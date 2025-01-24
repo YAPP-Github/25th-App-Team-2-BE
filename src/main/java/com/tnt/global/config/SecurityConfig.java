@@ -34,7 +34,6 @@ public class SecurityConfig {
 		"/api",
 		"/v3/api-docs/**",
 		"/swagger-ui/**",
-		"/oauth/**",
 		"/members/sign-up"
 	};
 	private final CustomOAuth2UserService customOAuth2UserService;
