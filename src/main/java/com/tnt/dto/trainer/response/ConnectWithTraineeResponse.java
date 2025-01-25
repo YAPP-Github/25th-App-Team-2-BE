@@ -10,20 +10,20 @@ public record ConnectWithTraineeResponse(
 	@Schema(description = "트레이니 이름", example = "홍길동", nullable = false)
 	String traineeName,
 
-	@Schema(description = "트레이너 프로필 이미지 URL", example = "https://images.tnt.com/a3hf2.jpg", nullable = false)
+	@Schema(description = "트레이너 프로필 이미지 URL", example = "https://images.tntapp.co.kr/a3hf2.jpg", nullable = false)
 	String trainerProfileImageUrl,
 
-	@Schema(description = "트레이니 프로필 이미지 URL", example = "https://images.tnt.com/3h4f.jpg", nullable = false)
+	@Schema(description = "트레이니 프로필 이미지 URL", example = "https://images.tntapp.co.kr/3h4f.jpg", nullable = false)
 	String traineeProfileImageUrl,
 
 	@Schema(description = "트레이니 나이", examples = {"20세", "비공개"}, nullable = false)
 	String traineeAge,
 
 	@Schema(description = "트레이니 키", example = "178.6cm", nullable = false)
-	String height,
+	Double height,
 
 	@Schema(description = "트레이니 몸무게", example = "70.2kg", nullable = false)
-	String weight,
+	Double weight,
 
 	@Schema(description = "PT 목표", example = "체중 감량, 근력 향상, 건강 관리", nullable = false)
 	String ptGoal,

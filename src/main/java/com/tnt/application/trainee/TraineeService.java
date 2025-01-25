@@ -22,4 +22,9 @@ public class TraineeService {
 		return traineeSearchRepository.findByMemberIdAndDeletedAtIsNull(Long.valueOf(memberId))
 			.orElseThrow(() -> new NotFoundException(TRAINEE_NOT_FOUND));
 	}
+
+	public Trainee getTraineeWithId(String traineeId) {
+		return traineeSearchRepository.findByIdAndDeletedAtIsNull(Long.valueOf(traineeId))
+			.orElseThrow(() -> new NotFoundException(TRAINEE_NOT_FOUND));
+	}
 }

@@ -20,10 +20,7 @@ Configuration:
 
       Policies:
         SizeBasedTriggeringPolicy:
-          size: "10 MB"
-        TimeBasedTriggeringPolicy:
-          Interval: 1
-          modulate: true
+          size: "100 MB"
 
       DefaultRollOverStrategy:
         max: 10

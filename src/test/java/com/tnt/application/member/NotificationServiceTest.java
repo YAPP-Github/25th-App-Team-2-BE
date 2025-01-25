@@ -1,5 +1,6 @@
 package com.tnt.application.member;
 
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -30,9 +31,9 @@ class NotificationServiceTest {
 		String traineeName = "김영명";
 
 		// when
-		notificationService.sendConnectNotificationToTrainer(fcmToken, traineeName);
+		notificationService.sendConnectNotificationToTrainer(fcmToken, traineeName, 1L, 2L);
 
 		// then
-		verify(fcmAdapter, times(1)).sendNotificationByToken(anyString(), anyString(), anyString());
+		verify(fcmAdapter, times(1)).sendNotificationByToken(anyString(), anyString(), anyString(), anyMap());
 	}
 }

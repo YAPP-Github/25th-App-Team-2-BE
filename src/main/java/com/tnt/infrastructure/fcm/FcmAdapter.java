@@ -2,6 +2,8 @@ package com.tnt.infrastructure.fcm;
 
 import static com.tnt.global.error.model.ErrorMessage.FCM_FAILED;
 
+import java.util.Map;
+
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
@@ -19,7 +21,7 @@ public class FcmAdapter {
 
 	private final Environment environment;
 
-	public void sendNotificationByToken(String token, String title, String body) {
+	public void sendNotificationByToken(String token, String title, String body, Map<String, String> data) {
 		String[] activeProfiles = environment.getActiveProfiles();
 		boolean isLocal = activeProfiles.length > 0 && "local".equals(activeProfiles[0]);
 
@@ -34,6 +36,7 @@ public class FcmAdapter {
 				.setTitle(title)
 				.setBody(body)
 				.build())
+			.putAllData(data)
 			.build();
 
 		try {

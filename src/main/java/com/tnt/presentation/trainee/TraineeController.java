@@ -35,7 +35,7 @@ public class TraineeController {
 		@RequestBody ConnectWithTrainerRequest request) {
 		ConnectWithTrainerDto connectWithTrainerDto = ptService.connectWithTrainer(memberId, request);
 		notificationService.sendConnectNotificationToTrainer(connectWithTrainerDto.trainerFcmToken(),
-			connectWithTrainerDto.traineeName());
+			connectWithTrainerDto.traineeName(), connectWithTrainerDto.trainerId(), connectWithTrainerDto.traineeId());
 
 		return connectWithTrainerDto.toResponse();
 	}

@@ -7,7 +7,9 @@ public record ConnectWithTrainerDto(
 	String trainerName,
 	String traineeName,
 	String trainerProfileImageUrl,
-	String traineeProfileImageUrl
+	String traineeProfileImageUrl,
+	Long trainerId,
+	Long traineeId
 ) {
 
 	public ConnectWithTrainerResponse toResponse() {

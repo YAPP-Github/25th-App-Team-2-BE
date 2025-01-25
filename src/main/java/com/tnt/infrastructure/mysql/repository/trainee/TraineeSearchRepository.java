@@ -28,4 +28,15 @@ public class TraineeSearchRepository {
 			)
 			.fetchOne());
 	}
+
+	public Optional<Trainee> findByIdAndDeletedAtIsNull(Long id) {
+		return Optional.ofNullable(jpaQueryFactory
+			.selectFrom(trainee)
+			.join(trainee.member, member).fetchJoin()
+			.where(
+				trainee.id.eq(id),
+				trainee.deletedAt.isNull()
+			)
+			.fetchOne());
+	}
 }

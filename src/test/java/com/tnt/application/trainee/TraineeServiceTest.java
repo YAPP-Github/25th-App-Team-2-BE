@@ -24,7 +24,7 @@ class TraineeServiceTest {
 	private TraineeSearchRepository traineeSearchRepository;
 
 	@Test
-	void getTraineeWithMemberId_success() {
+	void getTraineeWithMemberId_fail() {
 		// given
 		String memberId = "1234567";
 
@@ -33,6 +33,18 @@ class TraineeServiceTest {
 
 		// when & then
 		Assertions.assertThatThrownBy(() -> traineeService.getTraineeWithMemberId(memberId))
+			.isInstanceOf(NotFoundException.class);
+	}
+
+	@Test
+	void getTraineeWithId_fail() {
+		// given
+		String traineeId = "1";
+
+		given(traineeSearchRepository.findByIdAndDeletedAtIsNull(Long.valueOf(traineeId))).willReturn(Optional.empty());
+
+		// when & then
+		Assertions.assertThatThrownBy(() -> traineeService.getTraineeWithId(traineeId))
 			.isInstanceOf(NotFoundException.class);
 	}
 }
