@@ -14,6 +14,7 @@ public enum ErrorMessage {
 	S3_UPLOAD_ERROR("S3로 이미지 업로드 중 오류가 발생했습니다."),
 	IMAGE_NOT_FOUND("이미지가 존재하지 않습니다."),
 	IMAGE_NOT_SUPPORT("지원하지 않는 이미지 형식입니다. jpg, jpeg, png, svg만 가능합니다."),
+	INVALID_REQUEST_NOT_MATCH("요청자와 요청이 일치하지 않습니다."),
 
 	CLIENT_BAD_REQUEST("잘못된 요청입니다."),
 	FAILED_TO_PROCESS_REQUEST("요청 진행에 실패했습니다."),
@@ -37,6 +38,7 @@ public enum ErrorMessage {
 	FAILED_TO_VERIFY_ID_TOKEN("Apple ID 토큰 검증에 실패했습니다."),
 
 	MEMBER_NOT_FOUND("존재하지 않는 회원입니다."),
+	MEMBER_FCM_TOKEN_NOT_FOUND("회원 FCM 토큰이 존재하지 않습니다."),
 	MEMBER_CONFLICT("이미 존재하는 회원입니다."),
 	MEMBER_INVALID_SOCIAL_ID("유효하지 않는 소셜 ID 입니다."),
 	MEMBER_INVALID_EMAIL("유효하지 않는 EMAIL 입니다."),
@@ -50,19 +52,24 @@ public enum ErrorMessage {
 	MEMBER_NULL_PUSH_AGREEMENT("회원 푸쉬 알림 수신 동의 여부가 null 입니다."),
 
 	TRAINER_NULL_ID("트레이너 id가 null 입니다."),
-	TRAINER_NULL_MEMBER_ID("트레이너 member id가 null 입니다."),
+	TRAINER_NULL_MEMBER("트레이너 member 가 null 입니다."),
 	TRAINER_INVALID_INVITATION_CODE("초대 코드가 올바르지 않습니다."),
 	TRAINER_NOT_FOUND("존재하지 않는 트레이너입니다."),
 	TRAINER_INVITATION_CODE_GENERATE_FAILED("트레이너 초대 코드 생성에 실패했습니다."),
 
-	TRAINEE_NULL_MEMBER_ID("트레이니 member id가 null 입니다."),
+	TRAINEE_NULL_ID("트레이니 id가 null 입니다."),
+	TRAINEE_NULL_MEMBER("트레이니 member 가 null 입니다."),
 	TRAINEE_NULL_HEIGHT("트레이니 height가 null 입니다."),
 	TRAINEE_NULL_WEIGHT("트레이니 weight가 null 입니다."),
 	TRAINEE_INVALID_CAUTION_NOTE("주의사항이 올바르지 않습니다."),
 	TRAINEE_NOT_FOUND("존재하지 않는 트레이니입니다."),
 
 	PT_GOAL_NULL_TRAINEE_ID("PT 목적 트레이니 id가 null 입니다."),
-	PT_GOAL_INVALID_CONTENT("목적 내용이 올바르지 않습니다.");
+	PT_GOAL_INVALID_CONTENT("목적 내용이 올바르지 않습니다."),
+
+	PT_TRAINER_TRAINEE_ALREADY_EXIST("이미 연결된 트레이너-트레이니입니다."),
+	PT_TRAINEE_ALREADY_EXIST("이미 다른 트레이너와 연결되어 있습니다."),
+	PT_TRAINER_TRAINEE_NOT_FOUND("존재하지 않는 연결 정보입니다.");
 
 	private final String message;
 }

@@ -95,7 +95,7 @@ public class MemberService {
 	private Long createTrainer(SignUpRequest request) {
 		Member member = createMember(request, TRAINER_DEFAULT_IMAGE);
 		Trainer trainer = Trainer.builder()
-			.memberId(member.getId())
+			.member(member)
 			.build();
 
 		trainerRepository.save(trainer);
@@ -106,7 +106,7 @@ public class MemberService {
 	private Long createTrainee(SignUpRequest request) {
 		Member member = createMember(request, TRAINEE_DEFAULT_IMAGE);
 		Trainee trainee = Trainee.builder()
-			.memberId(member.getId())
+			.member(member)
 			.height(request.height())
 			.weight(request.weight())
 			.cautionNote(isNotBlank(request.cautionNote()) ? request.cautionNote() : "")

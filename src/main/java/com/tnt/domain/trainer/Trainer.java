@@ -1,22 +1,30 @@
 package com.tnt.domain.trainer;
 
-import static com.tnt.global.error.model.ErrorMessage.*;
-import static io.micrometer.common.util.StringUtils.*;
+import static com.tnt.global.error.model.ErrorMessage.TRAINER_INVALID_INVITATION_CODE;
+import static com.tnt.global.error.model.ErrorMessage.TRAINER_INVITATION_CODE_GENERATE_FAILED;
+import static com.tnt.global.error.model.ErrorMessage.TRAINER_NULL_MEMBER;
+import static io.micrometer.common.util.StringUtils.isBlank;
+import static java.util.Objects.requireNonNull;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
-import java.util.Objects;
 import java.util.UUID;
 
+import com.tnt.domain.member.Member;
 import com.tnt.global.common.entity.BaseTimeEntity;
 import com.tnt.global.error.exception.TnTException;
 
 import io.hypersistence.utils.hibernate.id.Tsid;
 import jakarta.persistence.Column;
+import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -36,8 +44,9 @@ public class Trainer extends BaseTimeEntity {
 	@Column(name = "id", nullable = false, unique = true)
 	private Long id;
 
-	@Column(name = "member_id", nullable = false)
-	private Long memberId;
+	@OneToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "member_id", nullable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+	private Member member;
 
 	@Column(name = "invitation_code", nullable = false, length = INVITATION_CODE_LENGTH)
 	private String invitationCode;
@@ -46,9 +55,9 @@ public class Trainer extends BaseTimeEntity {
 	private LocalDateTime deletedAt;
 
 	@Builder
-	public Trainer(Long id, Long memberId) {
+	public Trainer(Long id, Member member) {
 		this.id = id;
-		this.memberId = Objects.requireNonNull(memberId, TRAINER_NULL_MEMBER_ID.getMessage());
+		this.member = requireNonNull(member, TRAINER_NULL_MEMBER.getMessage());
 		setNewInvitationCode();
 	}
 
