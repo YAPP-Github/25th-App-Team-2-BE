@@ -95,7 +95,7 @@ class MemberServiceTest {
 
 		mockTrainee = Trainee.builder()
 			.id(1L)
-			.memberId(mockTraineeMember.getId())
+			.member(mockTraineeMember)
 			.height(traineeRequest.height())
 			.weight(traineeRequest.weight())
 			.cautionNote(traineeRequest.cautionNote())
@@ -121,7 +121,7 @@ class MemberServiceTest {
 				Optional.empty());
 			given(memberRepository.save(any(Member.class))).willReturn(mockTrainerMember);
 			given(trainerRepository.save(any(Trainer.class))).willReturn(
-				Trainer.builder().memberId(mockTrainerMember.getId()).build());
+				Trainer.builder().member(mockTrainerMember).build());
 
 			// when
 			Long result = memberService.signUp(trainerRequest);
@@ -210,7 +210,7 @@ class MemberServiceTest {
 				Optional.empty());
 			given(memberRepository.save(any(Member.class))).willReturn(mockTrainerMember);
 			given(trainerRepository.save(any(Trainer.class))).willReturn(
-				Trainer.builder().memberId(mockTrainerMember.getId()).build());
+				Trainer.builder().member(mockTrainerMember).build());
 			given(memberRepository.findByIdAndDeletedAtIsNull(any())).willReturn(Optional.of(mockTrainerMember));
 
 			// when
@@ -258,7 +258,7 @@ class MemberServiceTest {
 				Optional.empty());
 			given(memberRepository.save(any(Member.class))).willReturn(mockTrainerMember);
 			given(trainerRepository.save(any(Trainer.class))).willReturn(
-				Trainer.builder().memberId(mockTrainerMember.getId()).build());
+				Trainer.builder().member(mockTrainerMember).build());
 			given(memberRepository.findByIdAndDeletedAtIsNull(any())).willReturn(Optional.of(mockTrainerMember));
 			doThrow(new RuntimeException("세션 생성 실패")).when(sessionService)
 				.createOrUpdateSession(any(), eq(String.valueOf(mockTrainerMember.getId())));

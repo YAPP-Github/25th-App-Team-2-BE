@@ -4,11 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(description = "트레이너의 초대 코드 응답")
 public record InvitationCodeResponse(
-
-	@Schema(description = "트레이너 id", example = "23984725", type = "string")
-	String trainerId,
-
-	@Schema(description = "트레이너의 초대 코드", example = "2H9DG4X3", type = "string")
+	@Schema(description = "트레이너의 초대 코드 (재발급 포함)", example = "2H9DG4X3", nullable = false)
 	String invitationCode
 ) {
 

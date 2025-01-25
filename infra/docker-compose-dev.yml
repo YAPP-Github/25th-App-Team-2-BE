@@ -2,6 +2,7 @@ services:
   tnt:
     image: ${DOCKER_HUB_USERNAME}/${DOCKER_HUB_REPOSITORY}:latest
     container_name: tnt-spring-dev
+    #    platform: linux/arm64/v8
     restart: unless-stopped
     ports:
       - "80:8080"
@@ -9,6 +10,8 @@ services:
       - mysql
     environment:
       SPRING_ACTIVE_PROFILE: ${SPRING_ACTIVE_PROFILE}
+    volumes:
+      - ../logs:/logs
 
   mysql:
     image: mysql:8.0.40

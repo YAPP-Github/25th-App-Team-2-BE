@@ -31,6 +31,7 @@ class MemberControllerTest extends AbstractContainerBaseTest {
 
 	@Autowired
 	private MockMvc mockMvc;
+
 	@Autowired
 	private ObjectMapper objectMapper;
 

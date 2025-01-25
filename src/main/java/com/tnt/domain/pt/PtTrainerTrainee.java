@@ -1,8 +1,11 @@
 package com.tnt.domain.pt;
 
+import static java.util.Objects.requireNonNull;
+
 import java.time.LocalDate;
 
 import com.tnt.global.common.entity.BaseTimeEntity;
+import com.tnt.global.error.model.ErrorMessage;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -11,6 +14,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -35,11 +39,21 @@ public class PtTrainerTrainee extends BaseTimeEntity {
 	private LocalDate startedAt;
 
 	@Column(name = "finished_pt_count", nullable = false)
-	private int finishedPtCount;
+	private Integer finishedPtCount;
 
 	@Column(name = "total_pt_count", nullable = false)
-	private int totalPtCount;
+	private Integer totalPtCount;
 
 	@Column(name = "deleted_at")
 	private LocalDate deletedAt;
+
+	@Builder
+	public PtTrainerTrainee(Long trainerId, Long traineeId, LocalDate startedAt, Integer finishedPtCount,
+		Integer totalPtCount) {
+		this.trainerId = requireNonNull(trainerId, ErrorMessage.TRAINER_NULL_ID.getMessage());
+		this.traineeId = requireNonNull(traineeId, ErrorMessage.TRAINEE_NULL_ID.getMessage());
+		this.startedAt = requireNonNull(startedAt);
+		this.finishedPtCount = requireNonNull(finishedPtCount);
+		this.totalPtCount = requireNonNull(totalPtCount);
+	}
 }
