@@ -44,13 +44,7 @@ public class SessionService {
 	}
 
 	public void createOrUpdateSession(String sessionId, String memberId) {
-		String existingSessionId = redisTemplate.opsForValue().get(memberId);
-
-		// 중복 로그인 방지
-		if (nonNull(existingSessionId)) {
-			removeSession(existingSessionId);
-		}
-		
+		removeSession(memberId);
 		redisTemplate.opsForValue().set(sessionId, memberId, SESSION_DURATION, TimeUnit.SECONDS);
 		redisTemplate.opsForValue().set(memberId, sessionId, SESSION_DURATION, TimeUnit.SECONDS);
 	}

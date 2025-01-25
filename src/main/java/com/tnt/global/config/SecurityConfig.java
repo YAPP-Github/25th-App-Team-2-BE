@@ -49,14 +49,13 @@ public class SecurityConfig {
 			.httpBasic(AbstractHttpConfigurer::disable)
 			.csrf(AbstractHttpConfigurer::disable)
 			.headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
-			.sessionManagement(sessionManagement -> sessionManagement
-				.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+			.sessionManagement(sessionManagement ->
+				sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 			.oauth2Login(oauth2 -> oauth2.userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService)))
 			.authorizeHttpRequests(request -> request
 				.requestMatchers(ALLOWED_URIS).permitAll().anyRequest().authenticated())
 			.addFilterBefore(servletExceptionFilter(), LogoutFilter.class)
-			.addFilterAfter(sessionAuthenticationFilter(), LogoutFilter.class)
-		;
+			.addFilterAfter(sessionAuthenticationFilter(), LogoutFilter.class);
 
 		return http.build();
 	}

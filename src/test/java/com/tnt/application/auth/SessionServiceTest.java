@@ -105,19 +105,18 @@ class SessionServiceTest {
 		sessionService.createOrUpdateSession(sessionId, memberId);
 
 		// then
-		verify(valueOperations).set(
-			sessionId,
-			memberId,
-			2L * 24 * 60 * 60,
-			TimeUnit.SECONDS
-		);
+		verify(valueOperations).set(sessionId, memberId, 2L * 24 * 60 * 60, TimeUnit.SECONDS);
 	}
 
 	@Test
 	@DisplayName("세션 삭제 성공")
 	void remove_session_success() {
 		// given
-		String sessionId = "12345";
+		String sessionId = "test-session-id";
+		String memberId = "12345";
+
+		given(redisTemplate.opsForValue()).willReturn(valueOperations);
+		given(valueOperations.get(sessionId)).willReturn(memberId);
 
 		// when
 		sessionService.removeSession(sessionId);
