@@ -1,10 +1,17 @@
 package com.tnt.application.member;
 
-import static com.tnt.domain.constant.Constant.*;
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.BDDMockito.*;
+import static com.tnt.domain.constant.Constant.TRAINEE;
+import static com.tnt.domain.constant.Constant.TRAINEE_DEFAULT_IMAGE;
+import static com.tnt.domain.constant.Constant.TRAINER;
+import static com.tnt.domain.constant.Constant.TRAINER_DEFAULT_IMAGE;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.doThrow;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.verify;
 
 import java.util.List;
 import java.util.Optional;
@@ -188,7 +195,7 @@ class MemberServiceTest {
 			assertThat(response.name()).isEqualTo(MOCK_NAME);
 			assertThat(response.profileImageUrl()).isEqualTo(TRAINER_DEFAULT_IMAGE);
 			assertThat(response.memberType()).isEqualTo(TRAINER);
-			verify(sessionService).createSession(any(), any());
+			verify(sessionService).createSession(anyString(), anyString());
 		}
 	}
 
@@ -217,7 +224,7 @@ class MemberServiceTest {
 			assertThat(response.memberType()).isEqualTo(TRAINER);
 			assertThat(response.name()).isEqualTo(MOCK_NAME);
 			assertThat(response.profileImageUrl()).isEqualTo(TRAINER_DEFAULT_IMAGE);
-			verify(sessionService).createSession(any(), any());
+			verify(sessionService).createSession(anyString(), anyString());
 		}
 
 		@Test
@@ -241,7 +248,7 @@ class MemberServiceTest {
 			assertThat(response.memberType()).isEqualTo(TRAINEE);
 			assertThat(response.name()).isEqualTo(MOCK_NAME);
 			assertThat(response.profileImageUrl()).isEqualTo(TRAINEE_DEFAULT_IMAGE);
-			verify(sessionService).createSession(any(), any());
+			verify(sessionService).createSession(anyString(), anyString());
 		}
 
 		@Test
