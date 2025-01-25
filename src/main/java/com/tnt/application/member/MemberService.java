@@ -1,9 +1,14 @@
 package com.tnt.application.member;
 
-import static com.tnt.domain.constant.Constant.*;
-import static com.tnt.global.error.model.ErrorMessage.*;
-import static io.hypersistence.tsid.TSID.Factory.*;
-import static io.micrometer.common.util.StringUtils.*;
+import static com.tnt.domain.constant.Constant.TRAINEE;
+import static com.tnt.domain.constant.Constant.TRAINEE_DEFAULT_IMAGE;
+import static com.tnt.domain.constant.Constant.TRAINER;
+import static com.tnt.domain.constant.Constant.TRAINER_DEFAULT_IMAGE;
+import static com.tnt.global.error.model.ErrorMessage.MEMBER_CONFLICT;
+import static com.tnt.global.error.model.ErrorMessage.MEMBER_NOT_FOUND;
+import static com.tnt.global.error.model.ErrorMessage.UNSUPPORTED_MEMBER_TYPE;
+import static io.hypersistence.tsid.TSID.Factory.getTsid;
+import static io.micrometer.common.util.StringUtils.isNotBlank;
 
 import java.util.List;
 
@@ -77,10 +82,10 @@ public class MemberService {
 			.email(request.socialEmail())
 			.name(request.name())
 			.profileImageUrl(defaultImageUrl)
+			.birthday(request.birthday())
 			.serviceAgreement(request.serviceAgreement())
 			.collectionAgreement(request.collectionAgreement())
 			.advertisementAgreement(request.advertisementAgreement())
-			.pushAgreement(request.pushAgreement())
 			.socialType(SocialType.valueOf(request.socialType()))
 			.build();
 

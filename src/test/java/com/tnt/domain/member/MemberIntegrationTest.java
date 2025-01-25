@@ -33,7 +33,6 @@ class MemberIntegrationTest {
 			.serviceAgreement(true)
 			.collectionAgreement(true)
 			.advertisementAgreement(true)
-			.pushAgreement(true)
 			.socialType(SocialType.KAKAO)
 			.build();
 

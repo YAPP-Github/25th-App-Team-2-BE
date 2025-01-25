@@ -40,7 +40,6 @@ class MemberTest {
 				.serviceAgreement(true)
 				.collectionAgreement(true)
 				.advertisementAgreement(true)
-				.pushAgreement(true)
 				.socialType(SocialType.KAKAO)
 				.build();
 
@@ -65,7 +64,6 @@ class MemberTest {
 					.serviceAgreement(true)
 					.collectionAgreement(true)
 					.advertisementAgreement(true)
-					.pushAgreement(true)
 					.socialType(SocialType.KAKAO)
 					.build())
 				.map(Member::getId)
@@ -95,7 +93,6 @@ class MemberTest {
 				.serviceAgreement(true)
 				.collectionAgreement(true)
 				.advertisementAgreement(true)
-				.pushAgreement(true)
 				.socialType(SocialType.KAKAO)
 				.build();
 			TSID tsid = TSID.from(member.getId());
@@ -120,7 +117,6 @@ class MemberTest {
 				.serviceAgreement(true)
 				.collectionAgreement(true)
 				.advertisementAgreement(true)
-				.pushAgreement(true)
 				.socialType(SocialType.KAKAO)
 				.build();
 

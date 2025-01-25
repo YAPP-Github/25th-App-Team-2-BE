@@ -54,7 +54,6 @@ class TrainerServiceTest {
 			.serviceAgreement(true)
 			.collectionAgreement(true)
 			.advertisementAgreement(true)
-			.pushAgreement(true)
 			.socialType(SocialType.KAKAO)
 			.build();
 
@@ -108,7 +107,6 @@ class TrainerServiceTest {
 			.serviceAgreement(true)
 			.collectionAgreement(true)
 			.advertisementAgreement(true)
-			.pushAgreement(true)
 			.socialType(SocialType.KAKAO)
 			.build();
 
@@ -152,7 +150,6 @@ class TrainerServiceTest {
 			.serviceAgreement(true)
 			.collectionAgreement(true)
 			.advertisementAgreement(true)
-			.pushAgreement(true)
 			.socialType(SocialType.KAKAO)
 			.build();
 
