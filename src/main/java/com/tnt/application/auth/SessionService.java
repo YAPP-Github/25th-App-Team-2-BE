@@ -1,9 +1,8 @@
 package com.tnt.application.auth;
 
-import static com.tnt.global.error.model.ErrorMessage.AUTHORIZATION_HEADER_ERROR;
-import static com.tnt.global.error.model.ErrorMessage.NO_EXIST_SESSION_IN_STORAGE;
-import static io.micrometer.common.util.StringUtils.isBlank;
-import static java.util.Objects.isNull;
+import static com.tnt.global.error.model.ErrorMessage.*;
+import static io.micrometer.common.util.StringUtils.*;
+import static java.util.Objects.*;
 
 import java.util.concurrent.TimeUnit;
 
@@ -19,7 +18,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class SessionService {
 
-	private static final long SESSION_DURATION = 2L * 24 * 60 * 60; // 48시간
+	private static final long SESSION_DURATION = 7L * 24 * 60 * 60; // 24시간 * 7일
 	private static final String AUTHORIZATION_HEADER = "Authorization";
 	private static final String SESSION_ID_PREFIX = "SESSION-ID ";
 
@@ -39,28 +38,31 @@ public class SessionService {
 			throw new UnauthorizedException(NO_EXIST_SESSION_IN_STORAGE);
 		}
 
-		createOrUpdateSession(sessionId, "");
+		updateSession(sessionId, sessionValue);
 
 		return sessionValue;
 	}
 
-	public void createOrUpdateSession(String sessionId, String memberId) {
-		if (isBlank(memberId)) { // 세션 갱신
-			redisTemplate.expire(sessionId, SESSION_DURATION, TimeUnit.SECONDS);
-			redisTemplate.expire(memberId, SESSION_DURATION, TimeUnit.SECONDS);
-		} else { // 로그인 시 기존 로그인 상태 제거하고 새로운 세션 생성
-			String existingSessionId = redisTemplate.opsForValue().get(memberId);
-
-			if (!isNull(existingSessionId)) {
-				removeSession(sessionId);
-				removeSession(memberId);
-			}
-			redisTemplate.opsForValue().set(sessionId, memberId, SESSION_DURATION, TimeUnit.SECONDS);
-			redisTemplate.opsForValue().set(memberId, sessionId, SESSION_DURATION, TimeUnit.SECONDS);
-		}
+	public void createSession(String sessionId, String memberId) {
+		removeSession(memberId);
+		redisTemplate.opsForValue().set(sessionId, memberId, SESSION_DURATION, TimeUnit.SECONDS);
+		redisTemplate.opsForValue().set(memberId, sessionId, SESSION_DURATION, TimeUnit.SECONDS);
 	}
 
-	public void removeSession(String dataKey) {
+	public void updateSession(String sessionId, String memberId) {
+		redisTemplate.expire(sessionId, SESSION_DURATION, TimeUnit.SECONDS);
+		redisTemplate.expire(memberId, SESSION_DURATION, TimeUnit.SECONDS);
+	}
+
+	public String removeSession(String dataKey) {
+		String existingKey = redisTemplate.opsForValue().get(dataKey);
+
+		if (!isNull(existingKey)) {
+			redisTemplate.delete(existingKey);
+		}
+
 		redisTemplate.delete(dataKey);
+
+		return existingKey;
 	}
 }

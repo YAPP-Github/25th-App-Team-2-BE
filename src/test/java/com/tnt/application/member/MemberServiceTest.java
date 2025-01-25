@@ -7,10 +7,11 @@ import static com.tnt.domain.constant.Constant.TRAINER_DEFAULT_IMAGE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.doThrow;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.verify;
+import static org.mockito.BDDMockito.verify;
 
 import java.util.List;
 import java.util.Optional;
@@ -194,7 +195,7 @@ class MemberServiceTest {
 			assertThat(response.name()).isEqualTo(MOCK_NAME);
 			assertThat(response.profileImageUrl()).isEqualTo(TRAINER_DEFAULT_IMAGE);
 			assertThat(response.memberType()).isEqualTo(TRAINER);
-			verify(sessionService).createOrUpdateSession(any(), any());
+			verify(sessionService).createSession(anyString(), anyString());
 		}
 	}
 
@@ -223,7 +224,7 @@ class MemberServiceTest {
 			assertThat(response.memberType()).isEqualTo(TRAINER);
 			assertThat(response.name()).isEqualTo(MOCK_NAME);
 			assertThat(response.profileImageUrl()).isEqualTo(TRAINER_DEFAULT_IMAGE);
-			verify(sessionService).createOrUpdateSession(any(), any());
+			verify(sessionService).createSession(anyString(), anyString());
 		}
 
 		@Test
@@ -247,7 +248,7 @@ class MemberServiceTest {
 			assertThat(response.memberType()).isEqualTo(TRAINEE);
 			assertThat(response.name()).isEqualTo(MOCK_NAME);
 			assertThat(response.profileImageUrl()).isEqualTo(TRAINEE_DEFAULT_IMAGE);
-			verify(sessionService).createOrUpdateSession(any(), any());
+			verify(sessionService).createSession(anyString(), anyString());
 		}
 
 		@Test
@@ -261,7 +262,7 @@ class MemberServiceTest {
 				Trainer.builder().member(mockTrainerMember).build());
 			given(memberRepository.findByIdAndDeletedAtIsNull(any())).willReturn(Optional.of(mockTrainerMember));
 			doThrow(new RuntimeException("세션 생성 실패")).when(sessionService)
-				.createOrUpdateSession(any(), eq(String.valueOf(mockTrainerMember.getId())));
+				.createSession(any(), eq(String.valueOf(mockTrainerMember.getId())));
 
 			// when
 			Long savedMemberId = memberService.signUp(trainerRequest);
@@ -270,7 +271,7 @@ class MemberServiceTest {
 			assertThat(savedMemberId).isNotNull();
 			assertThrows(RuntimeException.class,
 				() -> memberService.finishSignUpWithImage(TRAINER_DEFAULT_IMAGE, savedMemberId, TRAINER));
-			verify(sessionService).createOrUpdateSession(any(), eq(String.valueOf(mockTrainerMember.getId())));
+			verify(sessionService).createSession(any(), eq(String.valueOf(mockTrainerMember.getId())));
 		}
 	}
 }

@@ -1,15 +1,9 @@
 package com.tnt.presentation.member;
 
-import static com.tnt.domain.constant.Constant.TRAINEE;
-import static com.tnt.domain.constant.Constant.TRAINEE_DEFAULT_IMAGE;
-import static com.tnt.domain.constant.Constant.TRAINER;
-import static com.tnt.domain.constant.Constant.TRAINER_DEFAULT_IMAGE;
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.http.MediaType.IMAGE_JPEG_VALUE;
-import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static com.tnt.domain.constant.Constant.*;
+import static org.springframework.http.MediaType.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -57,7 +51,7 @@ class MemberControllerTest extends AbstractContainerBaseTest {
 			.contentType(MULTIPART_FORM_DATA_VALUE));
 
 		// then
-		result.andExpect(status().isOk())
+		result.andExpect(status().isCreated())
 			.andExpect(jsonPath("$.memberType").value(TRAINER))
 			.andExpect(jsonPath("$.sessionId").exists())
 			.andExpect(jsonPath("$.name").value("홍길동"))
@@ -80,7 +74,7 @@ class MemberControllerTest extends AbstractContainerBaseTest {
 			.contentType(MULTIPART_FORM_DATA_VALUE));
 
 		// then
-		result.andExpect(status().isOk())
+		result.andExpect(status().isCreated())
 			.andExpect(jsonPath("$.memberType").value(TRAINEE))
 			.andExpect(jsonPath("$.sessionId").exists())
 			.andExpect(jsonPath("$.name").value("홍길동"))

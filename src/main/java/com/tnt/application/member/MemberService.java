@@ -1,14 +1,9 @@
 package com.tnt.application.member;
 
-import static com.tnt.domain.constant.Constant.TRAINEE;
-import static com.tnt.domain.constant.Constant.TRAINEE_DEFAULT_IMAGE;
-import static com.tnt.domain.constant.Constant.TRAINER;
-import static com.tnt.domain.constant.Constant.TRAINER_DEFAULT_IMAGE;
-import static com.tnt.global.error.model.ErrorMessage.MEMBER_CONFLICT;
-import static com.tnt.global.error.model.ErrorMessage.MEMBER_NOT_FOUND;
-import static com.tnt.global.error.model.ErrorMessage.UNSUPPORTED_MEMBER_TYPE;
-import static io.hypersistence.tsid.TSID.Factory.getTsid;
-import static io.micrometer.common.util.StringUtils.isNotBlank;
+import static com.tnt.domain.constant.Constant.*;
+import static com.tnt.global.error.model.ErrorMessage.*;
+import static io.hypersistence.tsid.TSID.Factory.*;
+import static io.micrometer.common.util.StringUtils.*;
 
 import java.util.List;
 
@@ -63,7 +58,7 @@ public class MemberService {
 
 		String sessionId = String.valueOf(getTsid());
 
-		sessionService.createOrUpdateSession(sessionId, String.valueOf(member.getId()));
+		sessionService.createSession(sessionId, String.valueOf(member.getId()));
 
 		return new SignUpResponse(memberType, sessionId, member.getName(), member.getProfileImageUrl());
 	}

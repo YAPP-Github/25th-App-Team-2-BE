@@ -19,6 +19,7 @@ import com.tnt.application.auth.SessionService;
 import com.tnt.global.auth.filter.ServletExceptionFilter;
 import com.tnt.global.auth.filter.SessionAuthenticationFilter;
 
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
 @Configuration
@@ -36,6 +37,7 @@ public class SecurityConfig {
 		"/swagger-ui/**",
 		"/members/sign-up"
 	};
+
 	private final CustomOAuth2UserService customOAuth2UserService;
 	private final SessionService sessionService;
 
@@ -44,16 +46,24 @@ public class SecurityConfig {
 		http
 			.cors(Customizer.withDefaults())
 			.formLogin(AbstractHttpConfigurer::disable)
+			.logout(AbstractHttpConfigurer::disable)
 			.httpBasic(AbstractHttpConfigurer::disable)
 			.csrf(AbstractHttpConfigurer::disable)
 			.headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
-			.sessionManagement(sessionManagement -> sessionManagement
-				.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+			.sessionManagement(sessionManagement ->
+				sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 			.oauth2Login(oauth2 -> oauth2.userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService)))
 			.authorizeHttpRequests(request -> request
 				.requestMatchers(ALLOWED_URIS).permitAll().anyRequest().authenticated())
 			.addFilterBefore(servletExceptionFilter(), LogoutFilter.class)
-			.addFilterAfter(sessionAuthenticationFilter(), LogoutFilter.class);
+			.addFilterAfter(sessionAuthenticationFilter(), LogoutFilter.class)
+			.exceptionHandling(exceptionHandling ->
+				exceptionHandling.authenticationEntryPoint((request, response, authException) -> {
+					response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+					response.setContentType("application/json;charset=UTF-8");
+					response.getWriter().write("{\"message\":\"Security 사용자 인증에 실패했습니다.\"}");
+				})
+			);
 
 		return http.build();
 	}
