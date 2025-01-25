@@ -19,6 +19,7 @@ import com.tnt.application.auth.SessionService;
 import com.tnt.global.auth.filter.ServletExceptionFilter;
 import com.tnt.global.auth.filter.SessionAuthenticationFilter;
 
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
 @Configuration
@@ -55,7 +56,14 @@ public class SecurityConfig {
 			.authorizeHttpRequests(request -> request
 				.requestMatchers(ALLOWED_URIS).permitAll().anyRequest().authenticated())
 			.addFilterBefore(servletExceptionFilter(), LogoutFilter.class)
-			.addFilterAfter(sessionAuthenticationFilter(), LogoutFilter.class);
+			.addFilterAfter(sessionAuthenticationFilter(), LogoutFilter.class)
+			.exceptionHandling(exceptionHandling ->
+				exceptionHandling.authenticationEntryPoint((request, response, authException) -> {
+					response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+					response.setContentType("application/json;charset=UTF-8");
+					response.getWriter().write("{\"message\":\"요청이 실패했습니다.\"}");
+				})
+			);
 
 		return http.build();
 	}

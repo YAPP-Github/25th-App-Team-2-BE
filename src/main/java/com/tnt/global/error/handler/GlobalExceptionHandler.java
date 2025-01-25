@@ -89,18 +89,18 @@ public class GlobalExceptionHandler {
 	@ResponseStatus(BAD_REQUEST)
 	@ExceptionHandler(HttpMessageNotReadableException.class)
 	protected ErrorResponse handleHttpMessageNotReadableException(HttpMessageNotReadableException exception) {
-		log.error(REQUEST_BODY_EMPTY.getMessage(), exception);
+		log.error(exception.getMessage(), exception);
 
-		return new ErrorResponse(REQUEST_BODY_EMPTY.getMessage());
+		return new ErrorResponse(exception.getMessage());
 	}
 
 	// 날짜/시간 형식 예외
 	@ResponseStatus(BAD_REQUEST)
 	@ExceptionHandler(DateTimeException.class)
 	protected ErrorResponse handleDateTimeParseException(DateTimeException exception) {
-		log.error(INVALID_FORMAT_DATETIME.getMessage(), exception);
+		log.error(exception.getMessage(), exception);
 
-		return new ErrorResponse(INVALID_FORMAT_DATETIME.getMessage());
+		return new ErrorResponse(exception.getMessage());
 	}
 
 	@ResponseStatus(BAD_REQUEST)
