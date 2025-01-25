@@ -1,7 +1,7 @@
 package com.tnt.presentation.member;
 
-import static org.springframework.http.HttpStatus.OK;
-import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
+import static org.springframework.http.HttpStatus.*;
+import static org.springframework.http.MediaType.*;
 
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,8 +31,8 @@ public class MemberController {
 
 	@Operation(summary = "회원가입 API")
 	@PostMapping(value = "/sign-up", consumes = MULTIPART_FORM_DATA_VALUE)
-	@ResponseStatus(value = OK)
-	public SignUpResponse signUp(@RequestPart(value = "request") @Valid SignUpRequest request,
+	@ResponseStatus(CREATED)
+	public SignUpResponse signUp(@RequestPart("request") @Valid SignUpRequest request,
 		@RequestPart(value = "profileImage", required = false) MultipartFile profileImage) {
 		Long memberId = memberService.signUp(request);
 		String profileImageUrl = s3Service.uploadProfileImage(profileImage, request.memberType());
