@@ -6,9 +6,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
-import java.net.URI;
-import java.net.URL;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -23,7 +20,6 @@ import com.tnt.global.error.exception.ImageException;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.S3Utilities;
-import software.amazon.awssdk.services.s3.model.GetUrlRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.S3Exception;
 
@@ -51,16 +47,12 @@ class S3AdapterTest {
 		byte[] fileData = "test data".getBytes();
 		String folderPath = "test/folder";
 		String extension = "jpg";
-		URL mockUrl = URI.create("https://test-bucket.s3.amazonaws.com/test/folder/123.jpg").toURL();
-
-		given(s3Client.utilities()).willReturn(s3Utilities);
-		given(s3Utilities.getUrl(any(GetUrlRequest.class))).willReturn(mockUrl);
 
 		// when
 		String result = s3Adapter.uploadFile(fileData, folderPath, extension);
 
 		// then
-		assertThat(result).startsWith("https://test-bucket.s3.amazonaws.com/test/folder/");
+		assertThat(result).startsWith("https://images.tntapp.co.kr/test/folder/");
 		verify(s3Client).putObject(any(PutObjectRequest.class), any(RequestBody.class));
 	}
 
