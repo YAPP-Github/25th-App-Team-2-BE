@@ -102,7 +102,7 @@ class SessionServiceTest {
 		given(redisTemplate.opsForValue()).willReturn(valueOperations);
 
 		// when
-		sessionService.createOrUpdateSession(sessionId, memberId);
+		sessionService.createSession(sessionId, memberId);
 
 		// then
 		verify(valueOperations).set(sessionId, memberId, 7L * 24 * 60 * 60, TimeUnit.SECONDS);

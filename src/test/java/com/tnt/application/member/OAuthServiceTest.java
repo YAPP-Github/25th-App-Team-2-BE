@@ -198,7 +198,7 @@ class OAuthServiceTest {
 
 			// then
 			assertThat(response).isNotNull();
-			verify(sessionService).createOrUpdateSession(anyString(), eq("1"));
+			verify(sessionService).createSession(anyString(), eq("1"));
 		}
 
 		@Test
@@ -242,7 +242,7 @@ class OAuthServiceTest {
 
 			// then
 			assertThat(response).isNotNull();
-			verify(sessionService).createOrUpdateSession(anyString(), eq("1"));
+			verify(sessionService).createSession(anyString(), eq("1"));
 		}
 
 		@Test
@@ -308,7 +308,7 @@ class OAuthServiceTest {
 
 			// then
 			assertThat(response).isNotNull();
-			verify(sessionService).createOrUpdateSession(anyString(), eq("1"));
+			verify(sessionService).createSession(anyString(), eq("1"));
 		}
 
 		@Test

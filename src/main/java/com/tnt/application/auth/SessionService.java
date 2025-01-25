@@ -38,21 +38,26 @@ public class SessionService {
 			throw new UnauthorizedException(NO_EXIST_SESSION_IN_STORAGE);
 		}
 
-		createOrUpdateSession(sessionId, sessionValue);
+		updateSession(sessionId, sessionValue);
 
 		return sessionValue;
 	}
 
-	public void createOrUpdateSession(String sessionId, String memberId) {
+	public void createSession(String sessionId, String memberId) {
 		removeSession(memberId);
 		redisTemplate.opsForValue().set(sessionId, memberId, SESSION_DURATION, TimeUnit.SECONDS);
 		redisTemplate.opsForValue().set(memberId, sessionId, SESSION_DURATION, TimeUnit.SECONDS);
 	}
 
+	public void updateSession(String sessionId, String memberId) {
+		redisTemplate.expire(sessionId, SESSION_DURATION, TimeUnit.SECONDS);
+		redisTemplate.expire(memberId, SESSION_DURATION, TimeUnit.SECONDS);
+	}
+
 	public String removeSession(String dataKey) {
 		String existingKey = redisTemplate.opsForValue().get(dataKey);
 
-		if (nonNull(existingKey)) {
+		if (!isNull(existingKey)) {
 			redisTemplate.delete(existingKey);
 		}
 

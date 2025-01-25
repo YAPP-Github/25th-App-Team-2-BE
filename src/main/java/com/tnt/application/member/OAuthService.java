@@ -91,7 +91,7 @@ public class OAuthService {
 
 		String sessionId = String.valueOf(getTsid());
 
-		sessionService.createOrUpdateSession(sessionId, String.valueOf(findMember.getId()));
+		sessionService.createSession(sessionId, String.valueOf(findMember.getId()));
 
 		return new OAuthLoginResponse(sessionId, null, null, null, true);
 	}
