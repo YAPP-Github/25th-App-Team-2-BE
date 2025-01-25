@@ -85,9 +85,18 @@ public class GlobalExceptionHandler {
 		return new ErrorResponse(errorMessage);
 	}
 
-	// json 파싱, 날짜/시간 형식 예외
+	// json 파싱 예외
 	@ResponseStatus(BAD_REQUEST)
-	@ExceptionHandler(value = {HttpMessageNotReadableException.class, DateTimeException.class})
+	@ExceptionHandler(HttpMessageNotReadableException.class)
+	protected ErrorResponse handleHttpMessageNotReadableException(HttpMessageNotReadableException exception) {
+		log.error(REQUEST_BODY_EMPTY.getMessage(), exception);
+
+		return new ErrorResponse(REQUEST_BODY_EMPTY.getMessage());
+	}
+
+	// 날짜/시간 형식 예외
+	@ResponseStatus(BAD_REQUEST)
+	@ExceptionHandler(DateTimeException.class)
 	protected ErrorResponse handleDateTimeParseException(DateTimeException exception) {
 		log.error(INVALID_FORMAT_DATETIME.getMessage(), exception);
 

@@ -21,6 +21,7 @@ public enum ErrorMessage {
 	MISSING_REQUIRED_PARAMETER_ERROR("필수 파라미터 '%s'가 누락되었습니다."),
 	PARAMETER_FORMAT_NOT_CORRECT("파라미터 '%s'의 형식이 올바르지 않습니다."),
 	INPUT_VALUE_IS_INVALID("입력값이 유효하지 않습니다."),
+	REQUEST_BODY_EMPTY("request body가 비어있습니다."),
 	INVALID_FORMAT_DATETIME("DateTime 형식이 잘못되었습니다."),
 
 	AUTHORIZATION_HEADER_ERROR("Authorization 헤더가 존재하지 않거나 올바르지 않은 형식입니다."),
