@@ -18,7 +18,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class SessionService {
 
-	static final long SESSION_DURATION = 2L * 24 * 60 * 60; // 48시간
+	private static final long SESSION_DURATION = 7L * 24 * 60 * 60; // 24시간 * 7일
 	private static final String AUTHORIZATION_HEADER = "Authorization";
 	private static final String SESSION_ID_PREFIX = "SESSION-ID ";
 
