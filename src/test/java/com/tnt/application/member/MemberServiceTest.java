@@ -79,7 +79,6 @@ class MemberServiceTest {
 			.serviceAgreement(true)
 			.collectionAgreement(true)
 			.advertisementAgreement(true)
-			.pushAgreement(true)
 			.socialType(SocialType.KAKAO)
 			.build();
 	}
@@ -87,9 +86,9 @@ class MemberServiceTest {
 	@BeforeEach
 	void setUp() {
 		trainerRequest = new SignUpRequest(MOCK_FCM_TOKEN, TRAINER, "KAKAO", MOCK_SOCIAL_ID, MOCK_EMAIL, true, true,
-			true, true, MOCK_NAME, null, null, null, null, null);
+			true, MOCK_NAME, null, null, null, null, null);
 		traineeRequest = new SignUpRequest(MOCK_FCM_TOKEN, TRAINEE, "KAKAO", MOCK_SOCIAL_ID, MOCK_EMAIL, true, true,
-			true, true, MOCK_NAME, null, 180.0, 75.0, MOCK_CAUTION, MOCK_GOALS);
+			true, MOCK_NAME, null, 180.0, 75.0, MOCK_CAUTION, MOCK_GOALS);
 
 		mockTrainerMember = createMockMember(1L, TRAINER_DEFAULT_IMAGE);
 		mockTraineeMember = createMockMember(2L, TRAINEE_DEFAULT_IMAGE);
@@ -169,7 +168,7 @@ class MemberServiceTest {
 		void save_member_unsupported_type_fail() {
 			// given
 			SignUpRequest invalidRequest = new SignUpRequest(MOCK_FCM_TOKEN, "invalid_type", "KAKAO", MOCK_SOCIAL_ID,
-				MOCK_EMAIL, true, true, true, true, MOCK_NAME, null, null, null, null, null);
+				MOCK_EMAIL, true, true, true, MOCK_NAME, null, null, null, null, null);
 
 			// when & then
 			assertThrows(IllegalArgumentException.class, () -> memberService.signUp(invalidRequest));

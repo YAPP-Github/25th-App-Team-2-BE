@@ -46,10 +46,6 @@ public record SignUpRequest(
 	@NotNull(message = "광고성 알림 수신 동의 여부는 필수입니다.")
 	Boolean advertisementAgreement,
 
-	@Schema(description = "푸쉬 알림 수신 동의 여부", example = "true", nullable = false)
-	@NotNull(message = "푸쉬 알림 수신 동의 여부는 필수입니다.")
-	Boolean pushAgreement,
-
 	@Schema(description = "회원 이름", example = "홍길동", nullable = false)
 	@NotBlank(message = "회원 이름은 필수입니다.")
 	String name,

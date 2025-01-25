@@ -86,7 +86,6 @@ class TrainerControllerTest {
 			.serviceAgreement(true)
 			.collectionAgreement(true)
 			.advertisementAgreement(true)
-			.pushAgreement(true)
 			.socialType(SocialType.KAKAO)
 			.build();
 
@@ -120,7 +119,6 @@ class TrainerControllerTest {
 			.serviceAgreement(true)
 			.collectionAgreement(true)
 			.advertisementAgreement(true)
-			.pushAgreement(true)
 			.socialType(SocialType.KAKAO)
 			.build();
 
@@ -154,7 +152,6 @@ class TrainerControllerTest {
 			.serviceAgreement(true)
 			.collectionAgreement(true)
 			.advertisementAgreement(true)
-			.pushAgreement(true)
 			.socialType(SocialType.KAKAO)
 			.build();
 
@@ -187,7 +184,6 @@ class TrainerControllerTest {
 			.serviceAgreement(true)
 			.collectionAgreement(true)
 			.advertisementAgreement(true)
-			.pushAgreement(true)
 			.socialType(SocialType.KAKAO)
 			.build();
 
@@ -224,7 +220,6 @@ class TrainerControllerTest {
 			.serviceAgreement(true)
 			.collectionAgreement(true)
 			.advertisementAgreement(true)
-			.pushAgreement(true)
 			.socialType(SocialType.KAKAO)
 			.build();
 

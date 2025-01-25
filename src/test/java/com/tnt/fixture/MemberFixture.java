@@ -25,7 +25,6 @@ public final class MemberFixture {
 			.serviceAgreement(true)
 			.collectionAgreement(true)
 			.advertisementAgreement(true)
-			.pushAgreement(true)
 			.socialType(SocialType.KAKAO)
 			.build();
 	}
@@ -48,7 +47,6 @@ public final class MemberFixture {
 			.serviceAgreement(true)
 			.collectionAgreement(true)
 			.advertisementAgreement(true)
-			.pushAgreement(true)
 			.socialType(SocialType.KAKAO)
 			.build();
 	}

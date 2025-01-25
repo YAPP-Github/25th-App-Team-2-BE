@@ -1,6 +1,13 @@
 package com.tnt.domain.member;
 
-import static com.tnt.global.error.model.ErrorMessage.*;
+import static com.tnt.global.error.model.ErrorMessage.MEMBER_INVALID_COLLECTION_AGREEMENT;
+import static com.tnt.global.error.model.ErrorMessage.MEMBER_INVALID_EMAIL;
+import static com.tnt.global.error.model.ErrorMessage.MEMBER_INVALID_NAME;
+import static com.tnt.global.error.model.ErrorMessage.MEMBER_INVALID_PROFILE_IMAGE_URL;
+import static com.tnt.global.error.model.ErrorMessage.MEMBER_INVALID_SERVICE_AGREEMENT;
+import static com.tnt.global.error.model.ErrorMessage.MEMBER_INVALID_SOCIAL_ID;
+import static com.tnt.global.error.model.ErrorMessage.MEMBER_INVALID_SOCIAL_TYPE;
+import static com.tnt.global.error.model.ErrorMessage.MEMBER_NULL_ADVERTISEMENT_AGREEMENT;
 import static io.micrometer.common.util.StringUtils.isBlank;
 import static java.lang.Boolean.FALSE;
 import static java.util.Objects.isNull;
@@ -67,9 +74,6 @@ public class Member extends BaseTimeEntity {
 	@Column(name = "advertisement_agreement", nullable = false)
 	private Boolean advertisementAgreement;
 
-	@Column(name = "push_agreement", nullable = false)
-	private Boolean pushAgreement;
-
 	@Column(name = "deleted_at", nullable = true)
 	private LocalDateTime deletedAt;
 
@@ -80,7 +84,7 @@ public class Member extends BaseTimeEntity {
 	@Builder
 	public Member(Long id, String socialId, String fcmToken, String email, String name, String profileImageUrl,
 		LocalDate birthday, Boolean serviceAgreement, Boolean collectionAgreement, Boolean advertisementAgreement,
-		Boolean pushAgreement, SocialType socialType) {
+		SocialType socialType) {
 		validateRequiredAgreements(serviceAgreement, collectionAgreement);
 
 		this.id = id;
@@ -94,7 +98,6 @@ public class Member extends BaseTimeEntity {
 		this.collectionAgreement = collectionAgreement;
 		this.advertisementAgreement = requireNonNull(advertisementAgreement,
 			MEMBER_NULL_ADVERTISEMENT_AGREEMENT.getMessage());
-		this.pushAgreement = requireNonNull(pushAgreement, MEMBER_NULL_PUSH_AGREEMENT.getMessage());
 		this.socialType = validateSocialType(socialType);
 	}
 
