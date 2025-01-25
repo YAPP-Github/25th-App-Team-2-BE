@@ -36,6 +36,7 @@ public class SecurityConfig {
 		"/swagger-ui/**",
 		"/members/sign-up"
 	};
+
 	private final CustomOAuth2UserService customOAuth2UserService;
 	private final SessionService sessionService;
 
@@ -44,6 +45,7 @@ public class SecurityConfig {
 		http
 			.cors(Customizer.withDefaults())
 			.formLogin(AbstractHttpConfigurer::disable)
+			.logout(AbstractHttpConfigurer::disable)
 			.httpBasic(AbstractHttpConfigurer::disable)
 			.csrf(AbstractHttpConfigurer::disable)
 			.headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
@@ -53,7 +55,8 @@ public class SecurityConfig {
 			.authorizeHttpRequests(request -> request
 				.requestMatchers(ALLOWED_URIS).permitAll().anyRequest().authenticated())
 			.addFilterBefore(servletExceptionFilter(), LogoutFilter.class)
-			.addFilterAfter(sessionAuthenticationFilter(), LogoutFilter.class);
+			.addFilterAfter(sessionAuthenticationFilter(), LogoutFilter.class)
+		;
 
 		return http.build();
 	}

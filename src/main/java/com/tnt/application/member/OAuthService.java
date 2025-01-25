@@ -1,9 +1,9 @@
 package com.tnt.application.member;
 
-import static com.tnt.domain.constant.Constant.APPLE;
-import static com.tnt.domain.constant.Constant.KAKAO;
+import static com.tnt.domain.constant.Constant.*;
 import static com.tnt.global.error.model.ErrorMessage.*;
-import static java.util.Objects.isNull;
+import static io.hypersistence.tsid.TSID.Factory.*;
+import static java.util.Objects.*;
 
 import java.math.BigInteger;
 import java.security.KeyFactory;
@@ -24,7 +24,9 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -39,16 +41,19 @@ import com.tnt.dto.member.AppleUserInfo;
 import com.tnt.dto.member.KakaoUserInfo;
 import com.tnt.dto.member.OAuthUserInfo;
 import com.tnt.dto.member.request.OAuthLoginRequest;
+import com.tnt.dto.member.response.LogoutResponse;
 import com.tnt.dto.member.response.OAuthLoginResponse;
 import com.tnt.global.error.exception.OAuthException;
 import com.tnt.global.error.model.ErrorMessage;
 import com.tnt.infrastructure.mysql.repository.member.MemberRepository;
 
-import io.hypersistence.tsid.TSID;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
+@Slf4j
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class OAuthService {
 
@@ -71,6 +76,7 @@ public class OAuthService {
 	@Value("${social-login.provider.apple.private-key}")
 	private String privateKey;
 
+	@Transactional
 	public OAuthLoginResponse oauthLogin(OAuthLoginRequest request) {
 		OAuthUserInfo oauthInfo = extractOAuthUserInfo(request);
 		String socialId = oauthInfo.getId();
@@ -82,13 +88,22 @@ public class OAuthService {
 		}
 
 		findMember.updateFcmTokenIfExpired(request.fcmToken());
-		memberRepository.save(findMember);
 
-		String sessionId = String.valueOf(TSID.Factory.getTsid());
+		String sessionId = String.valueOf(getTsid());
 
 		sessionService.createOrUpdateSession(sessionId, String.valueOf(findMember.getId()));
 
 		return new OAuthLoginResponse(sessionId, null, null, null, true);
+	}
+
+	public LogoutResponse logout(String memberId) {
+		String removeSessionId = sessionService.removeSession(memberId);
+
+		SecurityContextHolder.clearContext();
+
+		log.info("시큐리티 컨텍스트에서 인증 정보 제거 완료 - MemberId: {}", memberId);
+
+		return new LogoutResponse(removeSessionId);
 	}
 
 	private OAuthUserInfo extractOAuthUserInfo(OAuthLoginRequest request) {
