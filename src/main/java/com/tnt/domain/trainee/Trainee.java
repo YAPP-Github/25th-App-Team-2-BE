@@ -2,19 +2,25 @@ package com.tnt.domain.trainee;
 
 import static com.tnt.global.error.model.ErrorMessage.TRAINEE_INVALID_CAUTION_NOTE;
 import static com.tnt.global.error.model.ErrorMessage.TRAINEE_NULL_HEIGHT;
-import static com.tnt.global.error.model.ErrorMessage.TRAINEE_NULL_MEMBER_ID;
+import static com.tnt.global.error.model.ErrorMessage.TRAINEE_NULL_MEMBER;
 import static com.tnt.global.error.model.ErrorMessage.TRAINEE_NULL_WEIGHT;
 import static io.micrometer.common.util.StringUtils.isBlank;
 import static java.util.Objects.requireNonNull;
 
 import java.time.LocalDateTime;
 
+import com.tnt.domain.member.Member;
 import com.tnt.global.common.entity.BaseTimeEntity;
 
 import io.hypersistence.utils.hibernate.id.Tsid;
 import jakarta.persistence.Column;
+import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -34,8 +40,9 @@ public class Trainee extends BaseTimeEntity {
 	@Column(name = "id", nullable = false, unique = true)
 	private Long id;
 
-	@Column(name = "member_id", nullable = false)
-	private Long memberId;
+	@OneToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "member_id", nullable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+	private Member member;
 
 	@Column(name = "height", nullable = false)
 	private Double height;
@@ -50,9 +57,9 @@ public class Trainee extends BaseTimeEntity {
 	private LocalDateTime deletedAt;
 
 	@Builder
-	public Trainee(Long id, Long memberId, Double height, Double weight, String cautionNote) {
+	public Trainee(Long id, Member member, Double height, Double weight, String cautionNote) {
 		this.id = id;
-		this.memberId = requireNonNull(memberId, TRAINEE_NULL_MEMBER_ID.getMessage());
+		this.member = requireNonNull(member, TRAINEE_NULL_MEMBER.getMessage());
 		this.height = requireNonNull(height, TRAINEE_NULL_HEIGHT.getMessage());
 		this.weight = requireNonNull(weight, TRAINEE_NULL_WEIGHT.getMessage());
 		this.cautionNote = validateCautionNote(cautionNote);
