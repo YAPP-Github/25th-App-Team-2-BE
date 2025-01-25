@@ -105,7 +105,7 @@ class SessionServiceTest {
 		sessionService.createOrUpdateSession(sessionId, memberId);
 
 		// then
-		verify(valueOperations).set(sessionId, memberId, 2L * 24 * 60 * 60, TimeUnit.SECONDS);
+		verify(valueOperations).set(sessionId, memberId, 7L * 24 * 60 * 60, TimeUnit.SECONDS);
 	}
 
 	@Test
