@@ -24,7 +24,6 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.BodyInserters;
@@ -98,10 +97,6 @@ public class OAuthService {
 
 	public LogoutResponse logout(String memberId) {
 		String removeSessionId = sessionService.removeSession(memberId);
-
-		SecurityContextHolder.clearContext();
-
-		log.info("시큐리티 컨텍스트에서 인증 정보 제거 완료 - MemberId: {}", memberId);
 
 		return new LogoutResponse(removeSessionId);
 	}
