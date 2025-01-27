@@ -1,4 +1,4 @@
-package com.tnt.global.common.entity;
+package com.tnt.infrastructure.mysql;
 
 import java.time.LocalDateTime;
 

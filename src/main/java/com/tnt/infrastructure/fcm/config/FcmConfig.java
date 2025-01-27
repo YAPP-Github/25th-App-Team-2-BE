@@ -1,4 +1,4 @@
-package com.tnt.global.config;
+package com.tnt.infrastructure.fcm.config;
 
 import java.io.IOException;
 import java.util.Arrays;

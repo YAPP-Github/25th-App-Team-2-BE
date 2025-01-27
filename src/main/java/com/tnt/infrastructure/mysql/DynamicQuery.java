@@ -1,4 +1,4 @@
-package com.tnt.global.common.util;
+package com.tnt.infrastructure.mysql;
 
 import java.util.Objects;
 import java.util.function.Function;

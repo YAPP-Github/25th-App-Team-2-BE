@@ -10,7 +10,7 @@ import static java.util.Objects.requireNonNull;
 import java.time.LocalDateTime;
 
 import com.tnt.domain.member.Member;
-import com.tnt.global.common.entity.BaseTimeEntity;
+import com.tnt.infrastructure.mysql.BaseTimeEntity;
 
 import io.hypersistence.utils.hibernate.id.Tsid;
 import jakarta.persistence.Column;

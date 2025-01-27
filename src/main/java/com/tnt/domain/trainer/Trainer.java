@@ -13,8 +13,8 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 import com.tnt.domain.member.Member;
-import com.tnt.global.common.entity.BaseTimeEntity;
 import com.tnt.global.error.exception.TnTException;
+import com.tnt.infrastructure.mysql.BaseTimeEntity;
 
 import io.hypersistence.utils.hibernate.id.Tsid;
 import jakarta.persistence.Column;
