@@ -16,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.tnt.application.trainee.TraineeService;
 import com.tnt.application.trainer.TrainerService;
+import com.tnt.common.error.exception.ConflictException;
 import com.tnt.domain.member.Member;
 import com.tnt.domain.pt.PtTrainerTrainee;
 import com.tnt.domain.trainee.Trainee;
@@ -24,7 +25,6 @@ import com.tnt.dto.trainer.ConnectWithTrainerDto;
 import com.tnt.dto.trainer.request.ConnectWithTrainerRequest;
 import com.tnt.fixture.MemberFixture;
 import com.tnt.fixture.PtTrainerTraineeFixture;
-import com.tnt.global.error.exception.ConflictException;
 import com.tnt.infrastructure.mysql.repository.pt.PtTrainerTraineeRepository;
 
 @ExtendWith(MockitoExtension.class)

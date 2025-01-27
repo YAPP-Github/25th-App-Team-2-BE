@@ -1,12 +1,12 @@
 package com.tnt.application.trainee;
 
-import static com.tnt.global.error.model.ErrorMessage.TRAINEE_NOT_FOUND;
+import static com.tnt.common.error.model.ErrorMessage.TRAINEE_NOT_FOUND;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.tnt.common.error.exception.NotFoundException;
 import com.tnt.domain.trainee.Trainee;
-import com.tnt.global.error.exception.NotFoundException;
 import com.tnt.infrastructure.mysql.repository.trainee.TraineeSearchRepository;
 
 import lombok.RequiredArgsConstructor;

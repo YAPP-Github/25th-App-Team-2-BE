@@ -1,6 +1,6 @@
 package com.tnt.application.s3;
 
-import static com.tnt.domain.constant.Constant.TRAINEE_DEFAULT_IMAGE;
+import static com.tnt.common.constant.ProfileConstant.TRAINEE_DEFAULT_IMAGE;
 import static com.tnt.domain.member.MemberType.TRAINEE;
 import static com.tnt.domain.member.MemberType.TRAINER;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -25,7 +25,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 
-import com.tnt.global.error.exception.ImageException;
+import com.tnt.common.error.exception.ImageException;
 import com.tnt.infrastructure.s3.S3Adapter;
 
 @ExtendWith(MockitoExtension.class)

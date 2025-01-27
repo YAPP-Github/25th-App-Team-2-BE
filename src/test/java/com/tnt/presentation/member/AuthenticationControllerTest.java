@@ -1,12 +1,12 @@
 package com.tnt.presentation.member;
 
+import static com.tnt.common.error.model.ErrorMessage.FAILED_TO_FETCH_USER_INFO;
+import static com.tnt.common.error.model.ErrorMessage.MEMBER_NOT_FOUND;
+import static com.tnt.common.error.model.ErrorMessage.UNSUPPORTED_SOCIAL_TYPE;
 import static com.tnt.domain.member.MemberType.TRAINEE;
 import static com.tnt.domain.member.MemberType.TRAINER;
 import static com.tnt.domain.member.SocialType.APPLE;
 import static com.tnt.domain.member.SocialType.KAKAO;
-import static com.tnt.global.error.model.ErrorMessage.FAILED_TO_FETCH_USER_INFO;
-import static com.tnt.global.error.model.ErrorMessage.MEMBER_NOT_FOUND;
-import static com.tnt.global.error.model.ErrorMessage.UNSUPPORTED_SOCIAL_TYPE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
@@ -21,12 +21,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import com.tnt.application.member.OAuthService;
-import com.tnt.dto.member.request.OAuthLoginRequest;
+import com.tnt.common.error.exception.NotFoundException;
+import com.tnt.common.error.exception.OAuthException;
 import com.tnt.dto.member.response.LogoutResponse;
-import com.tnt.dto.member.response.OAuthLoginResponse;
-import com.tnt.global.error.exception.NotFoundException;
-import com.tnt.global.error.exception.OAuthException;
+import com.tnt.gateway.controller.AuthenticationController;
+import com.tnt.gateway.dto.OAuthLoginRequest;
+import com.tnt.gateway.dto.OAuthLoginResponse;
+import com.tnt.gateway.service.OAuthService;
 
 @ExtendWith(MockitoExtension.class)
 class AuthenticationControllerTest {

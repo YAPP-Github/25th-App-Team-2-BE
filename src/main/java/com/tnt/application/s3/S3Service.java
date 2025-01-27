@@ -1,10 +1,12 @@
 package com.tnt.application.s3;
 
-import static com.tnt.domain.constant.Constant.TRAINEE_DEFAULT_IMAGE;
-import static com.tnt.domain.constant.Constant.TRAINER_DEFAULT_IMAGE;
-import static com.tnt.global.error.model.ErrorMessage.IMAGE_NOT_FOUND;
-import static com.tnt.global.error.model.ErrorMessage.IMAGE_NOT_SUPPORT;
-import static com.tnt.global.error.model.ErrorMessage.UNSUPPORTED_MEMBER_TYPE;
+import static com.tnt.common.constant.ProfileConstant.TRAINEE_DEFAULT_IMAGE;
+import static com.tnt.common.constant.ProfileConstant.TRAINEE_S3_PROFILE_PATH;
+import static com.tnt.common.constant.ProfileConstant.TRAINER_DEFAULT_IMAGE;
+import static com.tnt.common.constant.ProfileConstant.TRAINER_S3_PROFILE_PATH;
+import static com.tnt.common.error.model.ErrorMessage.IMAGE_NOT_FOUND;
+import static com.tnt.common.error.model.ErrorMessage.IMAGE_NOT_SUPPORT;
+import static com.tnt.common.error.model.ErrorMessage.UNSUPPORTED_MEMBER_TYPE;
 import static java.util.Objects.isNull;
 
 import java.awt.image.BufferedImage;
@@ -21,8 +23,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import net.coobird.thumbnailator.Thumbnails;
 
+import com.tnt.common.error.exception.ImageException;
 import com.tnt.domain.member.MemberType;
-import com.tnt.global.error.exception.ImageException;
 import com.tnt.infrastructure.s3.S3Adapter;
 
 import lombok.RequiredArgsConstructor;
@@ -35,8 +37,6 @@ public class S3Service {
 	private static final int MAX_WIDTH = 1200;
 	private static final int MAX_HEIGHT = 1200;
 	private static final double IMAGE_QUALITY = 0.85;
-	private static final String TRAINER_S3_PROFILE_PATH = "profiles/trainers";
-	private static final String TRAINEE_S3_PROFILE_PATH = "profiles/trainees";
 
 	private final S3Adapter s3Adapter;
 

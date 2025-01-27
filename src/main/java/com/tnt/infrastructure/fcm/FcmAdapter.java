@@ -1,6 +1,6 @@
 package com.tnt.infrastructure.fcm;
 
-import static com.tnt.global.error.model.ErrorMessage.FCM_FAILED;
+import static com.tnt.common.error.model.ErrorMessage.FCM_FAILED;
 
 import java.util.Map;
 

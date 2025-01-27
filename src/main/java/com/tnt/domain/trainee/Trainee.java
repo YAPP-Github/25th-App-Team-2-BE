@@ -1,9 +1,9 @@
 package com.tnt.domain.trainee;
 
-import static com.tnt.global.error.model.ErrorMessage.TRAINEE_INVALID_CAUTION_NOTE;
-import static com.tnt.global.error.model.ErrorMessage.TRAINEE_NULL_HEIGHT;
-import static com.tnt.global.error.model.ErrorMessage.TRAINEE_NULL_MEMBER;
-import static com.tnt.global.error.model.ErrorMessage.TRAINEE_NULL_WEIGHT;
+import static com.tnt.common.error.model.ErrorMessage.TRAINEE_INVALID_CAUTION_NOTE;
+import static com.tnt.common.error.model.ErrorMessage.TRAINEE_NULL_HEIGHT;
+import static com.tnt.common.error.model.ErrorMessage.TRAINEE_NULL_MEMBER;
+import static com.tnt.common.error.model.ErrorMessage.TRAINEE_NULL_WEIGHT;
 import static io.micrometer.common.util.StringUtils.isBlank;
 import static java.util.Objects.requireNonNull;
 

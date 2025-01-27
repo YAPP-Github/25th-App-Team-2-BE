@@ -1,7 +1,7 @@
 package com.tnt.application.member;
 
-import static com.tnt.domain.constant.Constant.TRAINEE_DEFAULT_IMAGE;
-import static com.tnt.domain.constant.Constant.TRAINER_DEFAULT_IMAGE;
+import static com.tnt.common.constant.ProfileConstant.TRAINEE_DEFAULT_IMAGE;
+import static com.tnt.common.constant.ProfileConstant.TRAINER_DEFAULT_IMAGE;
 import static com.tnt.domain.member.MemberType.TRAINEE;
 import static com.tnt.domain.member.MemberType.TRAINER;
 import static com.tnt.domain.member.SocialType.KAKAO;
@@ -26,7 +26,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.tnt.application.auth.SessionService;
+import com.tnt.common.error.exception.ConflictException;
 import com.tnt.domain.member.Member;
 import com.tnt.domain.member.MemberType;
 import com.tnt.domain.trainee.PtGoal;
@@ -34,7 +34,7 @@ import com.tnt.domain.trainee.Trainee;
 import com.tnt.domain.trainer.Trainer;
 import com.tnt.dto.member.request.SignUpRequest;
 import com.tnt.dto.member.response.SignUpResponse;
-import com.tnt.global.error.exception.ConflictException;
+import com.tnt.gateway.service.SessionService;
 import com.tnt.infrastructure.mysql.repository.member.MemberRepository;
 import com.tnt.infrastructure.mysql.repository.trainee.PtGoalRepository;
 import com.tnt.infrastructure.mysql.repository.trainee.TraineeRepository;

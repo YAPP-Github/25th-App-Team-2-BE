@@ -1,9 +1,9 @@
 package com.tnt.application.member;
 
+import static com.tnt.common.error.model.ErrorMessage.APPLE_AUTH_ERROR;
+import static com.tnt.common.error.model.ErrorMessage.FAILED_TO_FETCH_USER_INFO;
 import static com.tnt.domain.member.SocialType.APPLE;
 import static com.tnt.domain.member.SocialType.KAKAO;
-import static com.tnt.global.error.model.ErrorMessage.APPLE_AUTH_ERROR;
-import static com.tnt.global.error.model.ErrorMessage.FAILED_TO_FETCH_USER_INFO;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.anyString;
@@ -39,12 +39,13 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.tnt.application.auth.SessionService;
+import com.tnt.common.error.exception.OAuthException;
 import com.tnt.domain.member.Member;
-import com.tnt.dto.member.request.OAuthLoginRequest;
 import com.tnt.dto.member.response.LogoutResponse;
-import com.tnt.dto.member.response.OAuthLoginResponse;
-import com.tnt.global.error.exception.OAuthException;
+import com.tnt.gateway.dto.OAuthLoginRequest;
+import com.tnt.gateway.dto.OAuthLoginResponse;
+import com.tnt.gateway.service.OAuthService;
+import com.tnt.gateway.service.SessionService;
 import com.tnt.infrastructure.mysql.repository.member.MemberRepository;
 
 import okhttp3.mockwebserver.MockResponse;

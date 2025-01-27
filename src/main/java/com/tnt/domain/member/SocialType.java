@@ -1,9 +1,9 @@
 package com.tnt.domain.member;
 
-import static com.tnt.global.error.model.ErrorMessage.UNSUPPORTED_SOCIAL_TYPE;
+import static com.tnt.common.error.model.ErrorMessage.UNSUPPORTED_SOCIAL_TYPE;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.tnt.global.error.exception.TnTException;
+import com.tnt.common.error.exception.TnTException;
 
 public enum SocialType {
 	KAKAO,

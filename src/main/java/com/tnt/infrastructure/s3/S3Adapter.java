@@ -1,11 +1,11 @@
 package com.tnt.infrastructure.s3;
 
-import static com.tnt.global.error.model.ErrorMessage.S3_UPLOAD_ERROR;
+import static com.tnt.common.error.model.ErrorMessage.S3_UPLOAD_ERROR;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.tnt.global.error.exception.ImageException;
+import com.tnt.common.error.exception.ImageException;
 
 import io.hypersistence.tsid.TSID;
 import lombok.RequiredArgsConstructor;

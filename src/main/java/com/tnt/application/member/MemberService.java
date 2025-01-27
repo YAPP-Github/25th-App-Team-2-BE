@@ -1,12 +1,12 @@
 package com.tnt.application.member;
 
-import static com.tnt.domain.constant.Constant.TRAINEE_DEFAULT_IMAGE;
-import static com.tnt.domain.constant.Constant.TRAINER_DEFAULT_IMAGE;
+import static com.tnt.common.constant.ProfileConstant.TRAINEE_DEFAULT_IMAGE;
+import static com.tnt.common.constant.ProfileConstant.TRAINER_DEFAULT_IMAGE;
+import static com.tnt.common.error.model.ErrorMessage.MEMBER_CONFLICT;
+import static com.tnt.common.error.model.ErrorMessage.MEMBER_NOT_FOUND;
+import static com.tnt.common.error.model.ErrorMessage.UNSUPPORTED_MEMBER_TYPE;
 import static com.tnt.domain.member.MemberType.TRAINEE;
 import static com.tnt.domain.member.MemberType.TRAINER;
-import static com.tnt.global.error.model.ErrorMessage.MEMBER_CONFLICT;
-import static com.tnt.global.error.model.ErrorMessage.MEMBER_NOT_FOUND;
-import static com.tnt.global.error.model.ErrorMessage.UNSUPPORTED_MEMBER_TYPE;
 import static io.hypersistence.tsid.TSID.Factory.getTsid;
 import static io.micrometer.common.util.StringUtils.isNotBlank;
 
@@ -15,7 +15,8 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.tnt.application.auth.SessionService;
+import com.tnt.common.error.exception.ConflictException;
+import com.tnt.common.error.exception.NotFoundException;
 import com.tnt.domain.member.Member;
 import com.tnt.domain.member.MemberType;
 import com.tnt.domain.member.SocialType;
@@ -24,8 +25,7 @@ import com.tnt.domain.trainee.Trainee;
 import com.tnt.domain.trainer.Trainer;
 import com.tnt.dto.member.request.SignUpRequest;
 import com.tnt.dto.member.response.SignUpResponse;
-import com.tnt.global.error.exception.ConflictException;
-import com.tnt.global.error.exception.NotFoundException;
+import com.tnt.gateway.service.SessionService;
 import com.tnt.infrastructure.mysql.repository.member.MemberRepository;
 import com.tnt.infrastructure.mysql.repository.trainee.PtGoalRepository;
 import com.tnt.infrastructure.mysql.repository.trainee.TraineeRepository;

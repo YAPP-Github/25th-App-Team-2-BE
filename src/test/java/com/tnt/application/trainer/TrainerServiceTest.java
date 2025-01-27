@@ -14,12 +14,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.tnt.common.error.exception.NotFoundException;
 import com.tnt.domain.member.Member;
 import com.tnt.domain.member.SocialType;
 import com.tnt.domain.trainer.Trainer;
 import com.tnt.dto.trainer.response.InvitationCodeResponse;
 import com.tnt.dto.trainer.response.InvitationCodeVerifyResponse;
-import com.tnt.global.error.exception.NotFoundException;
 import com.tnt.infrastructure.mysql.repository.trainer.TrainerRepository;
 import com.tnt.infrastructure.mysql.repository.trainer.TrainerSearchRepository;
 

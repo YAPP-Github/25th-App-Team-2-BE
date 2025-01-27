@@ -13,7 +13,7 @@ import com.tnt.application.pt.PtService;
 import com.tnt.dto.trainer.ConnectWithTrainerDto;
 import com.tnt.dto.trainer.request.ConnectWithTrainerRequest;
 import com.tnt.dto.trainer.response.ConnectWithTrainerResponse;
-import com.tnt.global.auth.annotation.AuthMember;
+import com.tnt.gateway.config.AuthMember;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
