@@ -1,5 +1,6 @@
 package com.tnt.presentation.trainer;
 
+import static com.tnt.domain.member.MemberType.TRAINER;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -87,6 +88,7 @@ class TrainerControllerTest {
 			.collectionAgreement(true)
 			.advertisementAgreement(true)
 			.socialType(SocialType.KAKAO)
+			.memberType(TRAINER)
 			.build();
 
 		Trainer trainer = Trainer.builder()
@@ -120,6 +122,7 @@ class TrainerControllerTest {
 			.collectionAgreement(true)
 			.advertisementAgreement(true)
 			.socialType(SocialType.KAKAO)
+			.memberType(TRAINER)
 			.build();
 
 		Trainer trainer = Trainer.builder()
@@ -153,6 +156,7 @@ class TrainerControllerTest {
 			.collectionAgreement(true)
 			.advertisementAgreement(true)
 			.socialType(SocialType.KAKAO)
+			.memberType(TRAINER)
 			.build();
 
 		Trainer trainer = Trainer.builder()
@@ -185,6 +189,7 @@ class TrainerControllerTest {
 			.collectionAgreement(true)
 			.advertisementAgreement(true)
 			.socialType(SocialType.KAKAO)
+			.memberType(TRAINER)
 			.build();
 
 		Trainer trainer = Trainer.builder()
@@ -221,6 +226,7 @@ class TrainerControllerTest {
 			.collectionAgreement(true)
 			.advertisementAgreement(true)
 			.socialType(SocialType.KAKAO)
+			.memberType(TRAINER)
 			.build();
 
 		Trainer trainer = Trainer.builder()
@@ -241,8 +247,8 @@ class TrainerControllerTest {
 	@DisplayName("통합 테스트 - 연결 완료된 트레이니 최초로 정보 가져오기 성공")
 	void get_first_connected_trainee_success() throws Exception {
 		// given
-		Member trainerMember = MemberFixture.getMember1();
-		Member traineeMember = MemberFixture.getMember2();
+		Member trainerMember = MemberFixture.getTrainerMember1();
+		Member traineeMember = MemberFixture.getTraineeMember1();
 
 		trainerMember = memberRepository.save(trainerMember);
 		traineeMember = memberRepository.save(traineeMember);

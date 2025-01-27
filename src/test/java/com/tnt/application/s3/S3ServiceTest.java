@@ -1,6 +1,8 @@
 package com.tnt.application.s3;
 
 import static com.tnt.domain.constant.Constant.TRAINEE_DEFAULT_IMAGE;
+import static com.tnt.domain.member.MemberType.TRAINEE;
+import static com.tnt.domain.member.MemberType.TRAINER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -52,7 +54,7 @@ class S3ServiceTest {
 		given(s3Adapter.uploadFile(any(byte[].class), anyString(), anyString())).willReturn(expectedUrl);
 
 		// when
-		String result = s3Service.uploadProfileImage(image, "trainer");
+		String result = s3Service.uploadProfileImage(image, TRAINER);
 
 		// then
 		assertThat(result).isEqualTo(expectedUrl);
@@ -63,7 +65,7 @@ class S3ServiceTest {
 	@DisplayName("트레이니 프로필 이미지가 null일 경우 기본 이미지 반환 성공")
 	void return_trainee_default_image_success() {
 		// when
-		String result = s3Service.uploadProfileImage(null, "trainee");
+		String result = s3Service.uploadProfileImage(null, TRAINEE);
 
 		// then
 		assertThat(result).isEqualTo(TRAINEE_DEFAULT_IMAGE);
@@ -76,16 +78,6 @@ class S3ServiceTest {
 		MockMultipartFile image = new MockMultipartFile("image", "test.gif", "image/gif", createDummyImageData());
 
 		// when & then
-		assertThrows(ImageException.class, () -> s3Service.uploadProfileImage(image, "trainer"));
-	}
-
-	@Test
-	@DisplayName("잘못된 회원 타입으로 업로드 시도 시 실패")
-	void upload_profile_image_invalid_member_type_error() throws IOException {
-		// given
-		MockMultipartFile image = new MockMultipartFile("image", "test.jpg", IMAGE_JPEG_VALUE, createDummyImageData());
-
-		// when & then
-		assertThrows(IllegalArgumentException.class, () -> s3Service.uploadProfileImage(image, "invalid_type"));
+		assertThrows(ImageException.class, () -> s3Service.uploadProfileImage(image, TRAINER));
 	}
 }

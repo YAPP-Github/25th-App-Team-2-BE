@@ -1,9 +1,16 @@
 package com.tnt.presentation.member;
 
-import static com.tnt.domain.constant.Constant.*;
-import static com.tnt.global.error.model.ErrorMessage.*;
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.BDDMockito.*;
+import static com.tnt.domain.member.MemberType.TRAINEE;
+import static com.tnt.domain.member.MemberType.TRAINER;
+import static com.tnt.domain.member.SocialType.APPLE;
+import static com.tnt.domain.member.SocialType.KAKAO;
+import static com.tnt.global.error.model.ErrorMessage.FAILED_TO_FETCH_USER_INFO;
+import static com.tnt.global.error.model.ErrorMessage.MEMBER_NOT_FOUND;
+import static com.tnt.global.error.model.ErrorMessage.UNSUPPORTED_SOCIAL_TYPE;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.verify;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -41,7 +48,7 @@ class AuthenticationControllerTest {
 			OAuthLoginRequest request = new OAuthLoginRequest(KAKAO, "fcm", "test-kakao-access-token", null, null);
 
 			given(oauthService.oauthLogin(request)).willReturn(
-				new OAuthLoginResponse("123456789", "", "", null, true));
+				new OAuthLoginResponse("123456789", "", "", null, true, TRAINER));
 
 			// when
 			OAuthLoginResponse response = authenticationController.oauthLogin(request);
@@ -57,7 +64,8 @@ class AuthenticationControllerTest {
 			// given
 			OAuthLoginRequest request = new OAuthLoginRequest(APPLE, "fcm", null, null, "test-id-token");
 
-			given(oauthService.oauthLogin(request)).willReturn(new OAuthLoginResponse("123456789", "", "", null, true));
+			given(oauthService.oauthLogin(request)).willReturn(
+				new OAuthLoginResponse("123456789", "", "", null, true, TRAINEE));
 
 			// when
 			OAuthLoginResponse response = authenticationController.oauthLogin(request);
@@ -74,7 +82,7 @@ class AuthenticationControllerTest {
 			OAuthLoginRequest request = new OAuthLoginRequest(APPLE, "fcm", null, "test-authorization-code", null);
 
 			given(oauthService.oauthLogin(request)).willReturn(
-				new OAuthLoginResponse("123456789", "", "", null, true));
+				new OAuthLoginResponse("123456789", "", "", null, true, TRAINEE));
 
 			// when
 			OAuthLoginResponse response = authenticationController.oauthLogin(request);
@@ -88,7 +96,7 @@ class AuthenticationControllerTest {
 		@DisplayName("지원하지 않는 소셜 타입일 경우 예외 발생")
 		void unsupported_social_type_error() {
 			// given
-			OAuthLoginRequest request = new OAuthLoginRequest("NAVER", "fcm", "test-access-token", null, null);
+			OAuthLoginRequest request = new OAuthLoginRequest(null, "fcm", "test-access-token", null, null);
 
 			given(oauthService.oauthLogin(request)).willThrow(new OAuthException(UNSUPPORTED_SOCIAL_TYPE));
 
@@ -124,108 +132,6 @@ class AuthenticationControllerTest {
 			assertThatThrownBy(() -> authenticationController.oauthLogin(request))
 				.isInstanceOf(NotFoundException.class)
 				.hasMessage(MEMBER_NOT_FOUND.getMessage());
-		}
-
-		@Nested
-		@DisplayName("OAuthLoginRequest Validation 테스트")
-		class OAuthLoginRequestValidationTest {
-
-			@Test
-			@DisplayName("카카오 로그인 시 socialAccessToken이 없으면 실패")
-			void kakao_login_without_access_token_fail() {
-				// given
-				OAuthLoginRequest request = new OAuthLoginRequest(KAKAO, "fcm-token", null, null, null);
-
-				// when & then
-				assertThat(request.validateKakaoLogin()).isFalse();
-			}
-
-			@Test
-			@DisplayName("카카오 로그인 시 socialAccessToken이 blank이면 실패")
-			void kakao_login_with_blank_access_token_fail() {
-				// given
-				OAuthLoginRequest request = new OAuthLoginRequest(KAKAO, "fcm-token", " ", null, null);
-
-				// when & then
-				assertThat(request.validateKakaoLogin()).isFalse();
-			}
-
-			@Test
-			@DisplayName("카카오 로그인 시 socialAccessToken이 있으면 성공")
-			void kakao_login_with_access_token_success() {
-				// given
-				OAuthLoginRequest request = new OAuthLoginRequest(KAKAO, "fcm-token", "valid-token", null, null);
-
-				// when & then
-				assertThat(request.validateKakaoLogin()).isTrue();
-			}
-
-			@Test
-			@DisplayName("카카오 로그인 시 validateAppleLogin은 true 반환")
-			void kakao_login_with_validateAppleLogin_method_success() {
-				OAuthLoginRequest request = new OAuthLoginRequest(KAKAO, "fcm-token", "access-token", null, null);
-
-				assertThat(request.validateAppleLogin()).isTrue();
-			}
-
-			@Test
-			@DisplayName("애플 로그인 시 authorizationCode와 idToken이 모두 없으면 실패")
-			void apple_login_without_code_and_token_fail() {
-				// given
-				OAuthLoginRequest request = new OAuthLoginRequest(APPLE, "fcm-token", null, null, null);
-
-				// when & then
-				assertThat(request.validateAppleLogin()).isFalse();
-			}
-
-			@Test
-			@DisplayName("애플 로그인 시 authorizationCode만 있어도 성공")
-			void apple_login_with_authorization_code_success() {
-				// given
-				OAuthLoginRequest request = new OAuthLoginRequest(APPLE, "fcm-token", null, "valid-auth-code", null);
-
-				// when & then
-				assertThat(request.validateAppleLogin()).isTrue();
-			}
-
-			@Test
-			@DisplayName("애플 로그인 시 idToken만 있어도 성공")
-			void apple_login_with_id_token_success() {
-				// given
-				OAuthLoginRequest request = new OAuthLoginRequest(APPLE, "fcm-token", null, null, "valid-id-token");
-
-				// when & then
-				assertThat(request.validateAppleLogin()).isTrue();
-			}
-
-			@Test
-			@DisplayName("애플 로그인 시 authorizationCode와 idToken이 모두 있어도 성공")
-			void apple_login_with_code_and_token_success() {
-				// given
-				OAuthLoginRequest request = new OAuthLoginRequest(APPLE, "fcm-token", null, "valid-auth-code",
-					"valid-id-token");
-
-				// when & then
-				assertThat(request.validateAppleLogin()).isTrue();
-			}
-
-			@Test
-			@DisplayName("애플 로그인 시 blank 토큰은 실패")
-			void apple_login_with_blank_token_fail() {
-				// given
-				OAuthLoginRequest request = new OAuthLoginRequest(APPLE, "fcm-token", null, " ", " ");
-
-				// when & then
-				assertThat(request.validateAppleLogin()).isFalse();
-			}
-
-			@Test
-			@DisplayName("애플 로그인 시 validateKakaoLogin()은 true 반환")
-			void apple_login_with_validateKakaoLogin_method_success() {
-				OAuthLoginRequest request = new OAuthLoginRequest(APPLE, "fcm-token", null, "auth-code", null);
-
-				assertThat(request.validateKakaoLogin()).isTrue();
-			}
 		}
 	}
 

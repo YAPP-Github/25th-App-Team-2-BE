@@ -51,8 +51,8 @@ class PtServiceTest {
 		Long trainerId = 1L;
 		Long traineeId = 2L;
 
-		Member trainerMember = MemberFixture.getMember1();
-		Member traineeMember = MemberFixture.getMember2();
+		Member trainerMember = MemberFixture.getTrainerMember1();
+		Member traineeMember = MemberFixture.getTraineeMember1();
 
 		Trainer trainer = Trainer.builder()
 			.id(trainerId)
@@ -100,8 +100,8 @@ class PtServiceTest {
 		Long otherTrainerId = 99L;
 		Long traineeId = 2L;
 
-		Member trainerMember = MemberFixture.getMember1();
-		Member traineeMember = MemberFixture.getMember2();
+		Member trainerMember = MemberFixture.getTrainerMember1();
+		Member traineeMember = MemberFixture.getTraineeMember1();
 
 		Trainer trainer = Trainer.builder()
 			.id(trainerId)
@@ -147,8 +147,8 @@ class PtServiceTest {
 		Long trainerId = 1L;
 		Long traineeId = 2L;
 
-		Member trainerMember = MemberFixture.getMember1();
-		Member traineeMember = MemberFixture.getMember2();
+		Member trainerMember = MemberFixture.getTrainerMember1();
+		Member traineeMember = MemberFixture.getTraineeMember1();
 
 		Trainer trainer = Trainer.builder()
 			.id(trainerId)

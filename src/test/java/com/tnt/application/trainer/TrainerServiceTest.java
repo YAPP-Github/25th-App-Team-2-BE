@@ -1,5 +1,6 @@
 package com.tnt.application.trainer;
 
+import static com.tnt.domain.member.MemberType.TRAINER;
 import static com.tnt.domain.trainer.Trainer.INVITATION_CODE_LENGTH;
 import static com.tnt.domain.trainer.Trainer.builder;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -55,6 +56,7 @@ class TrainerServiceTest {
 			.collectionAgreement(true)
 			.advertisementAgreement(true)
 			.socialType(SocialType.KAKAO)
+			.memberType(TRAINER)
 			.build();
 
 		Trainer trainer = builder()
@@ -108,6 +110,7 @@ class TrainerServiceTest {
 			.collectionAgreement(true)
 			.advertisementAgreement(true)
 			.socialType(SocialType.KAKAO)
+			.memberType(TRAINER)
 			.build();
 
 		Trainer trainer = Trainer.builder()
@@ -151,6 +154,7 @@ class TrainerServiceTest {
 			.collectionAgreement(true)
 			.advertisementAgreement(true)
 			.socialType(SocialType.KAKAO)
+			.memberType(TRAINER)
 			.build();
 
 		given(trainerRepository.findByInvitationCodeAndDeletedAtIsNull(code))

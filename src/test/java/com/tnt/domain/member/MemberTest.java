@@ -1,5 +1,7 @@
 package com.tnt.domain.member;
 
+import static com.tnt.domain.member.MemberType.TRAINEE;
+import static com.tnt.domain.member.MemberType.TRAINER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
 
@@ -36,11 +38,12 @@ class MemberTest {
 				.email("test@example.com")
 				.name("홍길동")
 				.birthday(LocalDate.parse("2022-01-01"))
-				.profileImageUrl("http://example.com")
+				.profileImageUrl("https://example.com")
 				.serviceAgreement(true)
 				.collectionAgreement(true)
 				.advertisementAgreement(true)
 				.socialType(SocialType.KAKAO)
+				.memberType(TRAINER)
 				.build();
 
 			// then
@@ -65,6 +68,7 @@ class MemberTest {
 					.collectionAgreement(true)
 					.advertisementAgreement(true)
 					.socialType(SocialType.KAKAO)
+					.memberType(TRAINEE)
 					.build())
 				.map(Member::getId)
 				.toList();
@@ -94,6 +98,7 @@ class MemberTest {
 				.collectionAgreement(true)
 				.advertisementAgreement(true)
 				.socialType(SocialType.KAKAO)
+				.memberType(TRAINEE)
 				.build();
 			TSID tsid = TSID.from(member.getId());
 			Instant timestamp = tsid.getInstant();
@@ -118,6 +123,7 @@ class MemberTest {
 				.collectionAgreement(true)
 				.advertisementAgreement(true)
 				.socialType(SocialType.KAKAO)
+				.memberType(TRAINER)
 				.build();
 
 			String newFcmToken = "new-fcm-token";
