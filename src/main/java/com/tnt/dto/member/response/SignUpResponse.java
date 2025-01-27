@@ -1,11 +1,13 @@
 package com.tnt.dto.member.response;
 
+import com.tnt.domain.member.MemberType;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(description = "회원가입 API 응답")
 public record SignUpResponse(
-	@Schema(description = "회원 타입 (trainer / trainee)", example = "trainer", nullable = false)
-	String memberType,
+	@Schema(description = "회원 타입", example = "TRAINER", nullable = false)
+	MemberType memberType,
 
 	@Schema(description = "세션 ID", example = "1645365389", nullable = false)
 	String sessionId,

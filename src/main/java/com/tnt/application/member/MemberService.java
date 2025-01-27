@@ -1,9 +1,9 @@
 package com.tnt.application.member;
 
-import static com.tnt.domain.constant.Constant.TRAINEE;
 import static com.tnt.domain.constant.Constant.TRAINEE_DEFAULT_IMAGE;
-import static com.tnt.domain.constant.Constant.TRAINER;
 import static com.tnt.domain.constant.Constant.TRAINER_DEFAULT_IMAGE;
+import static com.tnt.domain.member.MemberType.TRAINEE;
+import static com.tnt.domain.member.MemberType.TRAINER;
 import static com.tnt.global.error.model.ErrorMessage.MEMBER_CONFLICT;
 import static com.tnt.global.error.model.ErrorMessage.MEMBER_NOT_FOUND;
 import static com.tnt.global.error.model.ErrorMessage.UNSUPPORTED_MEMBER_TYPE;
@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.tnt.application.auth.SessionService;
 import com.tnt.domain.member.Member;
+import com.tnt.domain.member.MemberType;
 import com.tnt.domain.member.SocialType;
 import com.tnt.domain.trainee.PtGoal;
 import com.tnt.domain.trainee.Trainee;
@@ -55,7 +56,7 @@ public class MemberService {
 	}
 
 	@Transactional
-	public SignUpResponse finishSignUpWithImage(String profileImageUrl, Long memberId, String memberType) {
+	public SignUpResponse finishSignUpWithImage(String profileImageUrl, Long memberId, MemberType memberType) {
 		Member member = memberRepository.findByIdAndDeletedAtIsNull(memberId)
 			.orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
 
@@ -68,32 +69,15 @@ public class MemberService {
 		return new SignUpResponse(memberType, sessionId, member.getName(), member.getProfileImageUrl());
 	}
 
-	private void validateMemberNotExists(String socialId, String socialType) {
-		memberRepository.findBySocialIdAndSocialTypeAndDeletedAtIsNull(socialId, SocialType.valueOf(socialType))
+	private void validateMemberNotExists(String socialId, SocialType socialType) {
+		memberRepository.findBySocialIdAndSocialTypeAndDeletedAtIsNull(socialId, socialType)
 			.ifPresent(member -> {
 				throw new ConflictException(MEMBER_CONFLICT);
 			});
 	}
 
-	private Member createMember(SignUpRequest request, String defaultImageUrl) {
-		Member member = Member.builder()
-			.socialId(request.socialId())
-			.fcmToken(request.fcmToken())
-			.email(request.socialEmail())
-			.name(request.name())
-			.profileImageUrl(defaultImageUrl)
-			.birthday(request.birthday())
-			.serviceAgreement(request.serviceAgreement())
-			.collectionAgreement(request.collectionAgreement())
-			.advertisementAgreement(request.advertisementAgreement())
-			.socialType(SocialType.valueOf(request.socialType()))
-			.build();
-
-		return memberRepository.save(member);
-	}
-
 	private Long createTrainer(SignUpRequest request) {
-		Member member = createMember(request, TRAINER_DEFAULT_IMAGE);
+		Member member = createMember(request, TRAINER_DEFAULT_IMAGE, TRAINER);
 		Trainer trainer = Trainer.builder()
 			.member(member)
 			.build();
@@ -104,7 +88,7 @@ public class MemberService {
 	}
 
 	private Long createTrainee(SignUpRequest request) {
-		Member member = createMember(request, TRAINEE_DEFAULT_IMAGE);
+		Member member = createMember(request, TRAINEE_DEFAULT_IMAGE, TRAINEE);
 		Trainee trainee = Trainee.builder()
 			.member(member)
 			.height(request.height())
@@ -117,6 +101,24 @@ public class MemberService {
 		createPtGoals(trainee, request.goalContents());
 
 		return member.getId();
+	}
+
+	private Member createMember(SignUpRequest request, String defaultImageUrl, MemberType memberType) {
+		Member member = Member.builder()
+			.socialId(request.socialId())
+			.fcmToken(request.fcmToken())
+			.email(request.socialEmail())
+			.name(request.name())
+			.profileImageUrl(defaultImageUrl)
+			.birthday(request.birthday())
+			.serviceAgreement(request.serviceAgreement())
+			.collectionAgreement(request.collectionAgreement())
+			.advertisementAgreement(request.advertisementAgreement())
+			.socialType(request.socialType())
+			.memberType(memberType)
+			.build();
+
+		return memberRepository.save(member);
 	}
 
 	private void createPtGoals(Trainee trainee, List<String> goalContents) {

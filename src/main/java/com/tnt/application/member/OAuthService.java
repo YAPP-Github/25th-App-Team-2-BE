@@ -1,9 +1,14 @@
 package com.tnt.application.member;
 
-import static com.tnt.domain.constant.Constant.*;
-import static com.tnt.global.error.model.ErrorMessage.*;
-import static io.hypersistence.tsid.TSID.Factory.*;
-import static java.util.Objects.*;
+import static com.tnt.domain.member.MemberType.UNREGISTERED;
+import static com.tnt.global.error.model.ErrorMessage.APPLE_AUTH_ERROR;
+import static com.tnt.global.error.model.ErrorMessage.APPLE_CLIENT_ERROR;
+import static com.tnt.global.error.model.ErrorMessage.APPLE_SERVER_ERROR;
+import static com.tnt.global.error.model.ErrorMessage.FAILED_TO_FETCH_USER_INFO;
+import static com.tnt.global.error.model.ErrorMessage.MATCHING_KEY_NOT_FOUND;
+import static com.tnt.global.error.model.ErrorMessage.UNSUPPORTED_SOCIAL_TYPE;
+import static io.hypersistence.tsid.TSID.Factory.getTsid;
+import static java.util.Objects.isNull;
 
 import java.math.BigInteger;
 import java.security.KeyFactory;
@@ -68,10 +73,13 @@ public class OAuthService {
 
 	@Value("${social-login.provider.apple.team-id}")
 	private String teamId;
+
 	@Value("${social-login.provider.apple.client-id}")
 	private String clientId;
+
 	@Value("${social-login.provider.apple.key-id}")
 	private String keyId;
+
 	@Value("${social-login.provider.apple.private-key}")
 	private String privateKey;
 
@@ -83,7 +91,7 @@ public class OAuthService {
 		Member findMember = findMemberFromDB(socialId, request.socialType());
 
 		if (isNull(findMember)) {
-			return new OAuthLoginResponse(null, socialId, socialEmail, request.socialType(), false);
+			return new OAuthLoginResponse(null, socialId, socialEmail, request.socialType(), false, UNREGISTERED);
 		}
 
 		findMember.updateFcmTokenIfExpired(request.fcmToken());
@@ -92,7 +100,7 @@ public class OAuthService {
 
 		sessionService.createSession(sessionId, String.valueOf(findMember.getId()));
 
-		return new OAuthLoginResponse(sessionId, null, null, null, true);
+		return new OAuthLoginResponse(sessionId, null, null, null, true, findMember.getMemberType());
 	}
 
 	public LogoutResponse logout(String memberId) {
@@ -262,8 +270,8 @@ public class OAuthService {
 		return userInfo;
 	}
 
-	private Member findMemberFromDB(String socialId, String socialType) {
+	private Member findMemberFromDB(String socialId, SocialType socialType) {
 		return memberRepository.findBySocialIdAndSocialTypeAndDeletedAtIsNull(socialId,
-			SocialType.valueOf(socialType)).orElse(null);
+			socialType).orElse(null);
 	}
 }
