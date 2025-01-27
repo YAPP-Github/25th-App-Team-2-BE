@@ -13,7 +13,7 @@ import io.swagger.v3.oas.models.info.Info;
 
 @Configuration
 @Profile("dev")
-@OpenAPIDefinition(servers = {@Server(url = "http://dev-api.tntapp.co.kr")})
+@OpenAPIDefinition(servers = {@Server(url = "https://dev-api.tntapp.co.kr")})
 public class SwaggerConfig {
 
 	@Bean

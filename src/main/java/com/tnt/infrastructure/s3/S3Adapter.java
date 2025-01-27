@@ -1,6 +1,5 @@
 package com.tnt.infrastructure.s3;
 
-import static com.tnt.domain.constant.Constant.IMAGE_BASE_URL;
 import static com.tnt.global.error.model.ErrorMessage.S3_UPLOAD_ERROR;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -18,6 +17,8 @@ import software.amazon.awssdk.services.s3.model.S3Exception;
 @Component
 @RequiredArgsConstructor
 public class S3Adapter {
+
+	public static final String IMAGE_BASE_URL = "https://images.tntapp.co.kr/";
 
 	private final S3Client s3Client;
 
