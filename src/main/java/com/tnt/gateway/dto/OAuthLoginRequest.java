@@ -7,8 +7,7 @@ import jakarta.validation.constraints.NotBlank;
 
 @Schema(description = "소셜 로그인 API 요청")
 public record OAuthLoginRequest(
-	@Schema(description = "소셜 로그인 타입 (KAKAO / APPLE)", example = "KAKAO", allowableValues = {"KAKAO",
-		"APPLE"}, nullable = false)
+	@Schema(description = "소셜 로그인 타입", example = "KAKAO", nullable = false)
 	SocialType socialType,
 
 	@Schema(description = "FCM 토큰", example = "dsl5f7iho-28yg2g290u2fj0-23348-23r05", nullable = false)
