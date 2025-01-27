@@ -1,4 +1,4 @@
-package com.tnt.application.auth;
+package com.tnt.gateway.service;
 
 import static com.tnt.common.error.model.ErrorMessage.AUTHORIZATION_HEADER_ERROR;
 import static com.tnt.common.error.model.ErrorMessage.NO_EXIST_SESSION_IN_STORAGE;
@@ -19,7 +19,6 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 
 import com.tnt.common.error.exception.UnauthorizedException;
-import com.tnt.gateway.service.SessionService;
 
 import jakarta.servlet.http.HttpServletRequest;
 

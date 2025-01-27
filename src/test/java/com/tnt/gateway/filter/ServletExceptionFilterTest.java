@@ -1,4 +1,4 @@
-package com.tnt.common.auth.filter;
+package com.tnt.gateway.filter;
 
 import static com.tnt.common.error.model.ErrorMessage.ACCESS_DENIED;
 import static com.tnt.common.error.model.ErrorMessage.AUTHORIZATION_HEADER_ERROR;
@@ -26,7 +26,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.access.AccessDeniedException;
 
 import com.tnt.common.error.exception.UnauthorizedException;
-import com.tnt.gateway.filter.ServletExceptionFilter;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

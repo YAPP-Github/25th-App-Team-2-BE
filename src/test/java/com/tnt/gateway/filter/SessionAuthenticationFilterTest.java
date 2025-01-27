@@ -1,4 +1,4 @@
-package com.tnt.common.auth.filter;
+package com.tnt.gateway.filter;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -27,7 +27,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import com.tnt.common.error.exception.UnauthorizedException;
 import com.tnt.common.error.model.ErrorMessage;
-import com.tnt.gateway.filter.SessionAuthenticationFilter;
 import com.tnt.gateway.service.SessionService;
 
 import jakarta.servlet.FilterChain;
