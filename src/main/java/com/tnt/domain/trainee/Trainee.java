@@ -4,10 +4,12 @@ import static com.tnt.common.error.model.ErrorMessage.TRAINEE_INVALID_CAUTION_NO
 import static com.tnt.common.error.model.ErrorMessage.TRAINEE_NULL_HEIGHT;
 import static com.tnt.common.error.model.ErrorMessage.TRAINEE_NULL_MEMBER;
 import static com.tnt.common.error.model.ErrorMessage.TRAINEE_NULL_WEIGHT;
-import static io.micrometer.common.util.StringUtils.isBlank;
+import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
 
 import java.time.LocalDateTime;
+
+import org.springframework.lang.Nullable;
 
 import com.tnt.domain.member.Member;
 import com.tnt.infrastructure.mysql.BaseTimeEntity;
@@ -50,26 +52,30 @@ public class Trainee extends BaseTimeEntity {
 	@Column(name = "weight", nullable = false)
 	private Double weight;
 
-	@Column(name = "caution_note", nullable = false, length = CAUTION_NOTE_LENGTH)
+	@Column(name = "caution_note", nullable = true, length = CAUTION_NOTE_LENGTH)
 	private String cautionNote;
 
 	@Column(name = "deleted_at", nullable = true)
 	private LocalDateTime deletedAt;
 
 	@Builder
-	public Trainee(Long id, Member member, Double height, Double weight, String cautionNote) {
+	public Trainee(Long id, Member member, Double height, Double weight, @Nullable String cautionNote) {
 		this.id = id;
 		this.member = requireNonNull(member, TRAINEE_NULL_MEMBER.getMessage());
 		this.height = requireNonNull(height, TRAINEE_NULL_HEIGHT.getMessage());
 		this.weight = requireNonNull(weight, TRAINEE_NULL_WEIGHT.getMessage());
-		this.cautionNote = validateCautionNote(cautionNote);
+		validateAndSetCautionNote(cautionNote);
 	}
 
-	private String validateCautionNote(String cautionNote) {
-		if (isBlank(cautionNote) || cautionNote.length() > CAUTION_NOTE_LENGTH) {
+	private void validateAndSetCautionNote(String cautionNote) {
+		if (isNull(cautionNote)) {
+			return;
+		}
+
+		if (cautionNote.length() > CAUTION_NOTE_LENGTH) {
 			throw new IllegalArgumentException(TRAINEE_INVALID_CAUTION_NOTE.getMessage());
 		}
 
-		return cautionNote;
+		this.cautionNote = cautionNote;
 	}
 }
