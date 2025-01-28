@@ -1,5 +1,6 @@
 package com.tnt.domain.member;
 
+import static com.tnt.domain.member.MemberType.TRAINER;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
@@ -29,11 +30,12 @@ class MemberIntegrationTest {
 			.email("test@example.com")
 			.name("홍길동")
 			.birthday(LocalDate.parse("2022-01-01"))
-			.profileImageUrl("http://example.com")
+			.profileImageUrl("https://example.com")
 			.serviceAgreement(true)
 			.collectionAgreement(true)
 			.advertisementAgreement(true)
 			.socialType(SocialType.KAKAO)
+			.memberType(TRAINER)
 			.build();
 
 		// when

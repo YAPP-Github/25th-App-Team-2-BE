@@ -1,9 +1,10 @@
 package com.tnt.application.member;
 
-import static com.tnt.domain.constant.Constant.TRAINEE;
-import static com.tnt.domain.constant.Constant.TRAINEE_DEFAULT_IMAGE;
-import static com.tnt.domain.constant.Constant.TRAINER;
-import static com.tnt.domain.constant.Constant.TRAINER_DEFAULT_IMAGE;
+import static com.tnt.common.constant.ProfileConstant.TRAINEE_DEFAULT_IMAGE;
+import static com.tnt.common.constant.ProfileConstant.TRAINER_DEFAULT_IMAGE;
+import static com.tnt.domain.member.MemberType.TRAINEE;
+import static com.tnt.domain.member.MemberType.TRAINER;
+import static com.tnt.domain.member.SocialType.KAKAO;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -25,15 +26,15 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.tnt.application.auth.SessionService;
+import com.tnt.common.error.exception.ConflictException;
 import com.tnt.domain.member.Member;
-import com.tnt.domain.member.SocialType;
+import com.tnt.domain.member.MemberType;
 import com.tnt.domain.trainee.PtGoal;
 import com.tnt.domain.trainee.Trainee;
 import com.tnt.domain.trainer.Trainer;
 import com.tnt.dto.member.request.SignUpRequest;
 import com.tnt.dto.member.response.SignUpResponse;
-import com.tnt.global.error.exception.ConflictException;
+import com.tnt.gateway.service.SessionService;
 import com.tnt.infrastructure.mysql.repository.member.MemberRepository;
 import com.tnt.infrastructure.mysql.repository.trainee.PtGoalRepository;
 import com.tnt.infrastructure.mysql.repository.trainee.TraineeRepository;
@@ -69,7 +70,7 @@ class MemberServiceTest {
 	private Trainee mockTrainee;
 	private List<PtGoal> mockPtGoals;
 
-	private Member createMockMember(Long id, String profileImageUrl) {
+	private Member createMockMember(Long id, String profileImageUrl, MemberType memberType) {
 		return Member.builder()
 			.id(id)
 			.socialId(MOCK_SOCIAL_ID)
@@ -79,19 +80,20 @@ class MemberServiceTest {
 			.serviceAgreement(true)
 			.collectionAgreement(true)
 			.advertisementAgreement(true)
-			.socialType(SocialType.KAKAO)
+			.socialType(KAKAO)
+			.memberType(memberType)
 			.build();
 	}
 
 	@BeforeEach
 	void setUp() {
-		trainerRequest = new SignUpRequest(MOCK_FCM_TOKEN, TRAINER, "KAKAO", MOCK_SOCIAL_ID, MOCK_EMAIL, true, true,
+		trainerRequest = new SignUpRequest(MOCK_FCM_TOKEN, TRAINER, KAKAO, MOCK_SOCIAL_ID, MOCK_EMAIL, true, true,
 			true, MOCK_NAME, null, null, null, null, null);
-		traineeRequest = new SignUpRequest(MOCK_FCM_TOKEN, TRAINEE, "KAKAO", MOCK_SOCIAL_ID, MOCK_EMAIL, true, true,
+		traineeRequest = new SignUpRequest(MOCK_FCM_TOKEN, TRAINEE, KAKAO, MOCK_SOCIAL_ID, MOCK_EMAIL, true, true,
 			true, MOCK_NAME, null, 180.0, 75.0, MOCK_CAUTION, MOCK_GOALS);
 
-		mockTrainerMember = createMockMember(1L, TRAINER_DEFAULT_IMAGE);
-		mockTraineeMember = createMockMember(2L, TRAINEE_DEFAULT_IMAGE);
+		mockTrainerMember = createMockMember(1L, TRAINER_DEFAULT_IMAGE, TRAINER);
+		mockTraineeMember = createMockMember(2L, TRAINEE_DEFAULT_IMAGE, TRAINEE);
 
 		mockTrainee = Trainee.builder()
 			.id(1L)
@@ -161,17 +163,6 @@ class MemberServiceTest {
 
 			// when & then
 			assertThrows(ConflictException.class, () -> memberService.signUp(trainerRequest));
-		}
-
-		@Test
-		@DisplayName("지원하지 않는 회원 타입으로 가입 시도 실패")
-		void save_member_unsupported_type_fail() {
-			// given
-			SignUpRequest invalidRequest = new SignUpRequest(MOCK_FCM_TOKEN, "invalid_type", "KAKAO", MOCK_SOCIAL_ID,
-				MOCK_EMAIL, true, true, true, MOCK_NAME, null, null, null, null, null);
-
-			// when & then
-			assertThrows(IllegalArgumentException.class, () -> memberService.signUp(invalidRequest));
 		}
 	}
 

@@ -11,7 +11,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.tnt.global.error.exception.NotFoundException;
+import com.tnt.common.error.exception.NotFoundException;
 import com.tnt.infrastructure.mysql.repository.trainee.TraineeSearchRepository;
 
 @ExtendWith(MockitoExtension.class)

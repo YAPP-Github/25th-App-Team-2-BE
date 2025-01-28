@@ -16,7 +16,7 @@ import com.tnt.application.trainer.TrainerService;
 import com.tnt.dto.trainer.response.ConnectWithTraineeResponse;
 import com.tnt.dto.trainer.response.InvitationCodeResponse;
 import com.tnt.dto.trainer.response.InvitationCodeVerifyResponse;
-import com.tnt.global.auth.annotation.AuthMember;
+import com.tnt.gateway.config.AuthMember;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

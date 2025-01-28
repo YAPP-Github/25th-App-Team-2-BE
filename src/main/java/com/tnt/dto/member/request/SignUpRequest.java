@@ -3,13 +3,15 @@ package com.tnt.dto.member.request;
 import java.time.LocalDate;
 import java.util.List;
 
+import com.tnt.domain.member.MemberType;
+import com.tnt.domain.member.SocialType;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
-import jakarta.validation.constraints.Pattern;
 
 @Schema(description = "회원가입 API 요청")
 public record SignUpRequest(
@@ -17,14 +19,14 @@ public record SignUpRequest(
 	@NotBlank(message = "FCM 토큰은 필수입니다.")
 	String fcmToken,
 
-	@Schema(description = "회원 타입 (trainer / trainee)", example = "trainer", nullable = false)
-	@Pattern(regexp = "^(trainer|trainee)$", message = "회원 타입은 trainer 또는 trainee만 가능합니다.")
-	String memberType,
+	@Schema(description = "회원 타입", example = "TRAINER", nullable = false)
+	@NotNull(message = "회원 타입은 필수입니다.")
+	MemberType memberType,
 
-	@Schema(description = "소셜 로그인 타입 (KAKAO / APPLE)", example = "KAKAO", allowableValues = {"KAKAO",
-		"APPLE"}, nullable = false)
-	@Pattern(regexp = "^(KAKAO|APPLE)$", message = "소셜 로그인 타입은 KAKAO 또는 APPLE만 가능합니다.")
-	String socialType,
+	@Schema(description = "소셜 로그인 타입", example = "KAKAO", allowableValues = {"KAKAO", "APPLE"},
+		nullable = false)
+	@NotNull(message = "소셜 로그인 타입은 필수입니다.")
+	SocialType socialType,
 
 	@Schema(description = "소셜 ID", example = "563931436", nullable = false)
 	@NotBlank(message = "소셜 ID는 필수입니다.")

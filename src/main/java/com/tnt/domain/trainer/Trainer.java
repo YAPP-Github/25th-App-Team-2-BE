@@ -1,8 +1,8 @@
 package com.tnt.domain.trainer;
 
-import static com.tnt.global.error.model.ErrorMessage.TRAINER_INVALID_INVITATION_CODE;
-import static com.tnt.global.error.model.ErrorMessage.TRAINER_INVITATION_CODE_GENERATE_FAILED;
-import static com.tnt.global.error.model.ErrorMessage.TRAINER_NULL_MEMBER;
+import static com.tnt.common.error.model.ErrorMessage.TRAINER_INVALID_INVITATION_CODE;
+import static com.tnt.common.error.model.ErrorMessage.TRAINER_INVITATION_CODE_GENERATE_FAILED;
+import static com.tnt.common.error.model.ErrorMessage.TRAINER_NULL_MEMBER;
 import static io.micrometer.common.util.StringUtils.isBlank;
 import static java.util.Objects.requireNonNull;
 
@@ -12,9 +12,9 @@ import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import com.tnt.common.error.exception.TnTException;
 import com.tnt.domain.member.Member;
-import com.tnt.global.common.entity.BaseTimeEntity;
-import com.tnt.global.error.exception.TnTException;
+import com.tnt.infrastructure.mysql.BaseTimeEntity;
 
 import io.hypersistence.utils.hibernate.id.Tsid;
 import jakarta.persistence.Column;

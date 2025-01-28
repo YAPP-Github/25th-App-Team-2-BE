@@ -65,8 +65,8 @@ class TraineeControllerTest {
 	@DisplayName("통합 테스트 - 트레이너, 트레이니 연결 성공")
 	void connectWithTrainer_success() throws Exception {
 		// given
-		Member trainerMember = MemberFixture.getMember1();
-		Member traineeMember = MemberFixture.getMember2();
+		Member trainerMember = MemberFixture.getTrainerMember1();
+		Member traineeMember = MemberFixture.getTraineeMember1();
 
 		trainerMember = memberRepository.save(trainerMember);
 		traineeMember = memberRepository.save(traineeMember);

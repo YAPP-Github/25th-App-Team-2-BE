@@ -1,9 +1,16 @@
 package com.tnt.application.member;
 
-import static com.tnt.domain.constant.Constant.*;
-import static com.tnt.global.error.model.ErrorMessage.*;
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.BDDMockito.*;
+import static com.tnt.common.error.model.ErrorMessage.APPLE_AUTH_ERROR;
+import static com.tnt.common.error.model.ErrorMessage.FAILED_TO_FETCH_USER_INFO;
+import static com.tnt.domain.member.SocialType.APPLE;
+import static com.tnt.domain.member.SocialType.KAKAO;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.BDDMockito.anyString;
+import static org.mockito.BDDMockito.eq;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.mock;
+import static org.mockito.BDDMockito.verify;
 
 import java.io.IOException;
 import java.security.KeyPair;
@@ -32,13 +39,13 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.tnt.application.auth.SessionService;
+import com.tnt.common.error.exception.OAuthException;
 import com.tnt.domain.member.Member;
-import com.tnt.domain.member.SocialType;
-import com.tnt.dto.member.request.OAuthLoginRequest;
 import com.tnt.dto.member.response.LogoutResponse;
-import com.tnt.dto.member.response.OAuthLoginResponse;
-import com.tnt.global.error.exception.OAuthException;
+import com.tnt.gateway.dto.OAuthLoginRequest;
+import com.tnt.gateway.dto.OAuthLoginResponse;
+import com.tnt.gateway.service.OAuthService;
+import com.tnt.gateway.service.SessionService;
 import com.tnt.infrastructure.mysql.repository.member.MemberRepository;
 
 import okhttp3.mockwebserver.MockResponse;
@@ -89,7 +96,7 @@ class OAuthServiceTest {
 				.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
 				.setBody("{\"id\": \"12345\", \"kakao_account\": {\"email\": \"test@example.com\"}}"));
 
-			given(memberRepository.findBySocialIdAndSocialTypeAndDeletedAtIsNull("12345", SocialType.KAKAO)).willReturn(
+			given(memberRepository.findBySocialIdAndSocialTypeAndDeletedAtIsNull("12345", KAKAO)).willReturn(
 				Optional.empty());
 
 			// when
@@ -99,18 +106,6 @@ class OAuthServiceTest {
 			assertThat(response.sessionId()).isNull();
 			assertThat(response.socialId()).isEqualTo("12345");
 			assertThat(response.isSignUp()).isFalse();
-		}
-
-		@Test
-		@DisplayName("지원하지 않는 소셜 타입 예외 발생")
-		void unsupported_social_type_error() {
-			// given
-			OAuthLoginRequest request = new OAuthLoginRequest("NAVER", "fcm", "some-token", null, null);
-
-			// when & then
-			assertThatThrownBy(() -> oAuthService.oauthLogin(request))
-				.isInstanceOf(OAuthException.class)
-				.hasMessage(UNSUPPORTED_SOCIAL_TYPE.getMessage());
 		}
 
 		@Test
@@ -190,7 +185,7 @@ class OAuthServiceTest {
 				.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
 				.setBody("{\"id\": \"12345\"}"));
 
-			given(memberRepository.findBySocialIdAndSocialTypeAndDeletedAtIsNull("12345", SocialType.KAKAO)).willReturn(
+			given(memberRepository.findBySocialIdAndSocialTypeAndDeletedAtIsNull("12345", KAKAO)).willReturn(
 				Optional.of(member));
 
 			// when
@@ -235,7 +230,7 @@ class OAuthServiceTest {
 						+ "\"}]}"));
 
 			given(memberRepository.findBySocialIdAndSocialTypeAndDeletedAtIsNull(anyString(),
-				eq(SocialType.APPLE))).willReturn(Optional.of(mockMember));
+				eq(APPLE))).willReturn(Optional.of(mockMember));
 
 			// when
 			OAuthLoginResponse response = oAuthService.oauthLogin(request);
@@ -301,7 +296,7 @@ class OAuthServiceTest {
 						+ "\"}]}"));
 
 			given(memberRepository.findBySocialIdAndSocialTypeAndDeletedAtIsNull(anyString(),
-				eq(SocialType.APPLE))).willReturn(Optional.of(mockMember));
+				eq(APPLE))).willReturn(Optional.of(mockMember));
 
 			// when
 			OAuthLoginResponse response = oAuthService.oauthLogin(request);

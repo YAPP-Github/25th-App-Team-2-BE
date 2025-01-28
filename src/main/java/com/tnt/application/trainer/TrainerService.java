@@ -1,14 +1,14 @@
 package com.tnt.application.trainer;
 
-import static com.tnt.global.error.model.ErrorMessage.TRAINER_NOT_FOUND;
+import static com.tnt.common.error.model.ErrorMessage.TRAINER_NOT_FOUND;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.tnt.common.error.exception.NotFoundException;
 import com.tnt.domain.trainer.Trainer;
 import com.tnt.dto.trainer.response.InvitationCodeResponse;
 import com.tnt.dto.trainer.response.InvitationCodeVerifyResponse;
-import com.tnt.global.error.exception.NotFoundException;
 import com.tnt.infrastructure.mysql.repository.trainer.TrainerRepository;
 import com.tnt.infrastructure.mysql.repository.trainer.TrainerSearchRepository;
 

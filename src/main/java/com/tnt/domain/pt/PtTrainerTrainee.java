@@ -4,8 +4,8 @@ import static java.util.Objects.requireNonNull;
 
 import java.time.LocalDate;
 
-import com.tnt.global.common.entity.BaseTimeEntity;
-import com.tnt.global.error.model.ErrorMessage;
+import com.tnt.common.error.model.ErrorMessage;
+import com.tnt.infrastructure.mysql.BaseTimeEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

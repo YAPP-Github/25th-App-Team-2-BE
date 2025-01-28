@@ -1,13 +1,12 @@
 package com.tnt.domain.member;
 
-import static com.tnt.global.error.model.ErrorMessage.MEMBER_INVALID_COLLECTION_AGREEMENT;
-import static com.tnt.global.error.model.ErrorMessage.MEMBER_INVALID_EMAIL;
-import static com.tnt.global.error.model.ErrorMessage.MEMBER_INVALID_NAME;
-import static com.tnt.global.error.model.ErrorMessage.MEMBER_INVALID_PROFILE_IMAGE_URL;
-import static com.tnt.global.error.model.ErrorMessage.MEMBER_INVALID_SERVICE_AGREEMENT;
-import static com.tnt.global.error.model.ErrorMessage.MEMBER_INVALID_SOCIAL_ID;
-import static com.tnt.global.error.model.ErrorMessage.MEMBER_INVALID_SOCIAL_TYPE;
-import static com.tnt.global.error.model.ErrorMessage.MEMBER_NULL_ADVERTISEMENT_AGREEMENT;
+import static com.tnt.common.error.model.ErrorMessage.MEMBER_INVALID_COLLECTION_AGREEMENT;
+import static com.tnt.common.error.model.ErrorMessage.MEMBER_INVALID_EMAIL;
+import static com.tnt.common.error.model.ErrorMessage.MEMBER_INVALID_NAME;
+import static com.tnt.common.error.model.ErrorMessage.MEMBER_INVALID_PROFILE_IMAGE_URL;
+import static com.tnt.common.error.model.ErrorMessage.MEMBER_INVALID_SERVICE_AGREEMENT;
+import static com.tnt.common.error.model.ErrorMessage.MEMBER_INVALID_SOCIAL_ID;
+import static com.tnt.common.error.model.ErrorMessage.MEMBER_NULL_ADVERTISEMENT_AGREEMENT;
 import static io.micrometer.common.util.StringUtils.isBlank;
 import static java.lang.Boolean.FALSE;
 import static java.util.Objects.isNull;
@@ -16,7 +15,7 @@ import static java.util.Objects.requireNonNull;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-import com.tnt.global.common.entity.BaseTimeEntity;
+import com.tnt.infrastructure.mysql.BaseTimeEntity;
 
 import io.hypersistence.utils.hibernate.id.Tsid;
 import jakarta.persistence.Column;
@@ -41,6 +40,7 @@ public class Member extends BaseTimeEntity {
 	private static final int NAME_LENGTH = 50;
 	private static final int PROFILE_IMAGE_URL_LENGTH = 255;
 	private static final int SOCIAL_TYPE_LENGTH = 10;
+	private static final int MEMBER_TYPE_LENGTH = 30;
 
 	@Id
 	@Tsid
@@ -81,10 +81,14 @@ public class Member extends BaseTimeEntity {
 	@Column(name = "social_type", nullable = false, length = SOCIAL_TYPE_LENGTH)
 	private SocialType socialType;
 
+	@Enumerated(EnumType.STRING)
+	@Column(name = "member_type", nullable = false, length = MEMBER_TYPE_LENGTH)
+	private MemberType memberType;
+
 	@Builder
 	public Member(Long id, String socialId, String fcmToken, String email, String name, String profileImageUrl,
 		LocalDate birthday, Boolean serviceAgreement, Boolean collectionAgreement, Boolean advertisementAgreement,
-		SocialType socialType) {
+		SocialType socialType, MemberType memberType) {
 		validateRequiredAgreements(serviceAgreement, collectionAgreement);
 
 		this.id = id;
@@ -98,7 +102,8 @@ public class Member extends BaseTimeEntity {
 		this.collectionAgreement = collectionAgreement;
 		this.advertisementAgreement = requireNonNull(advertisementAgreement,
 			MEMBER_NULL_ADVERTISEMENT_AGREEMENT.getMessage());
-		this.socialType = validateSocialType(socialType);
+		this.socialType = requireNonNull(socialType);
+		this.memberType = requireNonNull(memberType);
 	}
 
 	public void updateFcmTokenIfExpired(String fcmToken) {
@@ -152,13 +157,5 @@ public class Member extends BaseTimeEntity {
 		if (isNull(collectionAgreement) || FALSE.equals(collectionAgreement)) {
 			throw new IllegalArgumentException(MEMBER_INVALID_COLLECTION_AGREEMENT.getMessage());
 		}
-	}
-
-	private SocialType validateSocialType(SocialType socialType) {
-		if (isNull(socialType) || socialType.toString().length() > SOCIAL_ID_LENGTH) {
-			throw new IllegalArgumentException(MEMBER_INVALID_SOCIAL_TYPE.getMessage());
-		}
-
-		return socialType;
 	}
 }

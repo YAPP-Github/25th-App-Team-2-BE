@@ -1,7 +1,7 @@
 package com.tnt.application.pt;
 
-import static com.tnt.global.error.model.ErrorMessage.PT_TRAINEE_ALREADY_EXIST;
-import static com.tnt.global.error.model.ErrorMessage.PT_TRAINER_TRAINEE_ALREADY_EXIST;
+import static com.tnt.common.error.model.ErrorMessage.PT_TRAINEE_ALREADY_EXIST;
+import static com.tnt.common.error.model.ErrorMessage.PT_TRAINER_TRAINEE_ALREADY_EXIST;
 import static java.util.Objects.isNull;
 
 import java.time.LocalDate;
@@ -12,6 +12,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.tnt.application.trainee.TraineeService;
 import com.tnt.application.trainer.TrainerService;
+import com.tnt.common.error.exception.ConflictException;
+import com.tnt.common.error.exception.NotFoundException;
+import com.tnt.common.error.model.ErrorMessage;
 import com.tnt.domain.member.Member;
 import com.tnt.domain.pt.PtTrainerTrainee;
 import com.tnt.domain.trainee.PtGoal;
@@ -20,9 +23,6 @@ import com.tnt.domain.trainer.Trainer;
 import com.tnt.dto.trainer.ConnectWithTrainerDto;
 import com.tnt.dto.trainer.request.ConnectWithTrainerRequest;
 import com.tnt.dto.trainer.response.ConnectWithTraineeResponse;
-import com.tnt.global.error.exception.ConflictException;
-import com.tnt.global.error.exception.NotFoundException;
-import com.tnt.global.error.model.ErrorMessage;
 import com.tnt.infrastructure.mysql.repository.pt.PtTrainerTraineeRepository;
 import com.tnt.infrastructure.mysql.repository.trainee.PtGoalRepository;
 
