@@ -87,19 +87,20 @@ public class OAuthService {
 		OAuthUserInfo oauthInfo = extractOAuthUserInfo(request);
 		String socialId = oauthInfo.getId();
 		String socialEmail = oauthInfo.getEmail();
-		Member findMember = findMemberFromDB(socialId, request.socialType());
+		Member member = findMemberFromDB(socialId, request.socialType());
 
-		if (isNull(findMember)) {
+		if (isNull(member)) {
 			return new OAuthLoginResponse(null, socialId, socialEmail, request.socialType(), false, UNREGISTERED);
 		}
 
-		findMember.updateFcmTokenIfExpired(request.fcmToken());
+		member.updateFcmTokenIfExpired(request.fcmToken());
 
 		String sessionId = String.valueOf(getTsid());
 
-		sessionService.createSession(sessionId, String.valueOf(findMember.getId()));
+		sessionService.createSession(sessionId, String.valueOf(member.getId()));
 
-		return new OAuthLoginResponse(sessionId, null, null, null, true, findMember.getMemberType());
+		return new OAuthLoginResponse(sessionId, member.getSocialId(), member.getEmail(), member.getSocialType(), true,
+			member.getMemberType());
 	}
 
 	public LogoutResponse logout(String memberId) {
