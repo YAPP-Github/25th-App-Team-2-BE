@@ -1,8 +1,9 @@
 package com.tnt.domain.pt;
 
-import static java.util.Objects.requireNonNull;
+import static java.util.Objects.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import com.tnt.common.error.model.ErrorMessage;
 import com.tnt.infrastructure.mysql.BaseTimeEntity;
@@ -44,8 +45,8 @@ public class PtTrainerTrainee extends BaseTimeEntity {
 	@Column(name = "total_pt_count", nullable = false)
 	private Integer totalPtCount;
 
-	@Column(name = "deleted_at")
-	private LocalDate deletedAt;
+	@Column(name = "deleted_at", nullable = true)
+	private LocalDateTime deletedAt;
 
 	@Builder
 	public PtTrainerTrainee(Long trainerId, Long traineeId, LocalDate startedAt, Integer finishedPtCount,
@@ -55,5 +56,9 @@ public class PtTrainerTrainee extends BaseTimeEntity {
 		this.startedAt = requireNonNull(startedAt);
 		this.finishedPtCount = requireNonNull(finishedPtCount);
 		this.totalPtCount = requireNonNull(totalPtCount);
+	}
+
+	public void updateDeletedAt(LocalDateTime deletedAt) {
+		this.deletedAt = deletedAt;
 	}
 }
