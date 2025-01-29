@@ -1,16 +1,9 @@
 package com.tnt.domain.member;
 
-import static com.tnt.common.error.model.ErrorMessage.MEMBER_INVALID_COLLECTION_AGREEMENT;
-import static com.tnt.common.error.model.ErrorMessage.MEMBER_INVALID_EMAIL;
-import static com.tnt.common.error.model.ErrorMessage.MEMBER_INVALID_NAME;
-import static com.tnt.common.error.model.ErrorMessage.MEMBER_INVALID_PROFILE_IMAGE_URL;
-import static com.tnt.common.error.model.ErrorMessage.MEMBER_INVALID_SERVICE_AGREEMENT;
-import static com.tnt.common.error.model.ErrorMessage.MEMBER_INVALID_SOCIAL_ID;
-import static com.tnt.common.error.model.ErrorMessage.MEMBER_NULL_ADVERTISEMENT_AGREEMENT;
-import static io.micrometer.common.util.StringUtils.isBlank;
-import static java.lang.Boolean.FALSE;
-import static java.util.Objects.isNull;
-import static java.util.Objects.requireNonNull;
+import static com.tnt.common.error.model.ErrorMessage.*;
+import static io.micrometer.common.util.StringUtils.*;
+import static java.lang.Boolean.*;
+import static java.util.Objects.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -116,6 +109,10 @@ public class Member extends BaseTimeEntity {
 		if (!this.profileImageUrl.equals(profileImageUrl)) {
 			this.profileImageUrl = profileImageUrl;
 		}
+	}
+
+	public void updateDeletedAt(LocalDateTime deletedAt) {
+		this.deletedAt = deletedAt;
 	}
 
 	private String validateSocialId(String socialId) {

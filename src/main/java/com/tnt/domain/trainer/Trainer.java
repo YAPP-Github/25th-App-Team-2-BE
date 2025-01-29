@@ -1,10 +1,8 @@
 package com.tnt.domain.trainer;
 
-import static com.tnt.common.error.model.ErrorMessage.TRAINER_INVALID_INVITATION_CODE;
-import static com.tnt.common.error.model.ErrorMessage.TRAINER_INVITATION_CODE_GENERATE_FAILED;
-import static com.tnt.common.error.model.ErrorMessage.TRAINER_NULL_MEMBER;
-import static io.micrometer.common.util.StringUtils.isBlank;
-import static java.util.Objects.requireNonNull;
+import static com.tnt.common.error.model.ErrorMessage.*;
+import static io.micrometer.common.util.StringUtils.*;
+import static java.util.Objects.*;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -80,6 +78,10 @@ public class Trainer extends BaseTimeEntity {
 		}
 
 		this.invitationCode = validateInvitationCode(sb.toString().toUpperCase());
+	}
+
+	public void updateDeletedAt(LocalDateTime deletedAt) {
+		this.deletedAt = deletedAt;
 	}
 
 	private String validateInvitationCode(String invitationCode) {
