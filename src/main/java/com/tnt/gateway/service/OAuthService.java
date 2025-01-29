@@ -1,14 +1,9 @@
 package com.tnt.gateway.service;
 
-import static com.tnt.common.error.model.ErrorMessage.APPLE_AUTH_ERROR;
-import static com.tnt.common.error.model.ErrorMessage.APPLE_CLIENT_ERROR;
-import static com.tnt.common.error.model.ErrorMessage.APPLE_SERVER_ERROR;
-import static com.tnt.common.error.model.ErrorMessage.FAILED_TO_FETCH_USER_INFO;
-import static com.tnt.common.error.model.ErrorMessage.MATCHING_KEY_NOT_FOUND;
-import static com.tnt.common.error.model.ErrorMessage.UNSUPPORTED_SOCIAL_TYPE;
-import static com.tnt.domain.member.MemberType.UNREGISTERED;
-import static io.hypersistence.tsid.TSID.Factory.getTsid;
-import static java.util.Objects.isNull;
+import static com.tnt.common.error.model.ErrorMessage.*;
+import static com.tnt.domain.member.MemberType.*;
+import static io.hypersistence.tsid.TSID.Factory.*;
+import static java.util.Objects.*;
 
 import java.math.BigInteger;
 import java.security.KeyFactory;
@@ -42,7 +37,9 @@ import com.tnt.common.error.exception.OAuthException;
 import com.tnt.common.error.model.ErrorMessage;
 import com.tnt.domain.member.Member;
 import com.tnt.domain.member.SocialType;
+import com.tnt.dto.member.request.WithdrawRequest;
 import com.tnt.dto.member.response.LogoutResponse;
+import com.tnt.gateway.dto.AppleAuthTokenInfo;
 import com.tnt.gateway.dto.AppleUserInfo;
 import com.tnt.gateway.dto.KakaoUserInfo;
 import com.tnt.gateway.dto.OAuthLoginRequest;
@@ -109,11 +106,18 @@ public class OAuthService {
 		return new LogoutResponse(removeSessionId);
 	}
 
+	public void revoke(String socialid, SocialType socialType, WithdrawRequest request) {
+		switch (socialType) {
+			case KAKAO -> unlinkKakao(socialid, request.socialAccessToken());
+			case APPLE -> unlinkApple(request.authorizationCode(), request.idToken());
+			default -> throw new IllegalArgumentException(UNSUPPORTED_SOCIAL_TYPE.getMessage());
+		}
+	}
+
 	private OAuthUserInfo extractOAuthUserInfo(OAuthLoginRequest request) {
 		return switch (request.socialType()) {
 			case KAKAO -> new KakaoUserInfo(handleKakaoLogin(request.socialAccessToken()));
 			case APPLE -> new AppleUserInfo(handleAppleLogin(request));
-			default -> throw new OAuthException(UNSUPPORTED_SOCIAL_TYPE);
 		};
 	}
 
@@ -131,7 +135,7 @@ public class OAuthService {
 
 	private Map<String, Object> handleAppleLogin(OAuthLoginRequest request) {
 		String idToken = Optional.ofNullable(request.idToken()) // Android
-			.orElseGet(() -> getAppleIdToken(request.authorizationCode())); // iOS
+			.orElseGet(() -> getAppleAuthToken(request.authorizationCode()).getIdToken()); // iOS
 
 		if (isNull(idToken)) {
 			throw new OAuthException(APPLE_AUTH_ERROR);
@@ -170,7 +174,7 @@ public class OAuthService {
 	}
 
 	// Apple 서버에 authorizationCode를 사용하여 idToken을 요청
-	private String getAppleIdToken(String authorizationCode) {
+	private AppleAuthTokenInfo getAppleAuthToken(String authorizationCode) {
 		String clientSecret = generateClientSecret();
 
 		return webClient.post()
@@ -181,7 +185,9 @@ public class OAuthService {
 			.onStatus(HttpStatusCode::is4xxClientError, response -> handleErrorResponse(response, APPLE_CLIENT_ERROR))
 			.onStatus(HttpStatusCode::is5xxServerError, response -> handleErrorResponse(response, APPLE_SERVER_ERROR))
 			.bodyToMono(Map.class)
-			.map(response -> (String)response.get("id_token"))
+			.map(response -> new AppleAuthTokenInfo((String)response.get("accessToken"),
+				(Integer)response.get("expiresIn"), (String)response.get("idToken"),
+				(String)response.get("refreshToken"), (String)response.get("tokenType")))
 			.block();
 	}
 
@@ -273,5 +279,19 @@ public class OAuthService {
 	private Member findMemberFromDB(String socialId, SocialType socialType) {
 		return memberRepository.findBySocialIdAndSocialTypeAndDeletedAtIsNull(socialId,
 			socialType).orElse(null);
+	}
+
+	private void unlinkKakao(String socialId, String accessToken) {
+		webClient.post()
+			.uri("https://kapi.kakao.com/v1/user/unlink")
+			.header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
+			.contentType(MediaType.APPLICATION_FORM_URLENCODED)
+			.bodyValue("target_id_type=user_id&target_id=" + socialId)
+			.retrieve()
+			.bodyToMono(String.class)
+			.block();
+	}
+
+	private void unlinkApple(String authorizationCode, String idToken) {
 	}
 }

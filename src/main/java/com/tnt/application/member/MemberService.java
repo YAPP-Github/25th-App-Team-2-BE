@@ -1,15 +1,12 @@
 package com.tnt.application.member;
 
-import static com.tnt.common.constant.ProfileConstant.TRAINEE_DEFAULT_IMAGE;
-import static com.tnt.common.constant.ProfileConstant.TRAINER_DEFAULT_IMAGE;
-import static com.tnt.common.error.model.ErrorMessage.MEMBER_CONFLICT;
-import static com.tnt.common.error.model.ErrorMessage.MEMBER_NOT_FOUND;
-import static com.tnt.common.error.model.ErrorMessage.UNSUPPORTED_MEMBER_TYPE;
-import static com.tnt.domain.member.MemberType.TRAINEE;
-import static com.tnt.domain.member.MemberType.TRAINER;
-import static io.hypersistence.tsid.TSID.Factory.getTsid;
-import static io.micrometer.common.util.StringUtils.isNotBlank;
+import static com.tnt.common.constant.ProfileConstant.*;
+import static com.tnt.common.error.model.ErrorMessage.*;
+import static com.tnt.domain.member.MemberType.*;
+import static io.hypersistence.tsid.TSID.Factory.*;
+import static io.micrometer.common.util.StringUtils.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -20,13 +17,17 @@ import com.tnt.common.error.exception.NotFoundException;
 import com.tnt.domain.member.Member;
 import com.tnt.domain.member.MemberType;
 import com.tnt.domain.member.SocialType;
+import com.tnt.domain.pt.PtTrainerTrainee;
 import com.tnt.domain.trainee.PtGoal;
 import com.tnt.domain.trainee.Trainee;
 import com.tnt.domain.trainer.Trainer;
 import com.tnt.dto.member.request.SignUpRequest;
+import com.tnt.dto.member.request.WithdrawRequest;
 import com.tnt.dto.member.response.SignUpResponse;
+import com.tnt.gateway.service.OAuthService;
 import com.tnt.gateway.service.SessionService;
 import com.tnt.infrastructure.mysql.repository.member.MemberRepository;
+import com.tnt.infrastructure.mysql.repository.pt.PtTrainerTraineeRepository;
 import com.tnt.infrastructure.mysql.repository.trainee.PtGoalRepository;
 import com.tnt.infrastructure.mysql.repository.trainee.TraineeRepository;
 import com.tnt.infrastructure.mysql.repository.trainer.TrainerRepository;
@@ -38,11 +39,18 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class MemberService {
 
+	private final SessionService sessionService;
+	private final OAuthService oAuthService;
 	private final MemberRepository memberRepository;
 	private final TrainerRepository trainerRepository;
 	private final TraineeRepository traineeRepository;
 	private final PtGoalRepository ptGoalRepository;
-	private final SessionService sessionService;
+	private final PtTrainerTraineeRepository ptTrainerTraineeRepository;
+
+	public Member getMemberWithMemberId(String memberId) {
+		return memberRepository.findByIdAndDeletedAtIsNull(Long.valueOf(memberId))
+			.orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
+	}
 
 	@Transactional
 	public Long signUp(SignUpRequest request) {
@@ -67,6 +75,46 @@ public class MemberService {
 		sessionService.createSession(sessionId, String.valueOf(member.getId()));
 
 		return new SignUpResponse(memberType, sessionId, member.getName(), member.getProfileImageUrl());
+	}
+
+	@Transactional
+	public void withdraw(String memberId, WithdrawRequest request) {
+		Member member = getMemberWithMemberId(memberId);
+		LocalDateTime now = LocalDateTime.now();
+
+		switch (member.getMemberType()) {
+			case TRAINER -> {
+				Trainer trainer = trainerRepository.findByMemberAndDeletedAtIsNull(member)
+					.orElseThrow(() -> new NotFoundException(TRAINER_NOT_FOUND));
+
+				PtTrainerTrainee ptTrainerTrainee = ptTrainerTraineeRepository.findByTrainerIdAndDeletedAtIsNull(
+						trainer.getId())
+					.orElseThrow(() -> new NotFoundException(PT_TRAINER_TRAINEE_NOT_FOUND));
+
+				ptTrainerTrainee.updateDeletedAt(now);
+				trainer.updateDeletedAt(now);
+			}
+			case TRAINEE -> {
+				Trainee trainee = traineeRepository.findByMemberAndDeletedAtIsNull(member)
+					.orElseThrow(() -> new NotFoundException(TRAINEE_NOT_FOUND));
+
+				PtTrainerTrainee ptTrainerTrainee = ptTrainerTraineeRepository.findByTraineeIdAndDeletedAtIsNull(
+						trainee.getId())
+					.orElseThrow(() -> new NotFoundException(PT_TRAINER_TRAINEE_NOT_FOUND));
+
+				List<PtGoal> ptGoals = ptGoalRepository.findAllByTraineeIdAndDeletedAtIsNull(trainee.getId());
+
+				ptGoals.forEach(ptGoal -> ptGoal.updateDeletedAt(now));
+				ptTrainerTrainee.updateDeletedAt(now);
+				trainee.updateDeletedAt(now);
+			}
+			default -> throw new IllegalArgumentException(UNSUPPORTED_MEMBER_TYPE.getMessage());
+		}
+
+		member.updateDeletedAt(now);
+
+		oAuthService.revoke(member.getSocialId(), member.getSocialType(), request);
+		sessionService.removeSession(memberId);
 	}
 
 	private void validateMemberNotExists(String socialId, SocialType socialType) {

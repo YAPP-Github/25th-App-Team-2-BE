@@ -4,6 +4,7 @@ import static org.springframework.http.HttpStatus.*;
 import static org.springframework.http.MediaType.*;
 
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -13,7 +14,9 @@ import org.springframework.web.multipart.MultipartFile;
 import com.tnt.application.member.MemberService;
 import com.tnt.application.s3.S3Service;
 import com.tnt.dto.member.request.SignUpRequest;
+import com.tnt.dto.member.request.WithdrawRequest;
 import com.tnt.dto.member.response.SignUpResponse;
+import com.tnt.gateway.config.AuthMember;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -38,5 +41,12 @@ public class MemberController {
 		String profileImageUrl = s3Service.uploadProfileImage(profileImage, request.memberType());
 
 		return memberService.finishSignUpWithImage(profileImageUrl, memberId, request.memberType());
+	}
+
+	@Operation(summary = "회원탈퇴 API")
+	@PostMapping("/withdraw")
+	@ResponseStatus(OK)
+	public void withdraw(@AuthMember String memberId, @RequestBody @Valid WithdrawRequest request) {
+		memberService.withdraw(memberId, request);
 	}
 }

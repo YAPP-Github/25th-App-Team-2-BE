@@ -1,8 +1,7 @@
 package com.tnt.application.pt;
 
-import static com.tnt.common.error.model.ErrorMessage.PT_TRAINEE_ALREADY_EXIST;
-import static com.tnt.common.error.model.ErrorMessage.PT_TRAINER_TRAINEE_ALREADY_EXIST;
-import static java.util.Objects.isNull;
+import static com.tnt.common.error.model.ErrorMessage.*;
+import static java.util.Objects.*;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -14,7 +13,6 @@ import com.tnt.application.trainee.TraineeService;
 import com.tnt.application.trainer.TrainerService;
 import com.tnt.common.error.exception.ConflictException;
 import com.tnt.common.error.exception.NotFoundException;
-import com.tnt.common.error.model.ErrorMessage;
 import com.tnt.domain.member.Member;
 import com.tnt.domain.pt.PtTrainerTrainee;
 import com.tnt.domain.trainee.PtGoal;
@@ -74,7 +72,7 @@ public class PtService {
 
 		String traineeAge = calculateCurrentAge(traineeMember.getBirthday());
 
-		List<PtGoal> ptGoals = ptGoalRepository.findAllByTraineeId(Long.valueOf(traineeId));
+		List<PtGoal> ptGoals = ptGoalRepository.findAllByTraineeIdAndDeletedAtIsNull(Long.valueOf(traineeId));
 		String ptGoal = getPtGoals(ptGoals);
 
 		return new ConnectWithTraineeResponse(trainerMember.getName(), traineeMember.getName(),
@@ -97,7 +95,7 @@ public class PtService {
 	private void validateIfNotConnected(String trainerId, String traineeId) {
 		ptTrainerTraineeRepository.findByTrainerIdAndTraineeIdAndDeletedAtIsNull(Long.valueOf(trainerId),
 				Long.valueOf(traineeId))
-			.orElseThrow(() -> new NotFoundException(ErrorMessage.PT_TRAINER_TRAINEE_NOT_FOUND));
+			.orElseThrow(() -> new NotFoundException(PT_TRAINER_TRAINEE_NOT_FOUND));
 	}
 
 	private String calculateCurrentAge(LocalDate birthDay) {
