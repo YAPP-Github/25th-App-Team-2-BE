@@ -47,9 +47,9 @@ import com.tnt.dto.member.response.LogoutResponse;
 import com.tnt.gateway.dto.AppleAuthTokenInfo;
 import com.tnt.gateway.dto.AppleUserInfo;
 import com.tnt.gateway.dto.KakaoUserInfo;
-import com.tnt.gateway.dto.OAuthLoginRequest;
-import com.tnt.gateway.dto.OAuthLoginResponse;
 import com.tnt.gateway.dto.OAuthUserInfo;
+import com.tnt.gateway.dto.request.OAuthLoginRequest;
+import com.tnt.gateway.dto.response.OAuthLoginResponse;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

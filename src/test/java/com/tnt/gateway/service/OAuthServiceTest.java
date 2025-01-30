@@ -40,8 +40,8 @@ import com.tnt.common.error.exception.OAuthException;
 import com.tnt.domain.member.Member;
 import com.tnt.dto.member.request.WithdrawRequest;
 import com.tnt.dto.member.response.LogoutResponse;
-import com.tnt.gateway.dto.OAuthLoginRequest;
-import com.tnt.gateway.dto.OAuthLoginResponse;
+import com.tnt.gateway.dto.request.OAuthLoginRequest;
+import com.tnt.gateway.dto.response.OAuthLoginResponse;
 
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;

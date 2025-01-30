@@ -1,4 +1,4 @@
-package com.tnt.gateway.dto;
+package com.tnt.gateway.dto.response;
 
 import com.tnt.domain.member.MemberType;
 import com.tnt.domain.member.SocialType;
