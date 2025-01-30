@@ -28,7 +28,7 @@ class TraineeServiceTest {
 		// given
 		Long memberId = 1234567L;
 
-		given(traineeSearchRepository.findByMemberIdAndDeletedAtIsNull(memberId)).willReturn(
+		given(traineeSearchRepository.findByMemberId(memberId)).willReturn(
 			Optional.empty());
 
 		// when & then
@@ -41,7 +41,7 @@ class TraineeServiceTest {
 		// given
 		Long traineeId = 124124L;
 
-		given(traineeSearchRepository.findByIdAndDeletedAtIsNull(traineeId)).willReturn(Optional.empty());
+		given(traineeSearchRepository.findById(traineeId)).willReturn(Optional.empty());
 
 		// when & then
 		Assertions.assertThatThrownBy(() -> traineeService.getTraineeWithId(traineeId))
