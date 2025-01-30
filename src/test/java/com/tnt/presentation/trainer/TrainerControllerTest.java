@@ -34,8 +34,8 @@ import com.tnt.domain.trainee.Trainee;
 import com.tnt.domain.trainer.Trainer;
 import com.tnt.fixture.MemberFixture;
 import com.tnt.infrastructure.mysql.repository.member.MemberRepository;
+import com.tnt.infrastructure.mysql.repository.pt.PtGoalRepository;
 import com.tnt.infrastructure.mysql.repository.pt.PtTrainerTraineeRepository;
-import com.tnt.infrastructure.mysql.repository.trainee.PtGoalRepository;
 import com.tnt.infrastructure.mysql.repository.trainee.TraineeRepository;
 import com.tnt.infrastructure.mysql.repository.trainer.TrainerRepository;
 

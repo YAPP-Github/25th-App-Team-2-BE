@@ -1,4 +1,4 @@
-package com.tnt.infrastructure.mysql.repository.trainee;
+package com.tnt.infrastructure.mysql.repository.pt;
 
 import java.util.List;
 
