@@ -48,7 +48,7 @@ public class TrainerService {
 	}
 
 	public Trainer getTrainerWithInvitationCode(String invitationCode) {
-		return trainerSearchRepository.findByInvitationCodeAndDeletedAtIsNull(invitationCode)
+		return trainerSearchRepository.findByInvitationCode(invitationCode)
 			.orElseThrow(() -> new NotFoundException(TRAINER_NOT_FOUND));
 	}
 }

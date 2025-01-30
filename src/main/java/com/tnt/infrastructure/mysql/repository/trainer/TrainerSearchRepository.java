@@ -18,7 +18,7 @@ public class TrainerSearchRepository {
 
 	private final JPAQueryFactory jpaQueryFactory;
 
-	public Optional<Trainer> findByMemberIdAndDeletedAtIsNull(Long memberId) {
+	public Optional<Trainer> findByMemberId(Long memberId) {
 		return Optional.ofNullable(jpaQueryFactory
 			.selectFrom(trainer)
 			.join(trainer.member, member).fetchJoin()
@@ -29,7 +29,7 @@ public class TrainerSearchRepository {
 			.fetchOne());
 	}
 
-	public Optional<Trainer> findByInvitationCodeAndDeletedAtIsNull(String invitationCode) {
+	public Optional<Trainer> findByInvitationCode(String invitationCode) {
 		return Optional.ofNullable(jpaQueryFactory
 			.selectFrom(trainer)
 			.join(trainer.member, member).fetchJoin()

@@ -19,12 +19,12 @@ public class TraineeService {
 	private final TraineeSearchRepository traineeSearchRepository;
 
 	public Trainee getTraineeWithMemberId(Long memberId) {
-		return traineeSearchRepository.findByMemberIdAndDeletedAtIsNull(memberId)
+		return traineeSearchRepository.findByMemberId(memberId)
 			.orElseThrow(() -> new NotFoundException(TRAINEE_NOT_FOUND));
 	}
 
 	public Trainee getTraineeWithId(Long traineeId) {
-		return traineeSearchRepository.findByIdAndDeletedAtIsNull(traineeId)
+		return traineeSearchRepository.findById(traineeId)
 			.orElseThrow(() -> new NotFoundException(TRAINEE_NOT_FOUND));
 	}
 }
