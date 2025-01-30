@@ -2,6 +2,8 @@ package com.tnt.gateway.controller;
 
 import static org.springframework.http.HttpStatus.OK;
 
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -37,5 +39,12 @@ public class AuthenticationController {
 	@ResponseStatus(OK)
 	public LogoutResponse logout(@AuthMember String memberId) {
 		return oauthService.logout(memberId);
+	}
+
+	@Operation(summary = "로그인 세션 유효 확인 API")
+	@GetMapping("/check-session")
+	@ResponseStatus(OK)
+	public ResponseEntity<Void> checkSession() {
+		return new ResponseEntity<>(OK);
 	}
 }
