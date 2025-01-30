@@ -1,14 +1,18 @@
 package com.tnt.application.pt;
 
-import static com.tnt.common.error.model.ErrorMessage.*;
-import static java.util.Objects.*;
+import static com.tnt.common.error.model.ErrorMessage.PT_TRAINEE_ALREADY_EXIST;
+import static com.tnt.common.error.model.ErrorMessage.PT_TRAINER_TRAINEE_ALREADY_EXIST;
+import static com.tnt.common.error.model.ErrorMessage.PT_TRAINER_TRAINEE_NOT_FOUND;
+import static java.util.Objects.isNull;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.tnt.application.trainee.PtGoalService;
 import com.tnt.application.trainee.TraineeService;
 import com.tnt.application.trainer.TrainerService;
 import com.tnt.common.error.exception.ConflictException;
@@ -22,7 +26,6 @@ import com.tnt.dto.trainer.ConnectWithTrainerDto;
 import com.tnt.dto.trainer.request.ConnectWithTrainerRequest;
 import com.tnt.dto.trainer.response.ConnectWithTraineeResponse;
 import com.tnt.infrastructure.mysql.repository.pt.PtTrainerTraineeRepository;
-import com.tnt.infrastructure.mysql.repository.trainee.PtGoalRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -33,8 +36,8 @@ public class PtService {
 
 	private final TraineeService traineeService;
 	private final TrainerService trainerService;
+	private final PtGoalService ptGoalService;
 	private final PtTrainerTraineeRepository ptTrainerTraineeRepository;
-	private final PtGoalRepository ptGoalRepository;
 
 	@Transactional
 	public ConnectWithTrainerDto connectWithTrainer(String memberId, ConnectWithTrainerRequest request) {
@@ -72,12 +75,28 @@ public class PtService {
 
 		String traineeAge = calculateCurrentAge(traineeMember.getBirthday());
 
-		List<PtGoal> ptGoals = ptGoalRepository.findAllByTraineeIdAndDeletedAtIsNull(Long.valueOf(traineeId));
+		List<PtGoal> ptGoals = ptGoalService.getAllPtGoalsWithTraineeId(Long.valueOf(traineeId));
 		String ptGoal = getPtGoals(ptGoals);
 
 		return new ConnectWithTraineeResponse(trainerMember.getName(), traineeMember.getName(),
 			trainerMember.getProfileImageUrl(), traineeMember.getProfileImageUrl(), traineeAge, trainee.getHeight(),
 			trainee.getWeight(), ptGoal, trainee.getCautionNote());
+	}
+
+	public PtTrainerTrainee getPtTrainerTraineeWithTrainerId(Long trainerId) {
+		return ptTrainerTraineeRepository.findByTrainerIdAndDeletedAtIsNull(trainerId)
+			.orElseThrow(() -> new NotFoundException(PT_TRAINER_TRAINEE_NOT_FOUND));
+	}
+
+	public PtTrainerTrainee getPtTrainerTraineeWithTraineeId(Long traineeId) {
+		return ptTrainerTraineeRepository.findByTraineeIdAndDeletedAtIsNull(traineeId)
+			.orElseThrow(() -> new NotFoundException(PT_TRAINER_TRAINEE_NOT_FOUND));
+	}
+
+	public void softDeletePtTrainerTrainee(PtTrainerTrainee ptTrainerTrainee) {
+		LocalDateTime now = LocalDateTime.now();
+
+		ptTrainerTrainee.updateDeletedAt(now);
 	}
 
 	private void validateNotAlreadyConnected(Long trainerId, Long traineeId) {

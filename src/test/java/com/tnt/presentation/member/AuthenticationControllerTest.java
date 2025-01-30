@@ -1,6 +1,6 @@
 package com.tnt.presentation.member;
 
-import static com.tnt.common.error.model.ErrorMessage.FAILED_TO_FETCH_USER_INFO;
+import static com.tnt.common.error.model.ErrorMessage.KAKAO_SERVER_ERROR;
 import static com.tnt.common.error.model.ErrorMessage.MEMBER_NOT_FOUND;
 import static com.tnt.common.error.model.ErrorMessage.UNSUPPORTED_SOCIAL_TYPE;
 import static com.tnt.domain.member.MemberType.TRAINEE;
@@ -113,12 +113,12 @@ class AuthenticationControllerTest {
 			// given
 			OAuthLoginRequest request = new OAuthLoginRequest(KAKAO, "fcm", "invalid-token", null, null);
 
-			given(oauthService.oauthLogin(request)).willThrow(new OAuthException(FAILED_TO_FETCH_USER_INFO));
+			given(oauthService.oauthLogin(request)).willThrow(new OAuthException(KAKAO_SERVER_ERROR));
 
 			// when & then
 			assertThatThrownBy(() -> authenticationController.oauthLogin(request))
 				.isInstanceOf(OAuthException.class)
-				.hasMessage(FAILED_TO_FETCH_USER_INFO.getMessage());
+				.hasMessage(KAKAO_SERVER_ERROR.getMessage());
 		}
 
 		@Test

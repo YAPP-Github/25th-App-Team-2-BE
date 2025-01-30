@@ -1,9 +1,9 @@
 package com.tnt.gateway.service;
 
 import static com.tnt.common.error.model.ErrorMessage.*;
-import static com.tnt.domain.member.MemberType.*;
-import static io.hypersistence.tsid.TSID.Factory.*;
-import static java.util.Objects.*;
+import static com.tnt.domain.member.MemberType.UNREGISTERED;
+import static io.hypersistence.tsid.TSID.Factory.getTsid;
+import static java.util.Objects.isNull;
 
 import java.math.BigInteger;
 import java.security.KeyFactory;
@@ -33,6 +33,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.JWTVerifier;
+import com.tnt.application.member.MemberService;
 import com.tnt.common.error.exception.OAuthException;
 import com.tnt.common.error.model.ErrorMessage;
 import com.tnt.domain.member.Member;
@@ -45,7 +46,6 @@ import com.tnt.gateway.dto.KakaoUserInfo;
 import com.tnt.gateway.dto.OAuthLoginRequest;
 import com.tnt.gateway.dto.OAuthLoginResponse;
 import com.tnt.gateway.dto.OAuthUserInfo;
-import com.tnt.infrastructure.mysql.repository.member.MemberRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -59,7 +59,7 @@ public class OAuthService {
 
 	private final WebClient webClient;
 	private final SessionService sessionService;
-	private final MemberRepository memberRepository;
+	private final MemberService memberService;
 
 	@Value("${spring.security.oauth2.client.provider.kakao.user-info-uri}")
 	private String kakaoApiUrl;
@@ -84,7 +84,7 @@ public class OAuthService {
 		OAuthUserInfo oauthInfo = extractOAuthUserInfo(request);
 		String socialId = oauthInfo.getId();
 		String socialEmail = oauthInfo.getEmail();
-		Member member = findMemberFromDB(socialId, request.socialType());
+		Member member = memberService.getMemberWithSocialIdAndSocialType(socialId, request.socialType());
 
 		if (isNull(member)) {
 			return new OAuthLoginResponse(null, socialId, socialEmail, request.socialType(), false, UNREGISTERED);
@@ -109,7 +109,7 @@ public class OAuthService {
 	public void revoke(String socialid, SocialType socialType, WithdrawRequest request) {
 		switch (socialType) {
 			case KAKAO -> unlinkKakao(socialid, request.socialAccessToken());
-			case APPLE -> unlinkApple(request.authorizationCode(), request.idToken());
+			case APPLE -> unlinkApple(request.authorizationCode());
 			default -> throw new IllegalArgumentException(UNSUPPORTED_SOCIAL_TYPE.getMessage());
 		}
 	}
@@ -127,7 +127,7 @@ public class OAuthService {
 			.uri(kakaoApiUrl)
 			.headers(headers -> headers.setBearerAuth(socialAccessToken))
 			.retrieve()
-			.onStatus(HttpStatusCode::isError, response -> handleErrorResponse(response, FAILED_TO_FETCH_USER_INFO))
+			.onStatus(HttpStatusCode::isError, response -> handleErrorResponse(response, KAKAO_SERVER_ERROR))
 			.bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {
 			})
 			.block();
@@ -136,10 +136,6 @@ public class OAuthService {
 	private Map<String, Object> handleAppleLogin(OAuthLoginRequest request) {
 		String idToken = Optional.ofNullable(request.idToken()) // Android
 			.orElseGet(() -> getAppleAuthToken(request.authorizationCode()).getIdToken()); // iOS
-
-		if (isNull(idToken)) {
-			throw new OAuthException(APPLE_AUTH_ERROR);
-		}
 
 		try {
 			// Apple의 공개키 가져오기
@@ -173,22 +169,21 @@ public class OAuthService {
 		}
 	}
 
-	// Apple 서버에 authorizationCode를 사용하여 idToken을 요청
+	// Apple 서버에 authorizationCode를 사용하여 TokenInfo 요청
 	private AppleAuthTokenInfo getAppleAuthToken(String authorizationCode) {
 		String clientSecret = generateClientSecret();
 
-		return webClient.post()
-			.uri(appleApiUrl + "/auth/token")
-			.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-			.body(createAuthRequestBody(authorizationCode, clientSecret))
-			.retrieve()
-			.onStatus(HttpStatusCode::is4xxClientError, response -> handleErrorResponse(response, APPLE_CLIENT_ERROR))
-			.onStatus(HttpStatusCode::is5xxServerError, response -> handleErrorResponse(response, APPLE_SERVER_ERROR))
-			.bodyToMono(Map.class)
-			.map(response -> new AppleAuthTokenInfo((String)response.get("accessToken"),
-				(Integer)response.get("expiresIn"), (String)response.get("idToken"),
-				(String)response.get("refreshToken"), (String)response.get("tokenType")))
-			.block();
+		return Optional.ofNullable(webClient.post()
+				.uri(appleApiUrl + "/auth/token")
+				.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+				.body(createAppleAuthRequestBody(authorizationCode, clientSecret))
+				.retrieve()
+				.bodyToMono(Map.class)
+				.map(response -> new AppleAuthTokenInfo((String)response.get("accessToken"),
+					(Integer)response.get("expiresIn"), (String)response.get("idToken"),
+					(String)response.get("refreshToken"), (String)response.get("tokenType")))
+				.block())
+			.orElseThrow(() -> new OAuthException(APPLE_AUTH_ERROR));
 	}
 
 	// JWT 형식의 클라이언트 시크릿 생성
@@ -212,11 +207,18 @@ public class OAuthService {
 		}
 	}
 
-	private BodyInserters.FormInserter<String> createAuthRequestBody(String authorizationCode, String clientSecret) {
+	private BodyInserters.FormInserter<String> createAppleAuthRequestBody(String authorizationCode,
+		String clientSecret) {
 		return BodyInserters.fromFormData("client_id", clientId)
 			.with("client_secret", clientSecret)
 			.with("code", authorizationCode)
 			.with("grant_type", "authorization_code");
+	}
+
+	private BodyInserters.FormInserter<String> createAppleRevokeRequestBody(String clientSecret, String token) {
+		return BodyInserters.fromFormData("client_id", clientId)
+			.with("client_secret", clientSecret)
+			.with("token", token);
 	}
 
 	private Mono<? extends Throwable> handleErrorResponse(ClientResponse response, ErrorMessage errorMessage) {
@@ -228,6 +230,7 @@ public class OAuthService {
 		return webClient.get()
 			.uri(appleApiUrl + "/auth/keys")
 			.retrieve()
+			.onStatus(HttpStatusCode::isError, response -> handleErrorResponse(response, APPLE_SERVER_ERROR))
 			.bodyToMono(String.class)
 			.block();
 	}
@@ -276,11 +279,6 @@ public class OAuthService {
 		return userInfo;
 	}
 
-	private Member findMemberFromDB(String socialId, SocialType socialType) {
-		return memberRepository.findBySocialIdAndSocialTypeAndDeletedAtIsNull(socialId,
-			socialType).orElse(null);
-	}
-
 	private void unlinkKakao(String socialId, String accessToken) {
 		webClient.post()
 			.uri("https://kapi.kakao.com/v1/user/unlink")
@@ -288,10 +286,22 @@ public class OAuthService {
 			.contentType(MediaType.APPLICATION_FORM_URLENCODED)
 			.bodyValue("target_id_type=user_id&target_id=" + socialId)
 			.retrieve()
+			.onStatus(HttpStatusCode::isError, response -> handleErrorResponse(response, KAKAO_SERVER_ERROR))
 			.bodyToMono(String.class)
 			.block();
 	}
 
-	private void unlinkApple(String authorizationCode, String idToken) {
+	private void unlinkApple(String authorizationCode) {
+		String clientSecret = generateClientSecret();
+		String token = getAppleAuthToken(authorizationCode).getAccessToken();
+
+		webClient.post()
+			.uri(appleApiUrl + "/auth/revoke")
+			.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+			.body(createAppleRevokeRequestBody(clientSecret, token))
+			.retrieve()
+			.onStatus(HttpStatusCode::isError, response -> handleErrorResponse(response, APPLE_SERVER_ERROR))
+			.bodyToMono(Map.class)
+			.block();
 	}
 }

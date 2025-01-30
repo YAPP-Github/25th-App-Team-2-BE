@@ -1,16 +1,12 @@
 package com.tnt.application.member;
 
 import static com.tnt.common.error.model.ErrorMessage.APPLE_AUTH_ERROR;
-import static com.tnt.common.error.model.ErrorMessage.FAILED_TO_FETCH_USER_INFO;
+import static com.tnt.common.error.model.ErrorMessage.KAKAO_SERVER_ERROR;
 import static com.tnt.domain.member.SocialType.APPLE;
 import static com.tnt.domain.member.SocialType.KAKAO;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.BDDMockito.anyString;
-import static org.mockito.BDDMockito.eq;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.mock;
-import static org.mockito.BDDMockito.verify;
+import static org.mockito.BDDMockito.*;
 
 import java.io.IOException;
 import java.security.KeyPair;
@@ -124,7 +120,7 @@ class OAuthServiceTest {
 			// when & then
 			assertThatThrownBy(() -> oAuthService.oauthLogin(request))
 				.isInstanceOf(OAuthException.class)
-				.hasMessage(FAILED_TO_FETCH_USER_INFO.getMessage());
+				.hasMessage(KAKAO_SERVER_ERROR.getMessage());
 		}
 
 		@Test
@@ -343,7 +339,7 @@ class OAuthServiceTest {
 			// when & then
 			assertThatThrownBy(() -> oAuthService.oauthLogin(request))
 				.isInstanceOf(OAuthException.class)
-				.hasMessage(FAILED_TO_FETCH_USER_INFO.getMessage());
+				.hasMessage(KAKAO_SERVER_ERROR.getMessage());
 		}
 
 		@Test
