@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
 
 import java.time.LocalDate;
-import java.util.Optional;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,13 +17,11 @@ import com.tnt.application.trainee.TraineeService;
 import com.tnt.application.trainer.TrainerService;
 import com.tnt.common.error.exception.ConflictException;
 import com.tnt.domain.member.Member;
-import com.tnt.domain.pt.PtTrainerTrainee;
 import com.tnt.domain.trainee.Trainee;
 import com.tnt.domain.trainer.Trainer;
 import com.tnt.dto.trainer.ConnectWithTrainerDto;
 import com.tnt.dto.trainer.request.ConnectWithTrainerRequest;
 import com.tnt.fixture.MemberFixture;
-import com.tnt.fixture.PtTrainerTraineeFixture;
 import com.tnt.infrastructure.mysql.repository.pt.PtTrainerTraineeRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -76,15 +73,13 @@ class PtServiceTest {
 			finishedPtCount);
 
 		given(trainerService.getTrainerWithInvitationCode(request.invitationCode())).willReturn(trainer);
-		given(traineeService.getTraineeWithMemberId(String.valueOf(traineeMemberId))).willReturn(trainee);
-		given(ptTrainerTraineeRepository.findByTraineeIdAndDeletedAtIsNull(traineeId)).willReturn(
-			Optional.empty());
-		given(ptTrainerTraineeRepository.findByTrainerIdAndTraineeIdAndDeletedAtIsNull(trainerId,
-			traineeId)).willReturn(Optional.empty());
+		given(traineeService.getTraineeWithMemberId(traineeMemberId)).willReturn(trainee);
+		given(ptTrainerTraineeRepository.existsByTraineeIdAndDeletedAtIsNull(traineeId)).willReturn(false);
+		given(ptTrainerTraineeRepository.existsByTrainerIdAndTraineeIdAndDeletedAtIsNull(trainerId, traineeId))
+			.willReturn(false);
 
 		// when
-		ConnectWithTrainerDto connectWithTrainerDto = ptService.connectWithTrainer(String.valueOf(traineeMemberId),
-			request);
+		ConnectWithTrainerDto connectWithTrainerDto = ptService.connectWithTrainer(traineeMemberId, request);
 
 		// then
 		assertThat(connectWithTrainerDto.trainerFcmToken()).isEqualTo(trainerMember.getFcmToken());
@@ -97,7 +92,6 @@ class PtServiceTest {
 		Long traineeMemberId = 20L;
 
 		Long trainerId = 1L;
-		Long otherTrainerId = 99L;
 		Long traineeId = 2L;
 
 		Member trainerMember = MemberFixture.getTrainerMember1();
@@ -124,17 +118,12 @@ class PtServiceTest {
 		ConnectWithTrainerRequest request = new ConnectWithTrainerRequest(invitationCode, startDate, totalPtCount,
 			finishedPtCount);
 
-		PtTrainerTrainee ptTrainerTrainee = PtTrainerTraineeFixture.getPtTrainerTrainee1(otherTrainerId, traineeId);
-
 		given(trainerService.getTrainerWithInvitationCode(request.invitationCode())).willReturn(trainer);
-		given(traineeService.getTraineeWithMemberId(String.valueOf(traineeMemberId))).willReturn(trainee);
-		given(ptTrainerTraineeRepository.findByTraineeIdAndDeletedAtIsNull(traineeId)).willReturn(
-			Optional.of(ptTrainerTrainee));
-
-		String traineeMemberIdStr = String.valueOf(traineeMemberId);
+		given(traineeService.getTraineeWithMemberId(traineeMemberId)).willReturn(trainee);
+		given(ptTrainerTraineeRepository.existsByTraineeIdAndDeletedAtIsNull(traineeId)).willReturn(true);
 
 		// when & then
-		assertThatThrownBy(() -> ptService.connectWithTrainer(traineeMemberIdStr, request))
+		assertThatThrownBy(() -> ptService.connectWithTrainer(traineeMemberId, request))
 			.isInstanceOf(ConflictException.class);
 	}
 
@@ -171,18 +160,14 @@ class PtServiceTest {
 		ConnectWithTrainerRequest request = new ConnectWithTrainerRequest(invitationCode, startDate, totalPtCount,
 			finishedPtCount);
 
-		PtTrainerTrainee ptTrainerTrainee = PtTrainerTraineeFixture.getPtTrainerTrainee1(trainerId, traineeId);
-
 		given(trainerService.getTrainerWithInvitationCode(request.invitationCode())).willReturn(trainer);
-		given(traineeService.getTraineeWithMemberId(String.valueOf(traineeMemberId))).willReturn(trainee);
-		given(ptTrainerTraineeRepository.findByTraineeIdAndDeletedAtIsNull(traineeId)).willReturn(Optional.empty());
-		given(ptTrainerTraineeRepository.findByTrainerIdAndTraineeIdAndDeletedAtIsNull(trainerId,
-			traineeId)).willReturn(Optional.of(ptTrainerTrainee));
-
-		String traineeMemberIdStr = String.valueOf(traineeMemberId);
+		given(traineeService.getTraineeWithMemberId(traineeMemberId)).willReturn(trainee);
+		given(ptTrainerTraineeRepository.existsByTraineeIdAndDeletedAtIsNull(traineeId)).willReturn(false);
+		given(ptTrainerTraineeRepository.existsByTrainerIdAndTraineeIdAndDeletedAtIsNull(trainerId, traineeId))
+			.willReturn(true);
 
 		// when & then
-		assertThatThrownBy(() -> ptService.connectWithTrainer(traineeMemberIdStr, request))
+		assertThatThrownBy(() -> ptService.connectWithTrainer(traineeMemberId, request))
 			.isInstanceOf(ConflictException.class);
 	}
 }

@@ -27,7 +27,7 @@ import com.tnt.dto.member.request.SignUpRequest;
 import com.tnt.dto.member.response.SignUpResponse;
 import com.tnt.gateway.service.SessionService;
 import com.tnt.infrastructure.mysql.repository.member.MemberRepository;
-import com.tnt.infrastructure.mysql.repository.trainee.PtGoalRepository;
+import com.tnt.infrastructure.mysql.repository.pt.PtGoalRepository;
 import com.tnt.infrastructure.mysql.repository.trainee.TraineeRepository;
 import com.tnt.infrastructure.mysql.repository.trainer.TrainerRepository;
 

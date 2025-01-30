@@ -16,16 +16,15 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.security.core.authority.mapping.NullAuthoritiesMapper;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tnt.annotation.WithMockCustomUser;
 import com.tnt.domain.member.Member;
 import com.tnt.domain.member.SocialType;
 import com.tnt.domain.pt.PtTrainerTrainee;
@@ -33,6 +32,7 @@ import com.tnt.domain.trainee.PtGoal;
 import com.tnt.domain.trainee.Trainee;
 import com.tnt.domain.trainer.Trainer;
 import com.tnt.fixture.MemberFixture;
+import com.tnt.gateway.filter.CustomUserDetails;
 import com.tnt.infrastructure.mysql.repository.member.MemberRepository;
 import com.tnt.infrastructure.mysql.repository.pt.PtGoalRepository;
 import com.tnt.infrastructure.mysql.repository.pt.PtTrainerTraineeRepository;
@@ -69,7 +69,7 @@ class TrainerControllerTest {
 
 	@Test
 	@DisplayName("통합 테스트 - 트레이너 초대 코드 불러오기 성공")
-	@WithMockUser(username = "1")
+	@WithMockCustomUser(memberId = 1L)
 	void get_invitation_code_success() throws Exception {
 		// given
 		Long memberId = 1L;
@@ -103,7 +103,7 @@ class TrainerControllerTest {
 
 	@Test
 	@DisplayName("통합 테스트 - 트레이너 초대 코드 불러오기 실패 - 존재하지 않는 계정")
-	@WithMockUser(username = "2")
+	@WithMockCustomUser(memberId = 2L)
 	void get_invitation_code_fail() throws Exception {
 		// given
 		Long memberId = 1L;
@@ -137,7 +137,7 @@ class TrainerControllerTest {
 
 	@Test
 	@DisplayName("통합 테스트 - 트레이너 초대 코드 재발급 성공")
-	@WithMockUser(username = "3")
+	@WithMockCustomUser(memberId = 3L)
 	void reissue_invitation_code_success() throws Exception {
 		// given
 		Long memberId = 3L;
@@ -253,14 +253,12 @@ class TrainerControllerTest {
 		trainerMember = memberRepository.save(trainerMember);
 		traineeMember = memberRepository.save(traineeMember);
 
-		UserDetails traineeUserDetails = User.builder()
-			.username(trainerMember.getId().toString())
-			.password("")
-			.roles("USER")
-			.build();
+		CustomUserDetails trainerUserDetails = new CustomUserDetails(trainerMember.getId(),
+			trainerMember.getId().toString(),
+			authoritiesMapper.mapAuthorities(List.of(new SimpleGrantedAuthority("ROLE_USER"))));
 
-		Authentication authentication = new UsernamePasswordAuthenticationToken(traineeUserDetails, null,
-			authoritiesMapper.mapAuthorities(traineeUserDetails.getAuthorities()));
+		Authentication authentication = new UsernamePasswordAuthenticationToken(trainerUserDetails, null,
+			authoritiesMapper.mapAuthorities(trainerUserDetails.getAuthorities()));
 
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 

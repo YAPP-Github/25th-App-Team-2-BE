@@ -26,9 +26,9 @@ class TraineeServiceTest {
 	@Test
 	void getTraineeWithMemberId_fail() {
 		// given
-		String memberId = "1234567";
+		Long memberId = 1234567L;
 
-		given(traineeSearchRepository.findByMemberIdAndDeletedAtIsNull(Long.valueOf(memberId))).willReturn(
+		given(traineeSearchRepository.findByMemberIdAndDeletedAtIsNull(memberId)).willReturn(
 			Optional.empty());
 
 		// when & then
@@ -39,9 +39,9 @@ class TraineeServiceTest {
 	@Test
 	void getTraineeWithId_fail() {
 		// given
-		String traineeId = "1";
+		Long traineeId = 124124L;
 
-		given(traineeSearchRepository.findByIdAndDeletedAtIsNull(Long.valueOf(traineeId))).willReturn(Optional.empty());
+		given(traineeSearchRepository.findByIdAndDeletedAtIsNull(traineeId)).willReturn(Optional.empty());
 
 		// when & then
 		Assertions.assertThatThrownBy(() -> traineeService.getTraineeWithId(traineeId))

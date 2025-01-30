@@ -5,11 +5,10 @@ import java.util.List;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.security.core.authority.mapping.NullAuthoritiesMapper;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -63,14 +62,11 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
 	}
 
 	private void saveAuthentication(String memberId) {
-		UserDetails userDetails = User.builder()
-			.username(memberId)
-			.password("")
-			.roles("USER")
-			.build();
+		CustomUserDetails userDetails = new CustomUserDetails(Long.valueOf(memberId), memberId,
+			authoritiesMapper.mapAuthorities(List.of(new SimpleGrantedAuthority("ROLE_USER"))));
 
 		Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null,
-			authoritiesMapper.mapAuthorities(userDetails.getAuthorities()));
+			userDetails.getAuthorities());
 
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 

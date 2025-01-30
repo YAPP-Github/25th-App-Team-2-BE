@@ -22,7 +22,7 @@ public class TrainerService {
 	private final TrainerRepository trainerRepository;
 	private final TrainerSearchRepository trainerSearchRepository;
 
-	public InvitationCodeResponse getInvitationCode(String memberId) {
+	public InvitationCodeResponse getInvitationCode(Long memberId) {
 		Trainer trainer = getTrainerWithMemberId(memberId);
 
 		return new InvitationCodeResponse(trainer.getInvitationCode());
@@ -35,15 +35,15 @@ public class TrainerService {
 	}
 
 	@Transactional
-	public InvitationCodeResponse reissueInvitationCode(String memberId) {
+	public InvitationCodeResponse reissueInvitationCode(Long memberId) {
 		Trainer trainer = getTrainerWithMemberId(memberId);
 		trainer.setNewInvitationCode();
 
 		return new InvitationCodeResponse(trainer.getInvitationCode());
 	}
 
-	public Trainer getTrainerWithMemberId(String memberId) {
-		return trainerRepository.findByMemberIdAndDeletedAtIsNull(Long.valueOf(memberId))
+	public Trainer getTrainerWithMemberId(Long memberId) {
+		return trainerRepository.findByMemberIdAndDeletedAtIsNull(memberId)
 			.orElseThrow(() -> new NotFoundException(TRAINER_NOT_FOUND));
 	}
 

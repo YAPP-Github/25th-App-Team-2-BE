@@ -68,7 +68,7 @@ class TrainerServiceTest {
 			java.util.Optional.of(trainer));
 
 		// when
-		InvitationCodeResponse response = trainerService.getInvitationCode(String.valueOf(memberId));
+		InvitationCodeResponse response = trainerService.getInvitationCode(memberId);
 
 		// then
 		assertThat(response.invitationCode()).isNotNull();
@@ -80,12 +80,11 @@ class TrainerServiceTest {
 	void get_invitation_code_no_member_fail() {
 		// given
 		Long memberId = 99L;
-		String memberIdString = String.valueOf(memberId);
 
 		given(trainerRepository.findByMemberIdAndDeletedAtIsNull(memberId)).willReturn(java.util.Optional.empty());
 
 		// when & then
-		assertThatThrownBy(() -> trainerService.getInvitationCode(memberIdString)).isInstanceOf(
+		assertThatThrownBy(() -> trainerService.getInvitationCode(memberId)).isInstanceOf(
 			NotFoundException.class);
 	}
 
@@ -124,7 +123,7 @@ class TrainerServiceTest {
 			java.util.Optional.of(trainer));
 
 		// when
-		InvitationCodeResponse response = trainerService.reissueInvitationCode(String.valueOf(memberId));
+		InvitationCodeResponse response = trainerService.reissueInvitationCode(memberId);
 
 		// then
 		assertThat(response.invitationCode()).isNotNull();

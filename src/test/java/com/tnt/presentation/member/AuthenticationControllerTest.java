@@ -144,13 +144,13 @@ class AuthenticationControllerTest {
 		@DisplayName("로그아웃 성공")
 		void logout_success() {
 			// given
-			String memberId = "testMemberId";
+			Long memberId = 111L;
 			String sessionId = "testSessionId";
 
 			given(oauthService.logout(memberId)).willReturn(new LogoutResponse(sessionId));
 
 			// when
-			LogoutResponse response = authenticationController.logout("testMemberId");
+			LogoutResponse response = authenticationController.logout(memberId);
 
 			//then
 			assertThat(response.sessionId()).isEqualTo(sessionId);

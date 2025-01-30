@@ -37,7 +37,7 @@ public class AuthenticationController {
 	@Operation(summary = "로그아웃 API")
 	@PostMapping("/logout")
 	@ResponseStatus(OK)
-	public LogoutResponse logout(@AuthMember String memberId) {
+	public LogoutResponse logout(@AuthMember Long memberId) {
 		return oauthService.logout(memberId);
 	}
 
