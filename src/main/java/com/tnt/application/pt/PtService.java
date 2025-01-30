@@ -8,6 +8,7 @@ import static java.util.Objects.isNull;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -83,14 +84,12 @@ public class PtService {
 			trainee.getWeight(), ptGoal, trainee.getCautionNote());
 	}
 
-	public PtTrainerTrainee getPtTrainerTraineeWithTrainerId(Long trainerId) {
-		return ptTrainerTraineeRepository.findByTrainerIdAndDeletedAtIsNull(trainerId)
-			.orElseThrow(() -> new NotFoundException(PT_TRAINER_TRAINEE_NOT_FOUND));
+	public Optional<PtTrainerTrainee> getPtTrainerTraineeWithTrainerId(Long trainerId) {
+		return ptTrainerTraineeRepository.findByTrainerIdAndDeletedAtIsNull(trainerId);
 	}
 
-	public PtTrainerTrainee getPtTrainerTraineeWithTraineeId(Long traineeId) {
-		return ptTrainerTraineeRepository.findByTraineeIdAndDeletedAtIsNull(traineeId)
-			.orElseThrow(() -> new NotFoundException(PT_TRAINER_TRAINEE_NOT_FOUND));
+	public Optional<PtTrainerTrainee> getPtTrainerTraineeWithTraineeId(Long traineeId) {
+		return ptTrainerTraineeRepository.findByTraineeIdAndDeletedAtIsNull(traineeId);
 	}
 
 	public void softDeletePtTrainerTrainee(PtTrainerTrainee ptTrainerTrainee) {

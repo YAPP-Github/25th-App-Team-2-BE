@@ -185,4 +185,20 @@ class PtServiceTest {
 		assertThatThrownBy(() -> ptService.connectWithTrainer(traineeMemberIdStr, request))
 			.isInstanceOf(ConflictException.class);
 	}
+
+	@Test
+	@DisplayName("PT 연결 정보 soft delete 성공")
+	void soft_delete_pt_trainer_trainee_success() {
+		// given
+		Long trainerId = 1L;
+		Long traineeId = 2L;
+
+		PtTrainerTrainee ptTrainerTrainee = PtTrainerTraineeFixture.getPtTrainerTrainee1(trainerId, traineeId);
+
+		// when
+		ptService.softDeletePtTrainerTrainee(ptTrainerTrainee);
+
+		// then
+		assertThat(ptTrainerTrainee.getDeletedAt()).isNotNull();
+	}
 }

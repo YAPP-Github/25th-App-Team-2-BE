@@ -60,27 +60,11 @@ class AuthenticationControllerTest {
 		}
 
 		@Test
-		@DisplayName("ANDROID - Apple 로그인 성공")
-		void apple_login_with_android_success() {
-			// given
-			OAuthLoginRequest request = new OAuthLoginRequest(APPLE, "fcm", null, null, "test-id-token");
-
-			given(oauthService.oauthLogin(request)).willReturn(
-				new OAuthLoginResponse("123456789", "", "", null, true, TRAINEE));
-
-			// when
-			OAuthLoginResponse response = authenticationController.oauthLogin(request);
-
-			// then
-			assertThat(response.sessionId()).isEqualTo("123456789");
-			verify(oauthService).oauthLogin(request);
-		}
-
-		@Test
-		@DisplayName("iOS - Apple 로그인 성공")
+		@DisplayName("Apple 로그인 성공")
 		void apple_login_with_ios_success() {
 			// given
-			OAuthLoginRequest request = new OAuthLoginRequest(APPLE, "fcm", null, "test-authorization-code", null);
+			OAuthLoginRequest request = new OAuthLoginRequest(APPLE, "fcm", null, "test-authorization-code",
+				"test-id-token");
 
 			given(oauthService.oauthLogin(request)).willReturn(
 				new OAuthLoginResponse("123456789", "", "", null, true, TRAINEE));
