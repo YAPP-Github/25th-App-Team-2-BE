@@ -2,10 +2,10 @@ package com.tnt.application.pt;
 
 import static com.tnt.common.error.model.ErrorMessage.PT_TRAINEE_ALREADY_EXIST;
 import static com.tnt.common.error.model.ErrorMessage.PT_TRAINER_TRAINEE_ALREADY_EXIST;
-import static java.util.Objects.isNull;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,8 +23,9 @@ import com.tnt.domain.trainer.Trainer;
 import com.tnt.dto.trainer.ConnectWithTrainerDto;
 import com.tnt.dto.trainer.request.ConnectWithTrainerRequest;
 import com.tnt.dto.trainer.response.ConnectWithTraineeResponse;
+import com.tnt.dto.trainer.response.GetPtLessonsOnDateResponse;
+import com.tnt.infrastructure.mysql.repository.pt.PtGoalRepository;
 import com.tnt.infrastructure.mysql.repository.pt.PtTrainerTraineeRepository;
-import com.tnt.infrastructure.mysql.repository.trainee.PtGoalRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -72,14 +73,16 @@ public class PtService {
 		Member trainerMember = trainer.getMember(); // fetch join 으로 가져온 member
 		Member traineeMember = trainee.getMember(); // fetch join 으로 가져온 member
 
-		String traineeAge = calculateCurrentAge(traineeMember.getBirthday());
-
 		List<PtGoal> ptGoals = ptGoalRepository.findAllByTraineeId(Long.valueOf(traineeId));
-		String ptGoal = getPtGoals(ptGoals);
+		String ptGoal = ptGoals.stream().map(PtGoal::getContent).collect(Collectors.joining(", "));
 
 		return new ConnectWithTraineeResponse(trainerMember.getName(), traineeMember.getName(),
-			trainerMember.getProfileImageUrl(), traineeMember.getProfileImageUrl(), traineeAge, trainee.getHeight(),
-			trainee.getWeight(), ptGoal, trainee.getCautionNote());
+			trainerMember.getProfileImageUrl(), traineeMember.getProfileImageUrl(), traineeMember.getAge(),
+			trainee.getHeight(), trainee.getWeight(), ptGoal, trainee.getCautionNote());
+	}
+
+	public GetPtLessonsOnDateResponse getPtLessonsOnDate(String memberId, LocalDate date) {
+		return null;
 	}
 
 	private void validateNotAlreadyConnected(Long trainerId, Long traineeId) {
@@ -98,35 +101,5 @@ public class PtService {
 		ptTrainerTraineeRepository.findByTrainerIdAndTraineeIdAndDeletedAtIsNull(Long.valueOf(trainerId),
 				Long.valueOf(traineeId))
 			.orElseThrow(() -> new NotFoundException(ErrorMessage.PT_TRAINER_TRAINEE_NOT_FOUND));
-	}
-
-	private String calculateCurrentAge(LocalDate birthDay) {
-		if (isNull(birthDay)) {
-			return "비공개";
-		}
-
-		LocalDate currentDate = LocalDate.now();
-		int age = currentDate.getYear() - birthDay.getYear();
-
-		// 생일이 아직 지나지 않았으면 나이를 1 줄임
-		if (currentDate.isBefore(birthDay.withYear(currentDate.getYear()))) {
-			age--;
-		}
-
-		return String.valueOf(age);
-	}
-
-	private String getPtGoals(List<PtGoal> ptGoals) {
-		StringBuilder sb = new StringBuilder();
-
-		for (int i = 0; i < ptGoals.size(); i++) {
-			sb.append(ptGoals.get(i).getContent());
-
-			if (i != ptGoals.size() - 1) {
-				sb.append(", ");
-			}
-		}
-
-		return sb.toString();
 	}
 }
