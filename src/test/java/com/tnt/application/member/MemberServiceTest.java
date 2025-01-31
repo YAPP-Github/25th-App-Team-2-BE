@@ -23,9 +23,6 @@ import com.tnt.domain.member.Member;
 import com.tnt.domain.member.SocialType;
 import com.tnt.fixture.MemberFixture;
 import com.tnt.infrastructure.mysql.repository.member.MemberRepository;
-import com.tnt.infrastructure.mysql.repository.pt.PtGoalRepository;
-import com.tnt.infrastructure.mysql.repository.trainee.TraineeRepository;
-import com.tnt.infrastructure.mysql.repository.trainer.TrainerRepository;
 
 @ExtendWith(MockitoExtension.class)
 class MemberServiceTest {
@@ -45,7 +42,7 @@ class MemberServiceTest {
 		given(memberRepository.findByIdAndDeletedAtIsNull(1L)).willReturn(Optional.ofNullable(trainerMember));
 
 		// when
-		Member result = memberService.getMemberWithMemberId(String.valueOf(requireNonNull(trainerMember).getId()));
+		Member result = memberService.getMemberWithMemberId(requireNonNull(trainerMember).getId());
 
 		// then
 		assertThat(result).isNotNull().isEqualTo(trainerMember);
@@ -56,7 +53,7 @@ class MemberServiceTest {
 	@DisplayName("존재하지 않는 memberId로 회원 조회시 실패")
 	void get_member_with_member_id_error() {
 		// given
-		String memberId = "999";
+		Long memberId = 999L;
 
 		given(memberRepository.findByIdAndDeletedAtIsNull(999L)).willReturn(Optional.empty());
 

@@ -1,4 +1,4 @@
-package com.tnt.application.trainee;
+package com.tnt.application.pt;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
@@ -13,8 +13,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.tnt.application.trainee.PtGoalService;
 import com.tnt.domain.trainee.PtGoal;
-import com.tnt.infrastructure.mysql.repository.trainee.PtGoalRepository;
+import com.tnt.infrastructure.mysql.repository.pt.PtGoalRepository;
 
 @ExtendWith(MockitoExtension.class)
 class PtGoalServiceTest {

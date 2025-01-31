@@ -29,11 +29,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.security.core.authority.mapping.NullAuthoritiesMapper;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.ClientResponse;
@@ -46,6 +45,8 @@ import com.tnt.domain.trainer.Trainer;
 import com.tnt.dto.member.request.SignUpRequest;
 import com.tnt.dto.member.request.WithdrawRequest;
 import com.tnt.fixture.MemberFixture;
+import com.tnt.fixture.TraineeFixture;
+import com.tnt.gateway.filter.CustomUserDetails;
 import com.tnt.infrastructure.mysql.repository.member.MemberRepository;
 import com.tnt.infrastructure.mysql.repository.trainee.TraineeRepository;
 import com.tnt.infrastructure.mysql.repository.trainer.TrainerRepository;
@@ -150,13 +151,10 @@ class MemberControllerTest extends AbstractContainerBaseTest {
 		// given
 		Member trainerMember = MemberFixture.getTrainerMember1();
 
-		trainerMember = memberRepository.save(trainerMember);
+		Member member = memberRepository.save(trainerMember);
 
-		UserDetails traineeUserDetails = User.builder()
-			.username(trainerMember.getId().toString())
-			.password("")
-			.roles("USER")
-			.build();
+		CustomUserDetails traineeUserDetails = new CustomUserDetails(member.getId(),
+			String.valueOf(member.getId()), List.of(new SimpleGrantedAuthority("ROLE_USER")));
 
 		Authentication authentication = new UsernamePasswordAuthenticationToken(traineeUserDetails, null,
 			authoritiesMapper.mapAuthorities(traineeUserDetails.getAuthorities()));
@@ -186,25 +184,17 @@ class MemberControllerTest extends AbstractContainerBaseTest {
 		// given
 		Member traineeMember = MemberFixture.getTraineeMember1();
 
-		traineeMember = memberRepository.save(traineeMember);
+		Member member = memberRepository.save(traineeMember);
 
-		UserDetails traineeUserDetails = User.builder()
-			.username(traineeMember.getId().toString())
-			.password("")
-			.roles("USER")
-			.build();
+		CustomUserDetails traineeUserDetails = new CustomUserDetails(member.getId(),
+			String.valueOf(member.getId()), List.of(new SimpleGrantedAuthority("ROLE_USER")));
 
 		Authentication authentication = new UsernamePasswordAuthenticationToken(traineeUserDetails, null,
 			authoritiesMapper.mapAuthorities(traineeUserDetails.getAuthorities()));
 
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
-		Trainee trainee = Trainee.builder()
-			.member(traineeMember)
-			.height(180.5)
-			.weight(78.4)
-			.cautionNote("주의사항")
-			.build();
+		Trainee trainee = TraineeFixture.getTrainee2(traineeMember);
 
 		traineeRepository.save(trainee);
 
@@ -225,13 +215,10 @@ class MemberControllerTest extends AbstractContainerBaseTest {
 		// given
 		Member traineeMember = MemberFixture.getTraineeMember2();
 
-		traineeMember = memberRepository.save(traineeMember);
+		Member member = memberRepository.save(traineeMember);
 
-		UserDetails traineeUserDetails = User.builder()
-			.username(traineeMember.getId().toString())
-			.password("")
-			.roles("USER")
-			.build();
+		CustomUserDetails traineeUserDetails = new CustomUserDetails(member.getId(),
+			String.valueOf(member.getId()), List.of(new SimpleGrantedAuthority("ROLE_USER")));
 
 		Authentication authentication = new UsernamePasswordAuthenticationToken(traineeUserDetails, null,
 			authoritiesMapper.mapAuthorities(traineeUserDetails.getAuthorities()));

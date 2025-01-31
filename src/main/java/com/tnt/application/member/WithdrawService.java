@@ -34,27 +34,27 @@ public class WithdrawService {
 	private final PtService ptService;
 
 	@Transactional
-	public void withdraw(String memberId, WithdrawRequest request) {
+	public void withdraw(Long memberId, WithdrawRequest request) {
 		Member member = memberService.getMemberWithMemberId(memberId);
 
 		softDeleteWithMemberData(member);
 
 		oAuthService.revoke(member.getSocialId(), member.getSocialType(), request);
 
-		sessionService.removeSession(memberId);
+		sessionService.removeSession(String.valueOf(memberId));
 	}
 
 	private void softDeleteWithMemberData(Member member) {
 		switch (member.getMemberType()) {
 			case TRAINER -> {
-				Trainer trainer = trainerService.getTrainerWithMemberId(String.valueOf(member.getId()));
+				Trainer trainer = trainerService.getTrainerWithMemberId(member.getId());
 
 				ptService.getPtTrainerTraineeWithTrainerId(trainer.getId())
 					.ifPresent(ptService::softDeletePtTrainerTrainee);
 				trainerService.softDeleteTrainer(trainer);
 			}
 			case TRAINEE -> {
-				Trainee trainee = traineeService.getTraineeWithMemberId(String.valueOf(member.getId()));
+				Trainee trainee = traineeService.getTraineeWithMemberId(member.getId());
 				List<PtGoal> ptGoals = ptGoalService.getAllPtGoalsWithTraineeId(trainee.getId());
 
 				ptService.getPtTrainerTraineeWithTraineeId(trainee.getId())

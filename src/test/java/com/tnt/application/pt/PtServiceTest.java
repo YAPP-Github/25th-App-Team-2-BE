@@ -158,10 +158,13 @@ class PtServiceTest {
 	@DisplayName("PT 연결 정보 soft delete 성공")
 	void soft_delete_pt_trainer_trainee_success() {
 		// given
-		Long trainerId = 1L;
-		Long traineeId = 2L;
+		Member trainerMember = MemberFixture.getTrainerMember1();
+		Member traineeMember = MemberFixture.getTraineeMember1();
 
-		PtTrainerTrainee ptTrainerTrainee = PtTrainerTraineeFixture.getPtTrainerTrainee1(trainerId, traineeId);
+		Trainer trainer = TrainerFixture.getTrainer2(trainerMember);
+		Trainee trainee = TraineeFixture.getTrainee2(traineeMember);
+
+		PtTrainerTrainee ptTrainerTrainee = PtTrainerTraineeFixture.getPtTrainerTrainee1(trainer, trainee);
 
 		// when
 		ptService.softDeletePtTrainerTrainee(ptTrainerTrainee);

@@ -1,7 +1,5 @@
 package com.tnt.domain.trainee;
 
-import static com.tnt.common.error.model.ErrorMessage.*;
-import static java.util.Objects.*;
 import static com.tnt.common.error.model.ErrorMessage.TRAINEE_INVALID_CAUTION_NOTE;
 import static com.tnt.common.error.model.ErrorMessage.TRAINEE_NULL_HEIGHT;
 import static com.tnt.common.error.model.ErrorMessage.TRAINEE_NULL_MEMBER;
@@ -69,10 +67,6 @@ public class Trainee extends BaseTimeEntity {
 		validateAndSetCautionNote(cautionNote);
 	}
 
-	public void updateDeletedAt(LocalDateTime deletedAt) {
-		this.deletedAt = deletedAt;
-	}
-
 	private void validateAndSetCautionNote(String cautionNote) {
 		if (isNull(cautionNote)) {
 			return;
@@ -83,5 +77,9 @@ public class Trainee extends BaseTimeEntity {
 		}
 
 		this.cautionNote = cautionNote;
+	}
+
+	public void updateDeletedAt(LocalDateTime deletedAt) {
+		this.deletedAt = deletedAt;
 	}
 }

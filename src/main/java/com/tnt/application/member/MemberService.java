@@ -13,9 +13,6 @@ import com.tnt.common.error.exception.NotFoundException;
 import com.tnt.domain.member.Member;
 import com.tnt.domain.member.SocialType;
 import com.tnt.infrastructure.mysql.repository.member.MemberRepository;
-import com.tnt.infrastructure.mysql.repository.pt.PtGoalRepository;
-import com.tnt.infrastructure.mysql.repository.trainee.TraineeRepository;
-import com.tnt.infrastructure.mysql.repository.trainer.TrainerRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -26,8 +23,8 @@ public class MemberService {
 
 	private final MemberRepository memberRepository;
 
-	public Member getMemberWithMemberId(String memberId) {
-		return memberRepository.findByIdAndDeletedAtIsNull(Long.valueOf(memberId))
+	public Member getMemberWithMemberId(Long memberId) {
+		return memberRepository.findByIdAndDeletedAtIsNull(memberId)
 			.orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
 	}
 

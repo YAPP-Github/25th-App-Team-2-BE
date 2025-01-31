@@ -2,8 +2,6 @@ package com.tnt.application.pt;
 
 import static com.tnt.common.error.model.ErrorMessage.PT_TRAINEE_ALREADY_EXIST;
 import static com.tnt.common.error.model.ErrorMessage.PT_TRAINER_TRAINEE_ALREADY_EXIST;
-import static com.tnt.common.error.model.ErrorMessage.PT_TRAINER_TRAINEE_NOT_FOUND;
-import static java.util.Objects.isNull;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -34,7 +32,6 @@ import com.tnt.dto.trainer.response.GetPtLessonsOnDateResponse.Lesson;
 import com.tnt.infrastructure.mysql.repository.pt.PtGoalRepository;
 import com.tnt.infrastructure.mysql.repository.pt.PtLessonSearchRepository;
 import com.tnt.infrastructure.mysql.repository.pt.PtTrainerTraineeRepository;
-import com.tnt.infrastructure.mysql.repository.trainee.PtGoalRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -84,7 +81,7 @@ public class PtService {
 		Member trainerMember = trainer.getMember(); // fetch join 으로 가져온 member
 		Member traineeMember = trainee.getMember(); // fetch join 으로 가져온 member
 
-		List<PtGoal> ptGoals = ptGoalService.getAllPtGoalsWithTraineeId(Long.valueOf(traineeId));
+		List<PtGoal> ptGoals = ptGoalService.getAllPtGoalsWithTraineeId(traineeId);
 		String ptGoal = ptGoals.stream().map(PtGoal::getContent).collect(Collectors.joining(", "));
 
 		return new ConnectWithTraineeResponse(trainerMember.getName(), traineeMember.getName(),
@@ -117,12 +114,6 @@ public class PtService {
 		return ptTrainerTraineeRepository.findByTraineeIdAndDeletedAtIsNull(traineeId);
 	}
 
-	public void softDeletePtTrainerTrainee(PtTrainerTrainee ptTrainerTrainee) {
-		LocalDateTime now = LocalDateTime.now();
-
-		ptTrainerTrainee.updateDeletedAt(now);
-	}
-
 	private void validateNotAlreadyConnected(Long trainerId, Long traineeId) {
 		if (ptTrainerTraineeRepository.existsByTraineeIdAndDeletedAtIsNull(traineeId)) {
 			throw new ConflictException(PT_TRAINEE_ALREADY_EXIST);
@@ -133,15 +124,15 @@ public class PtService {
 		}
 	}
 
-	private void validateIfNotConnected(String trainerId, String traineeId) {
-		ptTrainerTraineeRepository.findByTrainerIdAndTraineeIdAndDeletedAtIsNull(Long.valueOf(trainerId),
-				Long.valueOf(traineeId))
-			.orElseThrow(() -> new NotFoundException(PT_TRAINER_TRAINEE_NOT_FOUND));
-	}
-
 	private void validateIfNotConnected(Long trainerId, Long traineeId) {
 		if (!ptTrainerTraineeRepository.existsByTrainerIdAndTraineeIdAndDeletedAtIsNull(trainerId, traineeId)) {
 			throw new NotFoundException(ErrorMessage.PT_TRAINER_TRAINEE_NOT_FOUND);
 		}
+	}
+
+	public void softDeletePtTrainerTrainee(PtTrainerTrainee ptTrainerTrainee) {
+		LocalDateTime now = LocalDateTime.now();
+
+		ptTrainerTrainee.updateDeletedAt(now);
 	}
 }

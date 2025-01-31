@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.tnt.domain.trainee.PtGoal;
-import com.tnt.infrastructure.mysql.repository.trainee.PtGoalRepository;
+import com.tnt.infrastructure.mysql.repository.pt.PtGoalRepository;
 
 import lombok.RequiredArgsConstructor;
 

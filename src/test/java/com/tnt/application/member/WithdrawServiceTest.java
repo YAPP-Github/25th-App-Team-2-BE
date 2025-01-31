@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,6 +25,9 @@ import com.tnt.domain.trainee.Trainee;
 import com.tnt.domain.trainer.Trainer;
 import com.tnt.dto.member.request.WithdrawRequest;
 import com.tnt.fixture.MemberFixture;
+import com.tnt.fixture.PtTrainerTraineeFixture;
+import com.tnt.fixture.TraineeFixture;
+import com.tnt.fixture.TrainerFixture;
 import com.tnt.gateway.service.OAuthService;
 import com.tnt.gateway.service.SessionService;
 
@@ -68,12 +70,12 @@ class WithdrawServiceTest {
 
 		WithdrawRequest request = new WithdrawRequest("accessToken", "authCode");
 
-		given(memberService.getMemberWithMemberId(String.valueOf(trainerMember.getId()))).willReturn(trainerMember);
-		given(trainerService.getTrainerWithMemberId(trainerMember.getId().toString())).willReturn(trainer);
+		given(memberService.getMemberWithMemberId(trainerMember.getId())).willReturn(trainerMember);
+		given(trainerService.getTrainerWithMemberId(trainerMember.getId())).willReturn(trainer);
 		given(ptService.getPtTrainerTraineeWithTrainerId(trainer.getId())).willReturn(Optional.empty());
 
 		// when
-		withdrawService.withdraw(String.valueOf(trainerMember.getId()), request);
+		withdrawService.withdraw(trainerMember.getId(), request);
 
 		// then
 		verify(trainerService).softDeleteTrainer(trainer);
@@ -98,13 +100,13 @@ class WithdrawServiceTest {
 
 		WithdrawRequest request = new WithdrawRequest("accessToken", "authCode");
 
-		given(memberService.getMemberWithMemberId(String.valueOf(traineeMember.getId()))).willReturn(traineeMember);
-		given(traineeService.getTraineeWithMemberId(traineeMember.getId().toString())).willReturn(trainee);
+		given(memberService.getMemberWithMemberId(traineeMember.getId())).willReturn(traineeMember);
+		given(traineeService.getTraineeWithMemberId(traineeMember.getId())).willReturn(trainee);
 		given(ptGoalService.getAllPtGoalsWithTraineeId(trainee.getId())).willReturn(ptGoals);
 		given(ptService.getPtTrainerTraineeWithTraineeId(trainee.getId())).willReturn(Optional.empty());
 
 		// when
-		withdrawService.withdraw(String.valueOf(traineeMember.getId()), request);
+		withdrawService.withdraw(traineeMember.getId(), request);
 
 		// then
 		verify(ptGoalService).softDeleteAllPtGoals(ptGoals);
@@ -118,7 +120,7 @@ class WithdrawServiceTest {
 	@DisplayName("지원하지 않는 회원 타입으로 탈퇴 시도시 실패")
 	void withdraw_unsupported_member_type_error() {
 		// given
-		String memberId = String.valueOf(1L);
+		Long memberId = 1L;
 		Member traineeMember = MemberFixture.getTraineeMember2WithId();
 
 		WithdrawRequest request = new WithdrawRequest("accessToken", "authCode");
@@ -136,27 +138,20 @@ class WithdrawServiceTest {
 	void withdraw_trainer_with_pt_success() {
 		// given
 		Member trainerMember = MemberFixture.getTrainerMember1WithId();
-		Trainer trainer = Trainer.builder()
-			.id(1L)
-			.member(trainerMember)
-			.build();
+		Member traineeMember = MemberFixture.getTraineeMember2WithId();
 
-		PtTrainerTrainee ptTrainerTrainee = PtTrainerTrainee.builder()
-			.trainerId(trainer.getId())
-			.traineeId(2L)
-			.startedAt(LocalDate.now())
-			.finishedPtCount(0)
-			.totalPtCount(10)
-			.build();
+		Trainer trainer = TrainerFixture.getTrainer1(1L, trainerMember);
+		Trainee trainee = TraineeFixture.getTrainee1(1L, traineeMember);
+		PtTrainerTrainee ptTrainerTrainee = PtTrainerTraineeFixture.getPtTrainerTrainee1(trainer, trainee);
 
 		WithdrawRequest request = new WithdrawRequest("accessToken", "authCode");
 
-		given(memberService.getMemberWithMemberId(String.valueOf(trainerMember.getId()))).willReturn(trainerMember);
-		given(trainerService.getTrainerWithMemberId(trainerMember.getId().toString())).willReturn(trainer);
+		given(memberService.getMemberWithMemberId(trainerMember.getId())).willReturn(trainerMember);
+		given(trainerService.getTrainerWithMemberId(trainerMember.getId())).willReturn(trainer);
 		given(ptService.getPtTrainerTraineeWithTrainerId(trainer.getId())).willReturn(Optional.of(ptTrainerTrainee));
 
 		// when
-		withdrawService.withdraw(String.valueOf(trainerMember.getId()), request);
+		withdrawService.withdraw(trainerMember.getId(), request);
 
 		// then
 		verify(ptService).softDeletePtTrainerTrainee(ptTrainerTrainee);
@@ -170,33 +165,24 @@ class WithdrawServiceTest {
 	@DisplayName("PT 관계가 있는 트레이니 회원 탈퇴 성공")
 	void withdraw_trainee_with_pt_success() {
 		// given
+		Member trainerMember = MemberFixture.getTrainerMember1WithId();
 		Member traineeMember = MemberFixture.getTraineeMember1WithId();
-		Trainee trainee = Trainee.builder()
-			.id(1L)
-			.member(traineeMember)
-			.height(180.0)
-			.weight(75.0)
-			.build();
+
+		Trainer trainer = TrainerFixture.getTrainer1(1L, trainerMember);
+		Trainee trainee = TraineeFixture.getTrainee1(1L, traineeMember);
+		PtTrainerTrainee ptTrainerTrainee = PtTrainerTraineeFixture.getPtTrainerTrainee1(trainer, trainee);
 
 		List<PtGoal> ptGoals = List.of(PtGoal.builder().id(1L).traineeId(trainee.getId()).content("test").build());
 
-		PtTrainerTrainee ptTrainerTrainee = PtTrainerTrainee.builder()
-			.trainerId(2L)
-			.traineeId(trainee.getId())
-			.startedAt(LocalDate.now())
-			.finishedPtCount(0)
-			.totalPtCount(10)
-			.build();
-
 		WithdrawRequest request = new WithdrawRequest("accessToken", "authCode");
 
-		given(memberService.getMemberWithMemberId(String.valueOf(traineeMember.getId()))).willReturn(traineeMember);
-		given(traineeService.getTraineeWithMemberId(traineeMember.getId().toString())).willReturn(trainee);
+		given(memberService.getMemberWithMemberId(traineeMember.getId())).willReturn(traineeMember);
+		given(traineeService.getTraineeWithMemberId(traineeMember.getId())).willReturn(trainee);
 		given(ptGoalService.getAllPtGoalsWithTraineeId(trainee.getId())).willReturn(ptGoals);
 		given(ptService.getPtTrainerTraineeWithTraineeId(trainee.getId())).willReturn(Optional.of(ptTrainerTrainee));
 
 		// when
-		withdrawService.withdraw(String.valueOf(traineeMember.getId()), request);
+		withdrawService.withdraw(traineeMember.getId(), request);
 
 		// then
 		verify(ptService).softDeletePtTrainerTrainee(ptTrainerTrainee);

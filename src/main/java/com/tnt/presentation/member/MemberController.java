@@ -49,7 +49,7 @@ public class MemberController {
 	@Operation(summary = "회원탈퇴 API")
 	@PostMapping("/withdraw")
 	@ResponseStatus(OK)
-	public void withdraw(@AuthMember String memberId, @RequestBody @Valid WithdrawRequest request) {
+	public void withdraw(@AuthMember Long memberId, @RequestBody @Valid WithdrawRequest request) {
 		withdrawService.withdraw(memberId, request);
 	}
 }

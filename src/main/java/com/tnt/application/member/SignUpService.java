@@ -2,7 +2,6 @@ package com.tnt.application.member;
 
 import static com.tnt.common.constant.ProfileConstant.TRAINEE_DEFAULT_IMAGE;
 import static com.tnt.common.constant.ProfileConstant.TRAINER_DEFAULT_IMAGE;
-import static com.tnt.common.error.model.ErrorMessage.UNSUPPORTED_MEMBER_TYPE;
 import static com.tnt.domain.member.MemberType.TRAINEE;
 import static com.tnt.domain.member.MemberType.TRAINER;
 import static io.hypersistence.tsid.TSID.Factory.getTsid;
@@ -42,16 +41,16 @@ public class SignUpService {
 	public Long signUp(SignUpRequest request) {
 		memberService.validateMemberNotExists(request.socialId(), request.socialType());
 
-		return switch (request.memberType()) {
-			case TRAINER -> createTrainer(request);
-			case TRAINEE -> createTrainee(request);
-			default -> throw new IllegalArgumentException(UNSUPPORTED_MEMBER_TYPE.getMessage());
-		};
+		if (TRAINER.equals(request.memberType())) {
+			return createTrainer(request);
+		}
+
+		return createTrainee(request);
 	}
 
 	@Transactional
 	public SignUpResponse finishSignUpWithImage(String profileImageUrl, Long memberId, MemberType memberType) {
-		Member member = memberService.getMemberWithMemberId(String.valueOf(memberId));
+		Member member = memberService.getMemberWithMemberId(memberId);
 
 		member.updateProfileImageUrl(profileImageUrl);
 
