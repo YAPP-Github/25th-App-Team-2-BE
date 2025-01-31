@@ -399,10 +399,10 @@ class OAuthServiceTest {
 		@DisplayName("로그아웃 성공")
 		void logout_success() {
 			// given
-			String memberId = "testMemberId";
+			Long memberId = 123L;
 			String sessionId = "testSessionId";
 
-			given(sessionService.removeSession(memberId)).willReturn(sessionId);
+			given(sessionService.removeSession(String.valueOf(memberId))).willReturn(sessionId);
 
 			//when
 			LogoutResponse response = oAuthService.logout(memberId);

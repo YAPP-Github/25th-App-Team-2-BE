@@ -103,8 +103,8 @@ public class OAuthService {
 			member.getMemberType());
 	}
 
-	public LogoutResponse logout(String memberId) {
-		String removeSessionId = sessionService.removeSession(memberId);
+	public LogoutResponse logout(Long memberId) {
+		String removeSessionId = sessionService.removeSession(String.valueOf(memberId));
 
 		return new LogoutResponse(removeSessionId);
 	}

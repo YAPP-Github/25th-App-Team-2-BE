@@ -4,6 +4,7 @@ import static com.tnt.common.error.model.ErrorMessage.TRAINEE_INVALID_CAUTION_NO
 import static com.tnt.common.error.model.ErrorMessage.TRAINEE_NULL_HEIGHT;
 import static com.tnt.common.error.model.ErrorMessage.TRAINEE_NULL_MEMBER;
 import static com.tnt.common.error.model.ErrorMessage.TRAINEE_NULL_WEIGHT;
+import static jakarta.persistence.ConstraintMode.NO_CONSTRAINT;
 import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
 
@@ -16,7 +17,6 @@ import com.tnt.infrastructure.mysql.BaseTimeEntity;
 
 import io.hypersistence.utils.hibernate.id.Tsid;
 import jakarta.persistence.Column;
-import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ForeignKey;
@@ -43,7 +43,7 @@ public class Trainee extends BaseTimeEntity {
 	private Long id;
 
 	@OneToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "member_id", nullable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+	@JoinColumn(name = "member_id", nullable = false, foreignKey = @ForeignKey(NO_CONSTRAINT))
 	private Member member;
 
 	@Column(name = "height", nullable = false)

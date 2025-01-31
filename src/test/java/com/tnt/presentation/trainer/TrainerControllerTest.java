@@ -6,7 +6,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.junit.jupiter.api.DisplayName;
@@ -16,26 +16,31 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.security.core.authority.mapping.NullAuthoritiesMapper;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tnt.annotation.WithMockCustomUser;
 import com.tnt.domain.member.Member;
 import com.tnt.domain.member.SocialType;
+import com.tnt.domain.pt.PtLesson;
 import com.tnt.domain.pt.PtTrainerTrainee;
 import com.tnt.domain.trainee.PtGoal;
 import com.tnt.domain.trainee.Trainee;
 import com.tnt.domain.trainer.Trainer;
 import com.tnt.fixture.MemberFixture;
+import com.tnt.fixture.PtTrainerTraineeFixture;
+import com.tnt.fixture.TraineeFixture;
+import com.tnt.fixture.TrainerFixture;
+import com.tnt.gateway.filter.CustomUserDetails;
 import com.tnt.infrastructure.mysql.repository.member.MemberRepository;
+import com.tnt.infrastructure.mysql.repository.pt.PtGoalRepository;
+import com.tnt.infrastructure.mysql.repository.pt.PtLessonRepository;
 import com.tnt.infrastructure.mysql.repository.pt.PtTrainerTraineeRepository;
-import com.tnt.infrastructure.mysql.repository.trainee.PtGoalRepository;
 import com.tnt.infrastructure.mysql.repository.trainee.TraineeRepository;
 import com.tnt.infrastructure.mysql.repository.trainer.TrainerRepository;
 
@@ -67,9 +72,12 @@ class TrainerControllerTest {
 	@Autowired
 	private PtGoalRepository ptGoalRepository;
 
+	@Autowired
+	private PtLessonRepository ptLessonRepository;
+
 	@Test
 	@DisplayName("통합 테스트 - 트레이너 초대 코드 불러오기 성공")
-	@WithMockUser(username = "1")
+	@WithMockCustomUser(memberId = 1L)
 	void get_invitation_code_success() throws Exception {
 		// given
 		Long memberId = 1L;
@@ -103,7 +111,7 @@ class TrainerControllerTest {
 
 	@Test
 	@DisplayName("통합 테스트 - 트레이너 초대 코드 불러오기 실패 - 존재하지 않는 계정")
-	@WithMockUser(username = "2")
+	@WithMockCustomUser(memberId = 2L)
 	void get_invitation_code_fail() throws Exception {
 		// given
 		Long memberId = 1L;
@@ -137,7 +145,7 @@ class TrainerControllerTest {
 
 	@Test
 	@DisplayName("통합 테스트 - 트레이너 초대 코드 재발급 성공")
-	@WithMockUser(username = "3")
+	@WithMockCustomUser(memberId = 3L)
 	void reissue_invitation_code_success() throws Exception {
 		// given
 		Long memberId = 3L;
@@ -253,14 +261,12 @@ class TrainerControllerTest {
 		trainerMember = memberRepository.save(trainerMember);
 		traineeMember = memberRepository.save(traineeMember);
 
-		UserDetails traineeUserDetails = User.builder()
-			.username(trainerMember.getId().toString())
-			.password("")
-			.roles("USER")
-			.build();
+		CustomUserDetails trainerUserDetails = new CustomUserDetails(trainerMember.getId(),
+			trainerMember.getId().toString(),
+			authoritiesMapper.mapAuthorities(List.of(new SimpleGrantedAuthority("ROLE_USER"))));
 
-		Authentication authentication = new UsernamePasswordAuthenticationToken(traineeUserDetails, null,
-			authoritiesMapper.mapAuthorities(traineeUserDetails.getAuthorities()));
+		Authentication authentication = new UsernamePasswordAuthenticationToken(trainerUserDetails, null,
+			authoritiesMapper.mapAuthorities(trainerUserDetails.getAuthorities()));
 
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
@@ -278,13 +284,7 @@ class TrainerControllerTest {
 		trainer = trainerRepository.save(trainer);
 		trainee = traineeRepository.save(trainee);
 
-		PtTrainerTrainee ptTrainerTrainee = PtTrainerTrainee.builder()
-			.trainerId(trainer.getId())
-			.traineeId(trainee.getId())
-			.startedAt(LocalDate.now())
-			.finishedPtCount(10)
-			.totalPtCount(20)
-			.build();
+		PtTrainerTrainee ptTrainerTrainee = PtTrainerTraineeFixture.getPtTrainerTrainee1(trainer, trainee);
 
 		ptTrainerTraineeRepository.save(ptTrainerTrainee);
 
@@ -305,5 +305,49 @@ class TrainerControllerTest {
 				.param("trainerId", trainer.getId().toString())
 				.param("traineeId", trainee.getId().toString()))
 			.andExpect(status().isOk());
+	}
+
+	@Test
+	@DisplayName("통합 테스트 - 특정 날짜 PT 리스트 불러오기 성공")
+	void get_pt_lessons_on_date_success() throws Exception {
+		// given
+		Member trainerMember = MemberFixture.getTrainerMember1();
+		Member traineeMember = MemberFixture.getTraineeMember1();
+
+		trainerMember = memberRepository.save(trainerMember);
+		traineeMember = memberRepository.save(traineeMember);
+
+		CustomUserDetails trainerUserDetails = new CustomUserDetails(trainerMember.getId(),
+			trainerMember.getId().toString(),
+			authoritiesMapper.mapAuthorities(List.of(new SimpleGrantedAuthority("ROLE_USER"))));
+
+		Authentication authentication = new UsernamePasswordAuthenticationToken(trainerUserDetails, null,
+			authoritiesMapper.mapAuthorities(trainerUserDetails.getAuthorities()));
+
+		SecurityContextHolder.getContext().setAuthentication(authentication);
+
+		Trainer trainer = TrainerFixture.getTrainer2(trainerMember);
+		Trainee trainee = TraineeFixture.getTrainee2(traineeMember);
+		trainer = trainerRepository.save(trainer);
+		trainee = traineeRepository.save(trainee);
+
+		PtTrainerTrainee ptTrainerTrainee = PtTrainerTraineeFixture.getPtTrainerTrainee1(trainer, trainee);
+		ptTrainerTraineeRepository.save(ptTrainerTrainee);
+
+		PtLesson ptLesson = PtLesson.builder()
+			.ptTrainerTrainee(ptTrainerTrainee)
+			.lessonStart(LocalDateTime.of(2025, 1, 1, 10, 0))
+			.lessonEnd(LocalDateTime.of(2025, 1, 1, 11, 0))
+			.memo("THIS IS MEMO")
+			.build();
+
+		ptLesson = ptLessonRepository.save(ptLesson);
+
+		// when & then
+		mockMvc.perform(get("/trainers/lessons/{date}", "2025-01-01"))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.count").value(1))
+			.andExpect(jsonPath("$.date").value("2025-01-01"))
+			.andExpect(jsonPath("$.lessons[0].ptLessonId").value(ptLesson.getId()));
 	}
 }

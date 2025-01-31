@@ -18,7 +18,7 @@ public class TraineeSearchRepository {
 
 	private final JPAQueryFactory jpaQueryFactory;
 
-	public Optional<Trainee> findByMemberIdAndDeletedAtIsNull(Long memberId) {
+	public Optional<Trainee> findByMemberId(Long memberId) {
 		return Optional.ofNullable(jpaQueryFactory
 			.selectFrom(trainee)
 			.join(trainee.member, member).fetchJoin()
@@ -29,7 +29,7 @@ public class TraineeSearchRepository {
 			.fetchOne());
 	}
 
-	public Optional<Trainee> findByIdAndDeletedAtIsNull(Long id) {
+	public Optional<Trainee> findById(Long id) {
 		return Optional.ofNullable(jpaQueryFactory
 			.selectFrom(trainee)
 			.join(trainee.member, member).fetchJoin()

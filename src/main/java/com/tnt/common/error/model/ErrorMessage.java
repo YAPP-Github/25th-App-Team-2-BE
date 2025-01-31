@@ -52,13 +52,13 @@ public enum ErrorMessage {
 	MEMBER_NULL_ADVERTISEMENT_AGREEMENT("회원 광고성 알림 수신 동의 여부가 null 입니다."),
 	MEMBER_NULL_PUSH_AGREEMENT("회원 푸쉬 알림 수신 동의 여부가 null 입니다."),
 
-	TRAINER_NULL_ID("트레이너 id가 null 입니다."),
+	TRAINER_NULL("트레이너가 null 입니다."),
 	TRAINER_NULL_MEMBER("트레이너 member 가 null 입니다."),
 	TRAINER_INVALID_INVITATION_CODE("초대 코드가 올바르지 않습니다."),
 	TRAINER_NOT_FOUND("존재하지 않는 트레이너입니다."),
 	TRAINER_INVITATION_CODE_GENERATE_FAILED("트레이너 초대 코드 생성에 실패했습니다."),
 
-	TRAINEE_NULL_ID("트레이니 id가 null 입니다."),
+	TRAINEE_NULL("트레이니가 null 입니다."),
 	TRAINEE_NULL_MEMBER("트레이니 member 가 null 입니다."),
 	TRAINEE_NULL_HEIGHT("트레이니 height가 null 입니다."),
 	TRAINEE_NULL_WEIGHT("트레이니 weight가 null 입니다."),
@@ -70,7 +70,10 @@ public enum ErrorMessage {
 
 	PT_TRAINER_TRAINEE_ALREADY_EXIST("이미 연결된 트레이너-트레이니입니다."),
 	PT_TRAINEE_ALREADY_EXIST("이미 다른 트레이너와 연결되어 있습니다."),
-	PT_TRAINER_TRAINEE_NOT_FOUND("존재하지 않는 연결 정보입니다.");
+	PT_TRAINER_TRAINEE_NOT_FOUND("존재하지 않는 연결 정보입니다."),
+	PT_TRAINER_TRAINEE_NULL("트레이너 - 트레이니 연결 정보가 null 입니다."),
+
+	PT_LESSON_INVALID_MEMO("수업 메모의 길이는 공백 포함 30자 이하이어야 합니다.");
 
 	private final String message;
 }
