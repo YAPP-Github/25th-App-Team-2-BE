@@ -2,6 +2,7 @@ package com.tnt.application.pt;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.BDDMockito.given;
 
 import java.time.LocalDate;
@@ -209,5 +210,47 @@ class PtServiceTest {
 		assertThat(result.count()).isEqualTo(1);
 		assertThat(result.lessons().getFirst().isCompleted()).isTrue();
 		assertThat(result.lessons().getFirst().traineeId()).isEqualTo(String.valueOf(traineeId));
+	}
+
+	@Test
+	@DisplayName("PT 수업 리스트 soft delete 성공")
+	void soft_delete_pt_lessons_success() {
+		// given
+		Member trainerMember = MemberFixture.getTrainerMember1();
+		Member traineeMember = MemberFixture.getTraineeMember1();
+
+		Trainer trainer = TrainerFixture.getTrainer2(trainerMember);
+		Trainee trainee = TraineeFixture.getTrainee2(traineeMember);
+
+		PtTrainerTrainee ptTrainerTrainee = PtTrainerTraineeFixture.getPtTrainerTrainee1(trainer, trainee);
+
+		LocalDateTime lessonStart = LocalDateTime.of(2025, 1, 1, 10, 0);
+		LocalDateTime lessonEnd = LocalDateTime.of(2025, 1, 1, 11, 0);
+
+		PtLesson ptLesson1 = PtLesson.builder()
+			.id(1L)
+			.ptTrainerTrainee(ptTrainerTrainee)
+			.lessonStart(lessonStart)
+			.lessonEnd(lessonEnd)
+			.build();
+
+		PtLesson ptLesson2 = PtLesson.builder()
+			.id(2L)
+			.ptTrainerTrainee(ptTrainerTrainee)
+			.lessonStart(lessonStart.plusDays(1))
+			.lessonEnd(lessonEnd.plusDays(1))
+			.build();
+
+		List<PtLesson> ptLessons = List.of(ptLesson1, ptLesson2);
+
+		// when
+		ptService.softDeletePtLessons(ptLessons);
+
+		// then
+		assertAll(
+			() -> assertThat(ptLesson1.getDeletedAt()).isNotNull(),
+			() -> assertThat(ptLesson2.getDeletedAt()).isNotNull(),
+			() -> assertThat(ptLesson1.getDeletedAt()).isEqualTo(ptLesson2.getDeletedAt())
+		);
 	}
 }

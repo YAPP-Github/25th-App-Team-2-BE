@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.tnt.application.s3.S3Service;
 import com.tnt.common.error.exception.ConflictException;
 import com.tnt.common.error.exception.NotFoundException;
 import com.tnt.domain.member.Member;
@@ -21,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class MemberService {
 
+	private final S3Service s3Service;
 	private final MemberRepository memberRepository;
 
 	public Member getMemberWithMemberId(Long memberId) {
@@ -44,8 +46,11 @@ public class MemberService {
 		return memberRepository.save(member);
 	}
 
+	@Transactional
 	public void softDeleteMember(Member member) {
 		LocalDateTime now = LocalDateTime.now();
+
+		s3Service.deleteProfileImage(member.getProfileImageUrl());
 
 		member.updateDeletedAt(now);
 	}

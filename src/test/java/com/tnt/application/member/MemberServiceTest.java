@@ -17,6 +17,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.tnt.application.s3.S3Service;
 import com.tnt.common.error.exception.ConflictException;
 import com.tnt.common.error.exception.NotFoundException;
 import com.tnt.domain.member.Member;
@@ -26,6 +27,9 @@ import com.tnt.infrastructure.mysql.repository.member.MemberRepository;
 
 @ExtendWith(MockitoExtension.class)
 class MemberServiceTest {
+
+	@Mock
+	private S3Service s3Service;
 
 	@Mock
 	private MemberRepository memberRepository;

@@ -4,8 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,6 +19,7 @@ import com.tnt.application.trainee.PtGoalService;
 import com.tnt.application.trainee.TraineeService;
 import com.tnt.application.trainer.TrainerService;
 import com.tnt.domain.member.Member;
+import com.tnt.domain.pt.PtLesson;
 import com.tnt.domain.pt.PtTrainerTrainee;
 import com.tnt.domain.trainee.PtGoal;
 import com.tnt.domain.trainee.Trainee;
@@ -63,16 +64,13 @@ class WithdrawServiceTest {
 	void withdraw_trainer_success() {
 		// given
 		Member trainerMember = MemberFixture.getTrainerMember1WithId();
-		Trainer trainer = Trainer.builder()
-			.id(1L)
-			.member(trainerMember)
-			.build();
+		Trainer trainer = TrainerFixture.getTrainer1(1L, trainerMember);
 
 		WithdrawRequest request = new WithdrawRequest("accessToken", "authCode");
 
 		given(memberService.getMemberWithMemberId(trainerMember.getId())).willReturn(trainerMember);
 		given(trainerService.getTrainerWithMemberId(trainerMember.getId())).willReturn(trainer);
-		given(ptService.getPtTrainerTraineeWithTrainerId(trainer.getId())).willReturn(Optional.empty());
+		given(ptService.getPtTrainerTraineeWithTrainerId(trainer.getId())).willReturn(null);
 
 		// when
 		withdrawService.withdraw(trainerMember.getId(), request);
@@ -89,12 +87,7 @@ class WithdrawServiceTest {
 	void withdraw_trainee_success() {
 		// given
 		Member traineeMember = MemberFixture.getTraineeMember1WithId();
-		Trainee trainee = Trainee.builder()
-			.id(1L)
-			.member(traineeMember)
-			.height(180.0)
-			.weight(75.0)
-			.build();
+		Trainee trainee = TraineeFixture.getTrainee1(1L, traineeMember);
 
 		List<PtGoal> ptGoals = List.of(PtGoal.builder().id(1L).traineeId(trainee.getId()).content("test").build());
 
@@ -103,7 +96,7 @@ class WithdrawServiceTest {
 		given(memberService.getMemberWithMemberId(traineeMember.getId())).willReturn(traineeMember);
 		given(traineeService.getTraineeWithMemberId(traineeMember.getId())).willReturn(trainee);
 		given(ptGoalService.getAllPtGoalsWithTraineeId(trainee.getId())).willReturn(ptGoals);
-		given(ptService.getPtTrainerTraineeWithTraineeId(trainee.getId())).willReturn(Optional.empty());
+		given(ptService.getPtTrainerTraineeWithTraineeId(trainee.getId())).willReturn(null);
 
 		// when
 		withdrawService.withdraw(traineeMember.getId(), request);
@@ -142,13 +135,22 @@ class WithdrawServiceTest {
 
 		Trainer trainer = TrainerFixture.getTrainer1(1L, trainerMember);
 		Trainee trainee = TraineeFixture.getTrainee1(1L, traineeMember);
+
 		PtTrainerTrainee ptTrainerTrainee = PtTrainerTraineeFixture.getPtTrainerTrainee1(trainer, trainee);
+
+		List<PtLesson> ptLessons = List.of(PtLesson.builder()
+			.id(1L)
+			.ptTrainerTrainee(ptTrainerTrainee)
+			.lessonStart(LocalDateTime.now())
+			.lessonEnd(LocalDateTime.now())
+			.build());
 
 		WithdrawRequest request = new WithdrawRequest("accessToken", "authCode");
 
 		given(memberService.getMemberWithMemberId(trainerMember.getId())).willReturn(trainerMember);
 		given(trainerService.getTrainerWithMemberId(trainerMember.getId())).willReturn(trainer);
-		given(ptService.getPtTrainerTraineeWithTrainerId(trainer.getId())).willReturn(Optional.of(ptTrainerTrainee));
+		given(ptService.getPtTrainerTraineeWithTrainerId(trainer.getId())).willReturn(ptTrainerTrainee);
+		given(ptService.getPtLessonWithPtTrainerTrainee(ptTrainerTrainee)).willReturn(ptLessons);
 
 		// when
 		withdrawService.withdraw(trainerMember.getId(), request);
@@ -170,16 +172,25 @@ class WithdrawServiceTest {
 
 		Trainer trainer = TrainerFixture.getTrainer1(1L, trainerMember);
 		Trainee trainee = TraineeFixture.getTrainee1(1L, traineeMember);
+
 		PtTrainerTrainee ptTrainerTrainee = PtTrainerTraineeFixture.getPtTrainerTrainee1(trainer, trainee);
 
 		List<PtGoal> ptGoals = List.of(PtGoal.builder().id(1L).traineeId(trainee.getId()).content("test").build());
+
+		List<PtLesson> ptLessons = List.of(PtLesson.builder()
+			.id(1L)
+			.ptTrainerTrainee(ptTrainerTrainee)
+			.lessonStart(LocalDateTime.now())
+			.lessonEnd(LocalDateTime.now())
+			.build());
 
 		WithdrawRequest request = new WithdrawRequest("accessToken", "authCode");
 
 		given(memberService.getMemberWithMemberId(traineeMember.getId())).willReturn(traineeMember);
 		given(traineeService.getTraineeWithMemberId(traineeMember.getId())).willReturn(trainee);
 		given(ptGoalService.getAllPtGoalsWithTraineeId(trainee.getId())).willReturn(ptGoals);
-		given(ptService.getPtTrainerTraineeWithTraineeId(trainee.getId())).willReturn(Optional.of(ptTrainerTrainee));
+		given(ptService.getPtTrainerTraineeWithTraineeId(trainee.getId())).willReturn(ptTrainerTrainee);
+		given(ptService.getPtLessonWithPtTrainerTrainee(ptTrainerTrainee)).willReturn(ptLessons);
 
 		// when
 		withdrawService.withdraw(traineeMember.getId(), request);

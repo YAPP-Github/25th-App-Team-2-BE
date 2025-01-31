@@ -83,4 +83,8 @@ public class PtLesson extends BaseTimeEntity {
 
 		this.memo = memo;
 	}
+
+	public void updateDeletedAt(LocalDateTime deletedAt) {
+		this.deletedAt = deletedAt;
+	}
 }

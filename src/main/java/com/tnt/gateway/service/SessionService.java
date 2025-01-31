@@ -14,7 +14,9 @@ import com.tnt.common.error.exception.UnauthorizedException;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class SessionService {
@@ -27,6 +29,8 @@ public class SessionService {
 
 	public String authenticate(HttpServletRequest request) {
 		String authHeader = request.getHeader(AUTHORIZATION_HEADER);
+
+		log.info("요청 인증 헤더 - AuthHeader: {}", authHeader);
 
 		if (isBlank(authHeader) || !authHeader.startsWith(SESSION_ID_PREFIX)) {
 			throw new UnauthorizedException(AUTHORIZATION_HEADER_ERROR);

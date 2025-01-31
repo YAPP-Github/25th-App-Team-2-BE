@@ -1,6 +1,7 @@
 package com.tnt.application.member;
 
 import static com.tnt.common.error.model.ErrorMessage.UNSUPPORTED_MEMBER_TYPE;
+import static java.util.Objects.isNull;
 
 import java.util.List;
 
@@ -12,6 +13,8 @@ import com.tnt.application.trainee.PtGoalService;
 import com.tnt.application.trainee.TraineeService;
 import com.tnt.application.trainer.TrainerService;
 import com.tnt.domain.member.Member;
+import com.tnt.domain.pt.PtLesson;
+import com.tnt.domain.pt.PtTrainerTrainee;
 import com.tnt.domain.trainee.PtGoal;
 import com.tnt.domain.trainee.Trainee;
 import com.tnt.domain.trainer.Trainer;
@@ -37,29 +40,44 @@ public class WithdrawService {
 	public void withdraw(Long memberId, WithdrawRequest request) {
 		Member member = memberService.getMemberWithMemberId(memberId);
 
-		softDeleteWithMemberData(member);
+		deleteMemberData(member);
 
 		oAuthService.revoke(member.getSocialId(), member.getSocialType(), request);
 
 		sessionService.removeSession(String.valueOf(memberId));
 	}
 
-	private void softDeleteWithMemberData(Member member) {
+	private void deleteMemberData(Member member) {
 		switch (member.getMemberType()) {
 			case TRAINER -> {
 				Trainer trainer = trainerService.getTrainerWithMemberId(member.getId());
+				PtTrainerTrainee ptTrainerTrainee = ptService.getPtTrainerTraineeWithTrainerId(trainer.getId());
 
-				ptService.getPtTrainerTraineeWithTrainerId(trainer.getId())
-					.ifPresent(ptService::softDeletePtTrainerTrainee);
+				if (!isNull(ptTrainerTrainee)) {
+					List<PtLesson> ptLessons = ptService.getPtLessonWithPtTrainerTrainee(ptTrainerTrainee);
+
+					ptService.softDeletePtLessons(ptLessons);
+				}
+
+				ptService.softDeletePtTrainerTrainee(ptTrainerTrainee);
+
 				trainerService.softDeleteTrainer(trainer);
 			}
 			case TRAINEE -> {
 				Trainee trainee = traineeService.getTraineeWithMemberId(member.getId());
 				List<PtGoal> ptGoals = ptGoalService.getAllPtGoalsWithTraineeId(trainee.getId());
+				PtTrainerTrainee ptTrainerTrainee = ptService.getPtTrainerTraineeWithTraineeId(trainee.getId());
 
-				ptService.getPtTrainerTraineeWithTraineeId(trainee.getId())
-					.ifPresent(ptService::softDeletePtTrainerTrainee);
+				if (!isNull(ptTrainerTrainee)) {
+					List<PtLesson> ptLessons = ptService.getPtLessonWithPtTrainerTrainee(ptTrainerTrainee);
+
+					ptService.softDeletePtLessons(ptLessons);
+				}
+
+				ptService.softDeletePtTrainerTrainee(ptTrainerTrainee);
+
 				ptGoalService.softDeleteAllPtGoals(ptGoals);
+
 				traineeService.softDeleteTrainee(trainee);
 			}
 			default -> throw new IllegalArgumentException(UNSUPPORTED_MEMBER_TYPE.getMessage());
