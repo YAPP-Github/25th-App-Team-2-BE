@@ -21,7 +21,9 @@ import com.tnt.gateway.service.SessionService;
 
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -59,6 +61,7 @@ public class SecurityConfig {
 			.addFilterAfter(sessionAuthenticationFilter(), LogoutFilter.class)
 			.exceptionHandling(exceptionHandling ->
 				exceptionHandling.authenticationEntryPoint((request, response, authException) -> {
+					log.error("SecurityFilter Exception.", authException);
 					response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 					response.setContentType("application/json;charset=UTF-8");
 					response.getWriter().write("{\"message\":\"Security 사용자 인증에 실패했습니다.\"}");

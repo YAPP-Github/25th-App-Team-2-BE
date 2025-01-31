@@ -1,4 +1,4 @@
-package com.tnt.presentation.member;
+package com.tnt.gateway.controller;
 
 import static com.tnt.common.error.model.ErrorMessage.KAKAO_SERVER_ERROR;
 import static com.tnt.common.error.model.ErrorMessage.MEMBER_NOT_FOUND;
@@ -19,6 +19,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.tnt.common.error.exception.NotFoundException;
@@ -37,6 +39,16 @@ class AuthenticationControllerTest {
 
 	@InjectMocks
 	private AuthenticationController authenticationController;
+
+	@Test
+	@DisplayName("로그인 세션 유효 확인 성공")
+	void is_session_valid_success() {
+		// when
+		ResponseEntity<Void> voidResponseEntity = authenticationController.checkSession();
+
+		// then
+		assertThat(voidResponseEntity.getStatusCode()).isEqualTo(HttpStatusCode.valueOf(200));
+	}
 
 	@Nested
 	@DisplayName("Login 테스트")
@@ -128,13 +140,13 @@ class AuthenticationControllerTest {
 		@DisplayName("로그아웃 성공")
 		void logout_success() {
 			// given
-			String memberId = "testMemberId";
+			Long memberId = 111L;
 			String sessionId = "testSessionId";
 
 			given(oauthService.logout(memberId)).willReturn(new LogoutResponse(sessionId));
 
 			// when
-			LogoutResponse response = authenticationController.logout("testMemberId");
+			LogoutResponse response = authenticationController.logout(memberId);
 
 			//then
 			assertThat(response.sessionId()).isEqualTo(sessionId);

@@ -12,7 +12,7 @@ import io.swagger.v3.oas.annotations.Hidden;
 @Hidden
 @Target({ElementType.PARAMETER, ElementType.ANNOTATION_TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-@AuthenticationPrincipal(expression = "#this == 'anonymousUser' ? null : username")
+@AuthenticationPrincipal(expression = "#this == 'anonymousUser' ? null : memberId")
 public @interface AuthMember {
 
 }

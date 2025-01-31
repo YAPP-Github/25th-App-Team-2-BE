@@ -31,7 +31,7 @@ public class TraineeController {
 	@Operation(summary = "트레이너 연결 요청 API")
 	@ResponseStatus(CREATED)
 	@PostMapping("/connect-trainer")
-	public ConnectWithTrainerResponse connectWithTrainer(@AuthMember String memberId,
+	public ConnectWithTrainerResponse connectWithTrainer(@AuthMember Long memberId,
 		@RequestBody ConnectWithTrainerRequest request) {
 		ConnectWithTrainerDto connectWithTrainerDto = ptService.connectWithTrainer(memberId, request);
 		notificationService.sendConnectNotificationToTrainer(connectWithTrainerDto.trainerFcmToken(),

@@ -1,18 +1,26 @@
 package com.tnt.domain.pt;
 
 import static java.util.Objects.*;
+import static jakarta.persistence.ConstraintMode.NO_CONSTRAINT;
+import static java.util.Objects.requireNonNull;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import com.tnt.common.error.model.ErrorMessage;
+import com.tnt.domain.trainee.Trainee;
+import com.tnt.domain.trainer.Trainer;
 import com.tnt.infrastructure.mysql.BaseTimeEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -30,11 +38,13 @@ public class PtTrainerTrainee extends BaseTimeEntity {
 	@Column(name = "id", nullable = false, unique = true)
 	private Long id;
 
-	@Column(name = "trainer_id", nullable = false)
-	private Long trainerId;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "trainer_id", nullable = false, foreignKey = @ForeignKey(NO_CONSTRAINT))
+	private Trainer trainer;
 
-	@Column(name = "trainee_id", nullable = false)
-	private Long traineeId;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "trainee_id", nullable = false, foreignKey = @ForeignKey(NO_CONSTRAINT))
+	private Trainee trainee;
 
 	@Column(name = "started_at", nullable = false)
 	private LocalDate startedAt;
@@ -49,13 +59,18 @@ public class PtTrainerTrainee extends BaseTimeEntity {
 	private LocalDateTime deletedAt;
 
 	@Builder
-	public PtTrainerTrainee(Long trainerId, Long traineeId, LocalDate startedAt, Integer finishedPtCount,
+	public PtTrainerTrainee(Long id, Trainer trainer, Trainee trainee, LocalDate startedAt, Integer finishedPtCount,
 		Integer totalPtCount) {
-		this.trainerId = requireNonNull(trainerId, ErrorMessage.TRAINER_NULL_ID.getMessage());
-		this.traineeId = requireNonNull(traineeId, ErrorMessage.TRAINEE_NULL_ID.getMessage());
+		this.id = id;
+		this.trainer = requireNonNull(trainer, ErrorMessage.TRAINER_NULL.getMessage());
+		this.trainee = requireNonNull(trainee, ErrorMessage.TRAINEE_NULL.getMessage());
 		this.startedAt = requireNonNull(startedAt);
 		this.finishedPtCount = requireNonNull(finishedPtCount);
 		this.totalPtCount = requireNonNull(totalPtCount);
+	}
+
+	public int getCurrentSession() {
+		return this.finishedPtCount + 1;
 	}
 
 	public void updateDeletedAt(LocalDateTime deletedAt) {

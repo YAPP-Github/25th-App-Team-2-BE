@@ -23,6 +23,9 @@ import com.tnt.domain.member.Member;
 import com.tnt.domain.member.SocialType;
 import com.tnt.fixture.MemberFixture;
 import com.tnt.infrastructure.mysql.repository.member.MemberRepository;
+import com.tnt.infrastructure.mysql.repository.pt.PtGoalRepository;
+import com.tnt.infrastructure.mysql.repository.trainee.TraineeRepository;
+import com.tnt.infrastructure.mysql.repository.trainer.TrainerRepository;
 
 @ExtendWith(MockitoExtension.class)
 class MemberServiceTest {

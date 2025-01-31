@@ -22,13 +22,13 @@ public class TraineeService {
 	private final TraineeRepository traineeRepository;
 	private final TraineeSearchRepository traineeSearchRepository;
 
-	public Trainee getTraineeWithMemberId(String memberId) {
-		return traineeSearchRepository.findByMemberIdAndDeletedAtIsNull(Long.valueOf(memberId))
+	public Trainee getTraineeWithMemberId(Long memberId) {
+		return traineeSearchRepository.findByMemberId(memberId)
 			.orElseThrow(() -> new NotFoundException(TRAINEE_NOT_FOUND));
 	}
 
-	public Trainee getTraineeWithId(String traineeId) {
-		return traineeSearchRepository.findByIdAndDeletedAtIsNull(Long.valueOf(traineeId))
+	public Trainee getTraineeWithId(Long traineeId) {
+		return traineeSearchRepository.findById(traineeId)
 			.orElseThrow(() -> new NotFoundException(TRAINEE_NOT_FOUND));
 	}
 

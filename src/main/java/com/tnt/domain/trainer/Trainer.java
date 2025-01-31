@@ -3,6 +3,12 @@ package com.tnt.domain.trainer;
 import static com.tnt.common.error.model.ErrorMessage.*;
 import static io.micrometer.common.util.StringUtils.*;
 import static java.util.Objects.*;
+import static com.tnt.common.error.model.ErrorMessage.TRAINER_INVALID_INVITATION_CODE;
+import static com.tnt.common.error.model.ErrorMessage.TRAINER_INVITATION_CODE_GENERATE_FAILED;
+import static com.tnt.common.error.model.ErrorMessage.TRAINER_NULL_MEMBER;
+import static io.micrometer.common.util.StringUtils.isBlank;
+import static jakarta.persistence.ConstraintMode.NO_CONSTRAINT;
+import static java.util.Objects.requireNonNull;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -16,7 +22,6 @@ import com.tnt.infrastructure.mysql.BaseTimeEntity;
 
 import io.hypersistence.utils.hibernate.id.Tsid;
 import jakarta.persistence.Column;
-import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ForeignKey;
@@ -43,7 +48,7 @@ public class Trainer extends BaseTimeEntity {
 	private Long id;
 
 	@OneToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "member_id", nullable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+	@JoinColumn(name = "member_id", nullable = false, foreignKey = @ForeignKey(NO_CONSTRAINT))
 	private Member member;
 
 	@Column(name = "invitation_code", nullable = false, length = INVITATION_CODE_LENGTH)

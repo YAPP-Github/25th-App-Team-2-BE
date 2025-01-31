@@ -100,19 +100,35 @@ public class Member extends BaseTimeEntity {
 	}
 
 	public void updateFcmTokenIfExpired(String fcmToken) {
-		if (!this.fcmToken.equals(fcmToken)) {
+		if (!isBlank(fcmToken) && !this.fcmToken.equals(fcmToken)) {
 			this.fcmToken = fcmToken;
 		}
 	}
 
 	public void updateProfileImageUrl(String profileImageUrl) {
-		if (!this.profileImageUrl.equals(profileImageUrl)) {
+		if (!isBlank(profileImageUrl) && !this.profileImageUrl.equals(profileImageUrl)) {
 			this.profileImageUrl = profileImageUrl;
 		}
 	}
 
 	public void updateDeletedAt(LocalDateTime deletedAt) {
 		this.deletedAt = deletedAt;
+	}
+
+	public String getAge() {
+		if (isNull(this.birthday)) {
+			return "비공개";
+		}
+
+		LocalDate currentDate = LocalDate.now();
+		int age = currentDate.getYear() - this.birthday.getYear();
+
+		// 생일이 아직 지나지 않았으면 나이를 1 줄임
+		if (currentDate.isBefore(this.birthday.withYear(currentDate.getYear()))) {
+			age--;
+		}
+
+		return String.valueOf(age);
 	}
 
 	private String validateSocialId(String socialId) {

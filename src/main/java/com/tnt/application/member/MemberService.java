@@ -13,6 +13,9 @@ import com.tnt.common.error.exception.NotFoundException;
 import com.tnt.domain.member.Member;
 import com.tnt.domain.member.SocialType;
 import com.tnt.infrastructure.mysql.repository.member.MemberRepository;
+import com.tnt.infrastructure.mysql.repository.pt.PtGoalRepository;
+import com.tnt.infrastructure.mysql.repository.trainee.TraineeRepository;
+import com.tnt.infrastructure.mysql.repository.trainer.TrainerRepository;
 
 import lombok.RequiredArgsConstructor;
 
