@@ -15,7 +15,6 @@ import com.tnt.infrastructure.mysql.repository.member.MemberRepository;
 import lombok.RequiredArgsConstructor;
 
 @Service
-@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class MemberService {
 
@@ -25,8 +24,7 @@ public class MemberService {
 		return memberRepository.findByIdAndDeletedAtIsNull(memberId)
 			.orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
 	}
-
-	@Transactional(noRollbackFor = NotFoundException.class)
+	
 	public Member getMemberWithSocialIdAndSocialType(String socialId, SocialType socialType) {
 		return memberRepository.findBySocialIdAndSocialTypeAndDeletedAtIsNull(socialId, socialType)
 			.orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
