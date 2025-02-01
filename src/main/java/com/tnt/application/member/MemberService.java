@@ -24,7 +24,7 @@ public class MemberService {
 		return memberRepository.findByIdAndDeletedAtIsNull(memberId)
 			.orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
 	}
-	
+
 	public Member getMemberWithSocialIdAndSocialType(String socialId, SocialType socialType) {
 		return memberRepository.findBySocialIdAndSocialTypeAndDeletedAtIsNull(socialId, socialType)
 			.orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
