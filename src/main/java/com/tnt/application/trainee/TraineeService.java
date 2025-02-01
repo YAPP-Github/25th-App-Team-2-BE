@@ -2,8 +2,6 @@ package com.tnt.application.trainee;
 
 import static com.tnt.common.error.model.ErrorMessage.TRAINEE_NOT_FOUND;
 
-import java.time.LocalDateTime;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +20,11 @@ public class TraineeService {
 	private final TraineeRepository traineeRepository;
 	private final TraineeSearchRepository traineeSearchRepository;
 
+	@Transactional
+	public Trainee saveTrainee(Trainee trainee) {
+		return traineeRepository.save(trainee);
+	}
+
 	public Trainee getTraineeWithMemberId(Long memberId) {
 		return traineeSearchRepository.findByMemberId(memberId)
 			.orElseThrow(() -> new NotFoundException(TRAINEE_NOT_FOUND));
@@ -32,13 +35,4 @@ public class TraineeService {
 			.orElseThrow(() -> new NotFoundException(TRAINEE_NOT_FOUND));
 	}
 
-	public Trainee saveTrainee(Trainee trainee) {
-		return traineeRepository.save(trainee);
-	}
-
-	public void softDeleteTrainee(Trainee trainee) {
-		LocalDateTime now = LocalDateTime.now();
-
-		trainee.updateDeletedAt(now);
-	}
 }

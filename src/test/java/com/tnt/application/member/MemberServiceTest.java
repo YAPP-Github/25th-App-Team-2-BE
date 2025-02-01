@@ -86,24 +86,6 @@ class MemberServiceTest {
 	}
 
 	@Test
-	@DisplayName("존재하지 않는 social 정보로 조회시 null 반환 성공")
-	void get_member_with_social_id_and_type_return_null_success() {
-		// given
-		String socialId = "non";
-		SocialType socialType = KAKAO;
-
-		given(memberRepository.findBySocialIdAndSocialTypeAndDeletedAtIsNull(socialId, socialType)).willReturn(
-			Optional.empty());
-
-		// when
-		Member result = memberService.getMemberWithSocialIdAndSocialType(socialId, socialType);
-
-		// then
-		assertThat(result).isNull();
-		verify(memberRepository).findBySocialIdAndSocialTypeAndDeletedAtIsNull(socialId, socialType);
-	}
-
-	@Test
 	@DisplayName("회원 중복 검증 성공")
 	void validate_member_not_exists_success() {
 		// given
@@ -148,18 +130,5 @@ class MemberServiceTest {
 		// then
 		assertThat(savedMember).isNotNull().isEqualTo(member);
 		verify(memberRepository).save(member);
-	}
-
-	@Test
-	@DisplayName("회원 soft delete 성공")
-	void soft_delete_member_success() {
-		// given
-		Member member = MemberFixture.getTrainerMember1WithId();
-
-		// when
-		memberService.softDeleteMember(member);
-
-		// then
-		assertThat(member.getDeletedAt()).isNotNull();
 	}
 }

@@ -69,11 +69,11 @@ public class PtTrainerTrainee extends BaseTimeEntity {
 		this.totalPtCount = requireNonNull(totalPtCount);
 	}
 
-	public int getCurrentSession() {
+	public int getCurrentPtSession() {
 		return this.finishedPtCount + 1;
 	}
 
-	public void updateDeletedAt(LocalDateTime deletedAt) {
-		this.deletedAt = deletedAt;
+	public void softDelete() {
+		this.deletedAt = LocalDateTime.now();
 	}
 }

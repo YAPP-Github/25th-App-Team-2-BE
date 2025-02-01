@@ -12,6 +12,8 @@ public interface PtTrainerTraineeRepository extends JpaRepository<PtTrainerTrain
 
 	Optional<PtTrainerTrainee> findByTraineeIdAndDeletedAtIsNull(Long traineeId);
 
+	boolean existsByTrainerIdAndDeletedAtIsNull(Long trainerId);
+
 	boolean existsByTraineeIdAndDeletedAtIsNull(Long traineeId);
 
 	boolean existsByTrainerIdAndTraineeIdAndDeletedAtIsNull(Long trainerId, Long traineeId);

@@ -26,7 +26,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import com.tnt.common.error.exception.NotFoundException;
 import com.tnt.common.error.exception.OAuthException;
 import com.tnt.dto.member.response.LogoutResponse;
-import com.tnt.gateway.controller.AuthenticationController;
 import com.tnt.gateway.dto.request.OAuthLoginRequest;
 import com.tnt.gateway.dto.response.OAuthLoginResponse;
 import com.tnt.gateway.service.OAuthService;

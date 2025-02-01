@@ -15,10 +15,12 @@ import org.springframework.web.multipart.MultipartFile;
 import com.tnt.application.member.SignUpService;
 import com.tnt.application.member.WithdrawService;
 import com.tnt.application.s3.S3Service;
+import com.tnt.dto.member.WithdrawDto;
 import com.tnt.dto.member.request.SignUpRequest;
 import com.tnt.dto.member.request.WithdrawRequest;
 import com.tnt.dto.member.response.SignUpResponse;
 import com.tnt.gateway.config.AuthMember;
+import com.tnt.gateway.service.OAuthService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -34,6 +36,7 @@ public class MemberController {
 	private final S3Service s3Service;
 	private final SignUpService signUpService;
 	private final WithdrawService withdrawService;
+	private final OAuthService oAuthService;
 
 	@Operation(summary = "회원가입 API")
 	@PostMapping(value = "/sign-up", consumes = MULTIPART_FORM_DATA_VALUE)
@@ -50,6 +53,9 @@ public class MemberController {
 	@PostMapping("/withdraw")
 	@ResponseStatus(OK)
 	public void withdraw(@AuthMember Long memberId, @RequestBody @Valid WithdrawRequest request) {
-		withdrawService.withdraw(memberId, request);
+		WithdrawDto withdrawDto = withdrawService.withdraw(memberId);
+
+		s3Service.deleteProfileImage(withdrawDto.profileImageUrl());
+		oAuthService.revoke(withdrawDto.socialId(), withdrawDto.socialType(), request);
 	}
 }

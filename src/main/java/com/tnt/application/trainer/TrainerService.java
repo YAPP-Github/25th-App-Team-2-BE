@@ -2,8 +2,6 @@ package com.tnt.application.trainer;
 
 import static com.tnt.common.error.model.ErrorMessage.TRAINER_NOT_FOUND;
 
-import java.time.LocalDateTime;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,6 +42,11 @@ public class TrainerService {
 		return new InvitationCodeResponse(trainer.getInvitationCode());
 	}
 
+	@Transactional
+	public Trainer saveTrainer(Trainer trainer) {
+		return trainerRepository.save(trainer);
+	}
+
 	public Trainer getTrainerWithMemberId(Long memberId) {
 		return trainerRepository.findByMemberIdAndDeletedAtIsNull(memberId)
 			.orElseThrow(() -> new NotFoundException(TRAINER_NOT_FOUND));
@@ -54,13 +57,4 @@ public class TrainerService {
 			.orElseThrow(() -> new NotFoundException(TRAINER_NOT_FOUND));
 	}
 
-	public Trainer saveTrainer(Trainer trainer) {
-		return trainerRepository.save(trainer);
-	}
-
-	public void softDeleteTrainer(Trainer trainer) {
-		LocalDateTime now = LocalDateTime.now();
-
-		trainer.updateDeletedAt(now);
-	}
 }

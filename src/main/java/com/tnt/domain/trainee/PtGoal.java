@@ -57,7 +57,7 @@ public class PtGoal extends BaseTimeEntity {
 		return content;
 	}
 
-	public void updateDeletedAt(LocalDateTime deletedAt) {
-		this.deletedAt = deletedAt;
+	public void softDelete() {
+		this.deletedAt = LocalDateTime.now();
 	}
 }

@@ -209,33 +209,6 @@ class MemberControllerTest extends AbstractContainerBaseTest {
 			.andExpect(status().isOk());
 	}
 
-	@Test
-	@DisplayName("통합 테스트 - 존재하지 않는 회원 탈퇴 실패")
-	void revoke_non_existing_member_fail() throws Exception {
-		// given
-		Member traineeMember = MemberFixture.getTraineeMember2();
-
-		Member member = memberRepository.save(traineeMember);
-
-		CustomUserDetails traineeUserDetails = new CustomUserDetails(member.getId(),
-			String.valueOf(member.getId()), List.of(new SimpleGrantedAuthority("ROLE_USER")));
-
-		Authentication authentication = new UsernamePasswordAuthenticationToken(traineeUserDetails, null,
-			authoritiesMapper.mapAuthorities(traineeUserDetails.getAuthorities()));
-
-		SecurityContextHolder.getContext().setAuthentication(authentication);
-
-		WithdrawRequest request = new WithdrawRequest("test-access-token", "test-authorization-code");
-
-		var jsonRequest = objectMapper.writeValueAsString(request);
-
-		// when & then
-		mockMvc.perform(post("/members/withdraw")
-				.contentType(APPLICATION_JSON_VALUE)
-				.content(jsonRequest))
-			.andExpect(status().is5xxServerError());
-	}
-
 	@TestConfiguration
 	static class TestConfig {
 

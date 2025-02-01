@@ -17,6 +17,7 @@ import com.tnt.gateway.config.AuthMember;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @Tag(name = "트레이니", description = "트레이니 관련 API")
@@ -32,7 +33,7 @@ public class TraineeController {
 	@ResponseStatus(CREATED)
 	@PostMapping("/connect-trainer")
 	public ConnectWithTrainerResponse connectWithTrainer(@AuthMember Long memberId,
-		@RequestBody ConnectWithTrainerRequest request) {
+		@RequestBody @Valid ConnectWithTrainerRequest request) {
 		ConnectWithTrainerDto connectWithTrainerDto = ptService.connectWithTrainer(memberId, request);
 		notificationService.sendConnectNotificationToTrainer(connectWithTrainerDto.trainerFcmToken(),
 			connectWithTrainerDto.traineeName(), connectWithTrainerDto.trainerId(), connectWithTrainerDto.traineeId());

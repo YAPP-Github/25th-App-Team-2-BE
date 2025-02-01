@@ -87,28 +87,6 @@ class OAuthServiceTest {
 	}
 
 	@Test
-	@DisplayName("존재하지 않는 회원 신규 회원으로 간주하고 리턴")
-	void member_not_found_error() {
-		// given
-		OAuthLoginRequest request = new OAuthLoginRequest(KAKAO, "fcm", "kakao-access-token", null, null);
-
-		mockWebServer.enqueue(new MockResponse()
-			.setResponseCode(200)
-			.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-			.setBody("{\"id\": \"12345\", \"kakao_account\": {\"email\": \"test@example.com\"}}"));
-
-		given(memberService.getMemberWithSocialIdAndSocialType("12345", KAKAO)).willReturn(null);
-
-		// when
-		OAuthLoginResponse response = oAuthService.oauthLogin(request);
-
-		// then
-		assertThat(response.sessionId()).isNull();
-		assertThat(response.socialId()).isEqualTo("12345");
-		assertThat(response.isSignUp()).isFalse();
-	}
-
-	@Test
 	@DisplayName("Kakao 로그인 실패 시 예외 발생")
 	void kakao_login_failure_error() {
 		// given

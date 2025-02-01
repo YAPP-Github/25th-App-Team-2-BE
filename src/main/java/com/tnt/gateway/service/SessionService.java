@@ -30,8 +30,6 @@ public class SessionService {
 	public String authenticate(HttpServletRequest request) {
 		String authHeader = request.getHeader(AUTHORIZATION_HEADER);
 
-		log.info("요청 인증 헤더 - AuthHeader: {}", authHeader);
-
 		if (isBlank(authHeader) || !authHeader.startsWith(SESSION_ID_PREFIX)) {
 			log.error("Authorization Header Error: [{}]", authHeader);
 			throw new UnauthorizedException(AUTHORIZATION_HEADER_ERROR);

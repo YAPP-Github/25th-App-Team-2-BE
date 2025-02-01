@@ -2,10 +2,9 @@ package com.tnt.application.pt;
 
 import static com.tnt.common.error.model.ErrorMessage.PT_TRAINEE_ALREADY_EXIST;
 import static com.tnt.common.error.model.ErrorMessage.PT_TRAINER_TRAINEE_ALREADY_EXIST;
-import static java.util.Objects.isNull;
+import static com.tnt.common.error.model.ErrorMessage.PT_TRAINER_TRAINEE_NOT_FOUND;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -17,7 +16,6 @@ import com.tnt.application.trainee.TraineeService;
 import com.tnt.application.trainer.TrainerService;
 import com.tnt.common.error.exception.ConflictException;
 import com.tnt.common.error.exception.NotFoundException;
-import com.tnt.common.error.model.ErrorMessage;
 import com.tnt.domain.member.Member;
 import com.tnt.domain.pt.PtLesson;
 import com.tnt.domain.pt.PtTrainerTrainee;
@@ -99,11 +97,33 @@ public class PtService {
 			Trainee trainee = ptTrainerTrainee.getTrainee();
 
 			return new Lesson(String.valueOf(ptLesson.getId()),
-				String.valueOf(trainee.getId()), trainee.getMember().getName(), ptTrainerTrainee.getCurrentSession(),
+				String.valueOf(trainee.getId()), trainee.getMember().getName(), ptTrainerTrainee.getCurrentPtSession(),
 				ptLesson.getLessonStart(), ptLesson.getLessonEnd(), ptLesson.getIsCompleted());
 		}).toList();
 
 		return new GetPtLessonsOnDateResponse(ptLessons.size(), date, lessons);
+	}
+
+	public boolean isPtTrainerTraineeExistWithTrainerId(Long trainerId) {
+		return ptTrainerTraineeRepository.existsByTrainerIdAndDeletedAtIsNull(trainerId);
+	}
+
+	public boolean isPtTrainerTraineeExistWithTraineeId(Long traineeId) {
+		return ptTrainerTraineeRepository.existsByTraineeIdAndDeletedAtIsNull(traineeId);
+	}
+
+	public PtTrainerTrainee getPtTrainerTraineeWithTrainerId(Long trainerId) {
+		return ptTrainerTraineeRepository.findByTrainerIdAndDeletedAtIsNull(trainerId)
+			.orElseThrow(() -> new NotFoundException(PT_TRAINER_TRAINEE_NOT_FOUND));
+	}
+
+	public PtTrainerTrainee getPtTrainerTraineeWithTraineeId(Long traineeId) {
+		return ptTrainerTraineeRepository.findByTraineeIdAndDeletedAtIsNull(traineeId)
+			.orElseThrow(() -> new NotFoundException(PT_TRAINER_TRAINEE_NOT_FOUND));
+	}
+
+	public List<PtLesson> getPtLessonWithPtTrainerTrainee(PtTrainerTrainee ptTrainerTrainee) {
+		return ptLessonRepository.findAllByPtTrainerTraineeAndDeletedAtIsNull(ptTrainerTrainee);
 	}
 
 	private void validateNotAlreadyConnected(Long trainerId, Long traineeId) {
@@ -118,39 +138,7 @@ public class PtService {
 
 	private void validateIfNotConnected(Long trainerId, Long traineeId) {
 		if (!ptTrainerTraineeRepository.existsByTrainerIdAndTraineeIdAndDeletedAtIsNull(trainerId, traineeId)) {
-			throw new NotFoundException(ErrorMessage.PT_TRAINER_TRAINEE_NOT_FOUND);
+			throw new NotFoundException(PT_TRAINER_TRAINEE_NOT_FOUND);
 		}
-	}
-
-	public PtTrainerTrainee getPtTrainerTraineeWithTrainerId(Long trainerId) {
-		return ptTrainerTraineeRepository.findByTrainerIdAndDeletedAtIsNull(trainerId).orElse(null);
-	}
-
-	public PtTrainerTrainee getPtTrainerTraineeWithTraineeId(Long traineeId) {
-		return ptTrainerTraineeRepository.findByTraineeIdAndDeletedAtIsNull(traineeId).orElse(null);
-	}
-
-	public List<PtLesson> getPtLessonWithPtTrainerTrainee(PtTrainerTrainee ptTrainerTrainee) {
-		return ptLessonRepository.findAllByPtTrainerTraineeAndDeletedAtIsNull(ptTrainerTrainee).orElse(null);
-	}
-
-	public void softDeletePtTrainerTrainee(PtTrainerTrainee ptTrainerTrainee) {
-		if (isNull(ptTrainerTrainee)) {
-			return;
-		}
-
-		LocalDateTime now = LocalDateTime.now();
-
-		ptTrainerTrainee.updateDeletedAt(now);
-	}
-
-	public void softDeletePtLessons(List<PtLesson> ptLessons) {
-		if (isNull(ptLessons)) {
-			return;
-		}
-
-		LocalDateTime now = LocalDateTime.now();
-
-		ptLessons.forEach(ptLesson -> ptLesson.updateDeletedAt(now));
 	}
 }

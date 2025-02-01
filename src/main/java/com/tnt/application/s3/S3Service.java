@@ -74,7 +74,7 @@ public class S3Service {
 	}
 
 	public void deleteProfileImage(String imageUrl) {
-		if (isNull(imageUrl) || isDefaultImage(imageUrl)) {
+		if (isDefaultImage(imageUrl)) {
 			return;
 		}
 

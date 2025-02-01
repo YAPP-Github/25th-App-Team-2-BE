@@ -4,11 +4,7 @@ import static com.tnt.common.error.model.ErrorMessage.INPUT_VALUE_IS_INVALID;
 import static com.tnt.common.error.model.ErrorMessage.MISSING_REQUIRED_PARAMETER_ERROR;
 import static com.tnt.common.error.model.ErrorMessage.PARAMETER_FORMAT_NOT_CORRECT;
 import static com.tnt.common.error.model.ErrorMessage.SERVER_ERROR;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.CONFLICT;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
-import static org.springframework.http.HttpStatus.NOT_FOUND;
-import static org.springframework.http.HttpStatus.UNAUTHORIZED;
+import static org.springframework.http.HttpStatus.*;
 
 import java.security.SecureRandom;
 import java.time.DateTimeException;
@@ -112,7 +108,7 @@ public class GlobalExceptionHandler {
 
 	@ResponseStatus(BAD_REQUEST)
 	@ExceptionHandler(ImageException.class)
-	protected ErrorResponse handleImageException(TnTException exception) {
+	protected ErrorResponse handleImageException(ImageException exception) {
 		log.error(exception.getMessage(), exception);
 
 		return new ErrorResponse(exception.getMessage());
@@ -128,7 +124,7 @@ public class GlobalExceptionHandler {
 
 	@ResponseStatus(CONFLICT)
 	@ExceptionHandler(ConflictException.class)
-	protected ErrorResponse handleConflictException(TnTException exception) {
+	protected ErrorResponse handleConflictException(ConflictException exception) {
 		log.error(exception.getMessage(), exception);
 
 		return new ErrorResponse(exception.getMessage());
@@ -136,7 +132,7 @@ public class GlobalExceptionHandler {
 
 	@ResponseStatus(NOT_FOUND)
 	@ExceptionHandler(NotFoundException.class)
-	protected ErrorResponse handleNotFoundException(TnTException exception) {
+	protected ErrorResponse handleNotFoundException(NotFoundException exception) {
 		log.error(exception.getMessage(), exception);
 
 		return new ErrorResponse(exception.getMessage());

@@ -44,7 +44,7 @@ public class TrainerController {
 	@Operation(summary = "트레이너 초대 코드 인증 API")
 	@ResponseStatus(OK)
 	@GetMapping("/invitation-code/verify/{code}")
-	public InvitationCodeVerifyResponse verifyInvitationCode(@PathVariable String code) {
+	public InvitationCodeVerifyResponse verifyInvitationCode(@PathVariable("code") String code) {
 		return trainerService.verifyInvitationCode(code);
 	}
 
@@ -58,15 +58,16 @@ public class TrainerController {
 	@Operation(summary = "연결 완료된 트레이니 최초로 정보 불러오기 API")
 	@ResponseStatus(OK)
 	@GetMapping("/first-connected-trainee")
-	public ConnectWithTraineeResponse getFirstConnectedTrainee(@AuthMember Long memberId, @RequestParam Long trainerId,
-		@RequestParam Long traineeId) {
+	public ConnectWithTraineeResponse getFirstConnectedTrainee(@AuthMember Long memberId,
+		@RequestParam("trainerId") Long trainerId, @RequestParam Long traineeId) {
 		return ptService.getFirstTrainerTraineeConnect(memberId, trainerId, traineeId);
 	}
 
 	@Operation(summary = "특정 날짜의 PT 리스트 불러오기 API")
 	@ResponseStatus(OK)
 	@GetMapping("/lessons/{date}")
-	public GetPtLessonsOnDateResponse getPtLessonsOnDate(@AuthMember Long memberId, @PathVariable LocalDate date) {
+	public GetPtLessonsOnDateResponse getPtLessonsOnDate(@AuthMember Long memberId,
+		@PathVariable("date") LocalDate date) {
 		return ptService.getPtLessonsOnDate(memberId, date);
 	}
 }

@@ -77,26 +77,4 @@ class PtGoalServiceTest {
 		assertThat(savedPtGoals).isNotNull().hasSize(2).isEqualTo(ptGoals);
 		verify(ptGoalRepository).saveAll(ptGoals);
 	}
-
-	@Test
-	@DisplayName("PT 목표 목록 soft delete 성공")
-	void soft_delete_all_pt_goals_success() {
-		// given
-		List<PtGoal> ptGoals = List.of(
-			PtGoal.builder()
-				.traineeId(1L)
-				.content("목표1")
-				.build(),
-			PtGoal.builder()
-				.traineeId(1L)
-				.content("목표2")
-				.build()
-		);
-
-		// when
-		ptGoalService.softDeleteAllPtGoals(ptGoals);
-
-		// then
-		ptGoals.forEach(ptGoal -> assertThat(ptGoal.getDeletedAt()).isNotNull());
-	}
 }

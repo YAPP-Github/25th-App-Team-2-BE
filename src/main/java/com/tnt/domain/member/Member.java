@@ -153,8 +153,8 @@ public class Member extends BaseTimeEntity {
 		}
 	}
 
-	public void updateDeletedAt(LocalDateTime deletedAt) {
-		this.deletedAt = deletedAt;
+	public void softDelete() {
+		this.deletedAt = LocalDateTime.now();
 	}
 
 	public String getAge() {

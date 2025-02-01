@@ -38,6 +38,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.JWTVerifier;
 import com.tnt.application.member.MemberService;
+import com.tnt.common.error.exception.NotFoundException;
 import com.tnt.common.error.exception.OAuthException;
 import com.tnt.common.error.model.ErrorMessage;
 import com.tnt.domain.member.Member;
@@ -91,9 +92,11 @@ public class OAuthService {
 		OAuthUserInfo oauthInfo = extractOAuthUserInfo(request);
 		String socialId = oauthInfo.getId();
 		String socialEmail = oauthInfo.getEmail();
-		Member member = memberService.getMemberWithSocialIdAndSocialType(socialId, request.socialType());
+		Member member;
 
-		if (isNull(member)) {
+		try {
+			member = memberService.getMemberWithSocialIdAndSocialType(socialId, request.socialType());
+		} catch (NotFoundException e) {
 			return new OAuthLoginResponse(null, socialId, socialEmail, request.socialType(), false, UNREGISTERED);
 		}
 

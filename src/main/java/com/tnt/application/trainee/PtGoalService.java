@@ -1,6 +1,5 @@
 package com.tnt.application.trainee;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -24,11 +23,5 @@ public class PtGoalService {
 
 	public List<PtGoal> saveAllPtGoals(List<PtGoal> ptGoals) {
 		return ptGoalRepository.saveAll(ptGoals);
-	}
-
-	public void softDeleteAllPtGoals(List<PtGoal> ptGoals) {
-		LocalDateTime now = LocalDateTime.now();
-
-		ptGoals.forEach(ptGoal -> ptGoal.updateDeletedAt(now));
 	}
 }

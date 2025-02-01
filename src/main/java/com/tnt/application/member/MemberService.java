@@ -3,12 +3,9 @@ package com.tnt.application.member;
 import static com.tnt.common.error.model.ErrorMessage.MEMBER_CONFLICT;
 import static com.tnt.common.error.model.ErrorMessage.MEMBER_NOT_FOUND;
 
-import java.time.LocalDateTime;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.tnt.application.s3.S3Service;
 import com.tnt.common.error.exception.ConflictException;
 import com.tnt.common.error.exception.NotFoundException;
 import com.tnt.domain.member.Member;
@@ -22,7 +19,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class MemberService {
 
-	private final S3Service s3Service;
 	private final MemberRepository memberRepository;
 
 	public Member getMemberWithMemberId(Long memberId) {
@@ -30,9 +26,10 @@ public class MemberService {
 			.orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
 	}
 
+	@Transactional(noRollbackFor = NotFoundException.class)
 	public Member getMemberWithSocialIdAndSocialType(String socialId, SocialType socialType) {
-		return memberRepository.findBySocialIdAndSocialTypeAndDeletedAtIsNull(socialId,
-			socialType).orElse(null);
+		return memberRepository.findBySocialIdAndSocialTypeAndDeletedAtIsNull(socialId, socialType)
+			.orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
 	}
 
 	public void validateMemberNotExists(String socialId, SocialType socialType) {
@@ -42,16 +39,8 @@ public class MemberService {
 			});
 	}
 
+	@Transactional
 	public Member saveMember(Member member) {
 		return memberRepository.save(member);
-	}
-
-	@Transactional
-	public void softDeleteMember(Member member) {
-		LocalDateTime now = LocalDateTime.now();
-
-		s3Service.deleteProfileImage(member.getProfileImageUrl());
-
-		member.updateDeletedAt(now);
 	}
 }
