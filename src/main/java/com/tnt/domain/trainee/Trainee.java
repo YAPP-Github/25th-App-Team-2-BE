@@ -78,4 +78,8 @@ public class Trainee extends BaseTimeEntity {
 
 		this.cautionNote = cautionNote;
 	}
+
+	public void softDelete() {
+		this.deletedAt = LocalDateTime.now();
+	}
 }

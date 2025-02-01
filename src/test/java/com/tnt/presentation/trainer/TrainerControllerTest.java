@@ -1,6 +1,7 @@
 package com.tnt.presentation.trainer;
 
 import static com.tnt.domain.member.MemberType.TRAINER;
+import static com.tnt.domain.member.SocialType.KAKAO;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -26,7 +27,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tnt.annotation.WithMockCustomUser;
 import com.tnt.domain.member.Member;
-import com.tnt.domain.member.SocialType;
 import com.tnt.domain.pt.PtLesson;
 import com.tnt.domain.pt.PtTrainerTrainee;
 import com.tnt.domain.trainee.PtGoal;
@@ -95,7 +95,7 @@ class TrainerControllerTest {
 			.serviceAgreement(true)
 			.collectionAgreement(true)
 			.advertisementAgreement(true)
-			.socialType(SocialType.KAKAO)
+			.socialType(KAKAO)
 			.memberType(TRAINER)
 			.build();
 
@@ -129,7 +129,7 @@ class TrainerControllerTest {
 			.serviceAgreement(true)
 			.collectionAgreement(true)
 			.advertisementAgreement(true)
-			.socialType(SocialType.KAKAO)
+			.socialType(KAKAO)
 			.memberType(TRAINER)
 			.build();
 
@@ -163,7 +163,7 @@ class TrainerControllerTest {
 			.serviceAgreement(true)
 			.collectionAgreement(true)
 			.advertisementAgreement(true)
-			.socialType(SocialType.KAKAO)
+			.socialType(KAKAO)
 			.memberType(TRAINER)
 			.build();
 
@@ -196,7 +196,7 @@ class TrainerControllerTest {
 			.serviceAgreement(true)
 			.collectionAgreement(true)
 			.advertisementAgreement(true)
-			.socialType(SocialType.KAKAO)
+			.socialType(KAKAO)
 			.memberType(TRAINER)
 			.build();
 
@@ -233,7 +233,7 @@ class TrainerControllerTest {
 			.serviceAgreement(true)
 			.collectionAgreement(true)
 			.advertisementAgreement(true)
-			.socialType(SocialType.KAKAO)
+			.socialType(KAKAO)
 			.memberType(TRAINER)
 			.build();
 

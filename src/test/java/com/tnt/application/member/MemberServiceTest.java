@@ -1,267 +1,134 @@
 package com.tnt.application.member;
 
-import static com.tnt.common.constant.ProfileConstant.TRAINEE_DEFAULT_IMAGE;
-import static com.tnt.common.constant.ProfileConstant.TRAINER_DEFAULT_IMAGE;
-import static com.tnt.domain.member.MemberType.TRAINEE;
-import static com.tnt.domain.member.MemberType.TRAINER;
 import static com.tnt.domain.member.SocialType.KAKAO;
-import static org.assertj.core.api.Assertions.assertThat;
+import static java.util.Objects.requireNonNull;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.BDDMockito.doThrow;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.verify;
+import static org.mockito.Mockito.verify;
 
-import java.util.List;
 import java.util.Optional;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.tnt.application.s3.S3Service;
 import com.tnt.common.error.exception.ConflictException;
+import com.tnt.common.error.exception.NotFoundException;
 import com.tnt.domain.member.Member;
-import com.tnt.domain.member.MemberType;
-import com.tnt.domain.trainee.PtGoal;
-import com.tnt.domain.trainee.Trainee;
-import com.tnt.domain.trainer.Trainer;
-import com.tnt.dto.member.request.SignUpRequest;
-import com.tnt.dto.member.response.SignUpResponse;
-import com.tnt.gateway.service.SessionService;
+import com.tnt.domain.member.SocialType;
+import com.tnt.fixture.MemberFixture;
 import com.tnt.infrastructure.mysql.repository.member.MemberRepository;
-import com.tnt.infrastructure.mysql.repository.pt.PtGoalRepository;
-import com.tnt.infrastructure.mysql.repository.trainee.TraineeRepository;
-import com.tnt.infrastructure.mysql.repository.trainer.TrainerRepository;
 
 @ExtendWith(MockitoExtension.class)
 class MemberServiceTest {
 
-	private static final String MOCK_FCM_TOKEN = "fcm-token";
-	private static final String MOCK_SOCIAL_ID = "12345";
-	private static final String MOCK_EMAIL = "test@kakao.com";
-	private static final String MOCK_NAME = "홍길동";
-	private static final String MOCK_CAUTION = "주의사항";
-	private static final List<String> MOCK_GOALS = List.of("목표1", "목표2");
+	@Mock
+	private S3Service s3Service;
+
+	@Mock
+	private MemberRepository memberRepository;
 
 	@InjectMocks
 	private MemberService memberService;
-	@Mock
-	private MemberRepository memberRepository;
-	@Mock
-	private TrainerRepository trainerRepository;
-	@Mock
-	private TraineeRepository traineeRepository;
-	@Mock
-	private PtGoalRepository ptGoalRepository;
-	@Mock
-	private SessionService sessionService;
 
-	private SignUpRequest trainerRequest;
-	private SignUpRequest traineeRequest;
-	private Member mockTrainerMember;
-	private Member mockTraineeMember;
-	private Trainee mockTrainee;
-	private List<PtGoal> mockPtGoals;
+	@Test
+	@DisplayName("memberId로 회원 조회 성공")
+	void get_member_with_member_id_success() {
+		// given
+		Member trainerMember = MemberFixture.getTrainerMember1WithId();
 
-	private Member createMockMember(Long id, String profileImageUrl, MemberType memberType) {
-		return Member.builder()
-			.id(id)
-			.socialId(MOCK_SOCIAL_ID)
-			.email(MOCK_EMAIL)
-			.name(MOCK_NAME)
-			.profileImageUrl(profileImageUrl)
-			.serviceAgreement(true)
-			.collectionAgreement(true)
-			.advertisementAgreement(true)
-			.socialType(KAKAO)
-			.memberType(memberType)
-			.build();
+		given(memberRepository.findByIdAndDeletedAtIsNull(1L)).willReturn(Optional.ofNullable(trainerMember));
+
+		// when
+		Member result = memberService.getMemberWithMemberId(requireNonNull(trainerMember).getId());
+
+		// then
+		assertThat(result).isNotNull().isEqualTo(trainerMember);
+		verify(memberRepository).findByIdAndDeletedAtIsNull(1L);
 	}
 
-	@BeforeEach
-	void setUp() {
-		trainerRequest = new SignUpRequest(MOCK_FCM_TOKEN, TRAINER, KAKAO, MOCK_SOCIAL_ID, MOCK_EMAIL, true, true,
-			true, MOCK_NAME, null, null, null, null, null);
-		traineeRequest = new SignUpRequest(MOCK_FCM_TOKEN, TRAINEE, KAKAO, MOCK_SOCIAL_ID, MOCK_EMAIL, true, true,
-			true, MOCK_NAME, null, 180.0, 75.0, MOCK_CAUTION, MOCK_GOALS);
+	@Test
+	@DisplayName("존재하지 않는 memberId로 회원 조회시 실패")
+	void get_member_with_member_id_error() {
+		// given
+		Long memberId = 999L;
 
-		mockTrainerMember = createMockMember(1L, TRAINER_DEFAULT_IMAGE, TRAINER);
-		mockTraineeMember = createMockMember(2L, TRAINEE_DEFAULT_IMAGE, TRAINEE);
+		given(memberRepository.findByIdAndDeletedAtIsNull(999L)).willReturn(Optional.empty());
 
-		mockTrainee = Trainee.builder()
-			.id(1L)
-			.member(mockTraineeMember)
-			.height(traineeRequest.height())
-			.weight(traineeRequest.weight())
-			.cautionNote(traineeRequest.cautionNote())
-			.build();
-
-		mockPtGoals = MOCK_GOALS.stream()
-			.map(content -> PtGoal.builder()
-				.traineeId(mockTrainee.getId())
-				.content(content)
-				.build())
-			.toList();
+		// when & then
+		assertThrows(NotFoundException.class, () -> memberService.getMemberWithMemberId(memberId));
+		verify(memberRepository).findByIdAndDeletedAtIsNull(999L);
 	}
 
-	@Nested
-	@DisplayName("saveMember 테스트")
-	class SaveMemberTest {
+	@Test
+	@DisplayName("socialId와 socialType으로 회원 조회 성공")
+	void get_member_with_social_id_and_type_success() {
+		// given
+		Member member = MemberFixture.getTrainerMember1WithId();
+		String socialId = member.getSocialId();
+		SocialType socialType = member.getSocialType();
 
-		@Test
-		@DisplayName("트레이너 회원가입 성공")
-		void save_trainer_success() {
-			// given
-			given(memberRepository.findBySocialIdAndSocialTypeAndDeletedAtIsNull(any(), any())).willReturn(
-				Optional.empty());
-			given(memberRepository.save(any(Member.class))).willReturn(mockTrainerMember);
-			given(trainerRepository.save(any(Trainer.class))).willReturn(
-				Trainer.builder().member(mockTrainerMember).build());
+		given(memberRepository.findBySocialIdAndSocialTypeAndDeletedAtIsNull(socialId, socialType)).willReturn(
+			Optional.of(member));
 
-			// when
-			Long result = memberService.signUp(trainerRequest);
+		// when
+		Member result = memberService.getMemberWithSocialIdAndSocialType(socialId, socialType);
 
-			// then
-			assertThat(result).isNotNull().isEqualTo(mockTrainerMember.getId());
-			verify(memberRepository).save(any(Member.class));
-			verify(trainerRepository).save(any(Trainer.class));
-		}
-
-		@Test
-		@DisplayName("트레이니 회원가입 성공")
-		void save_trainee_success() {
-			// given
-			given(memberRepository.findBySocialIdAndSocialTypeAndDeletedAtIsNull(any(), any())).willReturn(
-				Optional.empty());
-			given(memberRepository.save(any(Member.class))).willReturn(mockTraineeMember);
-			given(traineeRepository.save(any(Trainee.class))).willReturn(mockTrainee);
-			given(ptGoalRepository.saveAll(any())).willReturn(mockPtGoals);
-
-			// when
-			Long result = memberService.signUp(traineeRequest);
-
-			// then
-			assertThat(result).isNotNull().isEqualTo(mockTraineeMember.getId());
-			verify(memberRepository).save(any(Member.class));
-			verify(traineeRepository).save(any(Trainee.class));
-			verify(ptGoalRepository).saveAll(any());
-		}
-
-		@Test
-		@DisplayName("이미 존재하는 회원 가입 시도 실패")
-		void save_member_already_exists_fail() {
-			// given
-			given(memberRepository.findBySocialIdAndSocialTypeAndDeletedAtIsNull(any(), any())).willReturn(
-				Optional.of(mockTrainerMember));
-
-			// when & then
-			assertThrows(ConflictException.class, () -> memberService.signUp(trainerRequest));
-		}
+		// then
+		assertThat(result).isNotNull().isEqualTo(member);
+		verify(memberRepository).findBySocialIdAndSocialTypeAndDeletedAtIsNull(socialId, socialType);
 	}
 
-	@Nested
-	@DisplayName("signUp 테스트")
-	class SignUpTest {
+	@Test
+	@DisplayName("회원 중복 검증 성공")
+	void validate_member_not_exists_success() {
+		// given
+		String socialId = "user";
+		SocialType socialType = KAKAO;
 
-		@Test
-		@DisplayName("회원가입 완료 성공")
-		void sign_up_success() {
-			// given
-			given(memberRepository.findByIdAndDeletedAtIsNull(any())).willReturn(Optional.of(mockTrainerMember));
+		given(memberRepository.findBySocialIdAndSocialTypeAndDeletedAtIsNull(socialId, socialType)).willReturn(
+			Optional.empty());
 
-			// when
-			SignUpResponse response = memberService.finishSignUpWithImage(TRAINER_DEFAULT_IMAGE,
-				mockTrainerMember.getId(), TRAINER);
-
-			// then
-			assertThat(response).isNotNull();
-			assertThat(response.name()).isEqualTo(MOCK_NAME);
-			assertThat(response.profileImageUrl()).isEqualTo(TRAINER_DEFAULT_IMAGE);
-			assertThat(response.memberType()).isEqualTo(TRAINER);
-			verify(sessionService).createSession(anyString(), anyString());
-		}
+		// when & then
+		assertDoesNotThrow(() -> memberService.validateMemberNotExists(socialId, socialType));
+		verify(memberRepository).findBySocialIdAndSocialTypeAndDeletedAtIsNull(socialId, socialType);
 	}
 
-	@Nested
-	@DisplayName("회원가입 프로세스 통합 테스트")
-	class SignUpProcessTest {
+	@Test
+	@DisplayName("이미 존재하는 회원 검증시 실패")
+	void validate_member_exists_error() {
+		// given
+		Member existingMember = MemberFixture.getTrainerMember1WithId();
+		String socialId = existingMember.getSocialId();
+		SocialType socialType = existingMember.getSocialType();
 
-		@Test
-		@DisplayName("트레이너 회원가입 전체 프로세스 성공")
-		void trainer_sign_up_process_success() {
-			// given
-			given(memberRepository.findBySocialIdAndSocialTypeAndDeletedAtIsNull(any(), any())).willReturn(
-				Optional.empty());
-			given(memberRepository.save(any(Member.class))).willReturn(mockTrainerMember);
-			given(trainerRepository.save(any(Trainer.class))).willReturn(
-				Trainer.builder().member(mockTrainerMember).build());
-			given(memberRepository.findByIdAndDeletedAtIsNull(any())).willReturn(Optional.of(mockTrainerMember));
+		given(memberRepository.findBySocialIdAndSocialTypeAndDeletedAtIsNull(socialId, socialType)).willReturn(
+			Optional.of(existingMember));
 
-			// when
-			Long savedMemberId = memberService.signUp(trainerRequest);
-			SignUpResponse response = memberService.finishSignUpWithImage(TRAINER_DEFAULT_IMAGE, savedMemberId,
-				TRAINER);
+		// when & then
+		assertThrows(ConflictException.class, () -> memberService.validateMemberNotExists(socialId, socialType));
+		verify(memberRepository).findBySocialIdAndSocialTypeAndDeletedAtIsNull(socialId, socialType);
+	}
 
-			// then
-			assertThat(response).isNotNull();
-			assertThat(response.memberType()).isEqualTo(TRAINER);
-			assertThat(response.name()).isEqualTo(MOCK_NAME);
-			assertThat(response.profileImageUrl()).isEqualTo(TRAINER_DEFAULT_IMAGE);
-			verify(sessionService).createSession(anyString(), anyString());
-		}
+	@Test
+	@DisplayName("회원 저장 성공")
+	void save_member_success() {
+		// given
+		Member member = MemberFixture.getTrainerMember1WithId();
 
-		@Test
-		@DisplayName("트레이니 회원가입 전체 프로세스 성공")
-		void trainee_sign_up_process_success() {
-			// given
-			given(memberRepository.findBySocialIdAndSocialTypeAndDeletedAtIsNull(any(), any())).willReturn(
-				Optional.empty());
-			given(memberRepository.save(any(Member.class))).willReturn(mockTraineeMember);
-			given(traineeRepository.save(any(Trainee.class))).willReturn(mockTrainee);
-			given(ptGoalRepository.saveAll(any())).willReturn(mockPtGoals);
-			given(memberRepository.findByIdAndDeletedAtIsNull(any())).willReturn(Optional.of(mockTrainerMember));
+		given(memberRepository.save(member)).willReturn(member);
 
-			// when
-			Long savedMemberId = memberService.signUp(traineeRequest);
-			SignUpResponse response = memberService.finishSignUpWithImage(TRAINEE_DEFAULT_IMAGE, savedMemberId,
-				TRAINEE);
+		// when
+		Member savedMember = memberService.saveMember(member);
 
-			// then
-			assertThat(response).isNotNull();
-			assertThat(response.memberType()).isEqualTo(TRAINEE);
-			assertThat(response.name()).isEqualTo(MOCK_NAME);
-			assertThat(response.profileImageUrl()).isEqualTo(TRAINEE_DEFAULT_IMAGE);
-			verify(sessionService).createSession(anyString(), anyString());
-		}
-
-		@Test
-		@DisplayName("회원가입 중 세션 생성 실패")
-		void sign_up_process_session_fail() {
-			// given
-			given(memberRepository.findBySocialIdAndSocialTypeAndDeletedAtIsNull(any(), any())).willReturn(
-				Optional.empty());
-			given(memberRepository.save(any(Member.class))).willReturn(mockTrainerMember);
-			given(trainerRepository.save(any(Trainer.class))).willReturn(
-				Trainer.builder().member(mockTrainerMember).build());
-			given(memberRepository.findByIdAndDeletedAtIsNull(any())).willReturn(Optional.of(mockTrainerMember));
-			doThrow(new RuntimeException("세션 생성 실패")).when(sessionService)
-				.createSession(any(), eq(String.valueOf(mockTrainerMember.getId())));
-
-			// when
-			Long savedMemberId = memberService.signUp(trainerRequest);
-
-			// then
-			assertThat(savedMemberId).isNotNull();
-			assertThrows(RuntimeException.class,
-				() -> memberService.finishSignUpWithImage(TRAINER_DEFAULT_IMAGE, savedMemberId, TRAINER));
-			verify(sessionService).createSession(any(), eq(String.valueOf(mockTrainerMember.getId())));
-		}
+		// then
+		assertThat(savedMember).isNotNull().isEqualTo(member);
+		verify(memberRepository).save(member);
 	}
 }

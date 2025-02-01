@@ -1,11 +1,13 @@
 package com.tnt.domain.pt;
 
+import static com.tnt.common.error.model.ErrorMessage.TRAINEE_NULL;
+import static com.tnt.common.error.model.ErrorMessage.TRAINER_NULL;
 import static jakarta.persistence.ConstraintMode.NO_CONSTRAINT;
 import static java.util.Objects.requireNonNull;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
-import com.tnt.common.error.model.ErrorMessage;
 import com.tnt.domain.trainee.Trainee;
 import com.tnt.domain.trainer.Trainer;
 import com.tnt.infrastructure.mysql.BaseTimeEntity;
@@ -53,21 +55,25 @@ public class PtTrainerTrainee extends BaseTimeEntity {
 	@Column(name = "total_pt_count", nullable = false)
 	private Integer totalPtCount;
 
-	@Column(name = "deleted_at")
-	private LocalDate deletedAt;
+	@Column(name = "deleted_at", nullable = true)
+	private LocalDateTime deletedAt;
 
 	@Builder
 	public PtTrainerTrainee(Long id, Trainer trainer, Trainee trainee, LocalDate startedAt, Integer finishedPtCount,
 		Integer totalPtCount) {
 		this.id = id;
-		this.trainer = requireNonNull(trainer, ErrorMessage.TRAINER_NULL.getMessage());
-		this.trainee = requireNonNull(trainee, ErrorMessage.TRAINEE_NULL.getMessage());
+		this.trainer = requireNonNull(trainer, TRAINER_NULL.getMessage());
+		this.trainee = requireNonNull(trainee, TRAINEE_NULL.getMessage());
 		this.startedAt = requireNonNull(startedAt);
 		this.finishedPtCount = requireNonNull(finishedPtCount);
 		this.totalPtCount = requireNonNull(totalPtCount);
 	}
 
-	public int getCurrentSession() {
+	public int getCurrentPtSession() {
 		return this.finishedPtCount + 1;
+	}
+
+	public void softDelete() {
+		this.deletedAt = LocalDateTime.now();
 	}
 }

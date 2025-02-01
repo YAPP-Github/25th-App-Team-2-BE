@@ -2,6 +2,7 @@ package com.tnt.application.pt;
 
 import static com.tnt.common.error.model.ErrorMessage.PT_TRAINEE_ALREADY_EXIST;
 import static com.tnt.common.error.model.ErrorMessage.PT_TRAINER_TRAINEE_ALREADY_EXIST;
+import static com.tnt.common.error.model.ErrorMessage.PT_TRAINER_TRAINEE_NOT_FOUND;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -10,11 +11,11 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.tnt.application.trainee.PtGoalService;
 import com.tnt.application.trainee.TraineeService;
 import com.tnt.application.trainer.TrainerService;
 import com.tnt.common.error.exception.ConflictException;
 import com.tnt.common.error.exception.NotFoundException;
-import com.tnt.common.error.model.ErrorMessage;
 import com.tnt.domain.member.Member;
 import com.tnt.domain.pt.PtLesson;
 import com.tnt.domain.pt.PtTrainerTrainee;
@@ -26,7 +27,7 @@ import com.tnt.dto.trainer.request.ConnectWithTrainerRequest;
 import com.tnt.dto.trainer.response.ConnectWithTraineeResponse;
 import com.tnt.dto.trainer.response.GetPtLessonsOnDateResponse;
 import com.tnt.dto.trainer.response.GetPtLessonsOnDateResponse.Lesson;
-import com.tnt.infrastructure.mysql.repository.pt.PtGoalRepository;
+import com.tnt.infrastructure.mysql.repository.pt.PtLessonRepository;
 import com.tnt.infrastructure.mysql.repository.pt.PtLessonSearchRepository;
 import com.tnt.infrastructure.mysql.repository.pt.PtTrainerTraineeRepository;
 
@@ -39,8 +40,9 @@ public class PtService {
 
 	private final TraineeService traineeService;
 	private final TrainerService trainerService;
+	private final PtGoalService ptGoalService;
 	private final PtTrainerTraineeRepository ptTrainerTraineeRepository;
-	private final PtGoalRepository ptGoalRepository;
+	private final PtLessonRepository ptLessonRepository;
 	private final PtLessonSearchRepository ptLessonSearchRepository;
 
 	@Transactional
@@ -77,7 +79,7 @@ public class PtService {
 		Member trainerMember = trainer.getMember(); // fetch join 으로 가져온 member
 		Member traineeMember = trainee.getMember(); // fetch join 으로 가져온 member
 
-		List<PtGoal> ptGoals = ptGoalRepository.findAllByTraineeId(traineeId);
+		List<PtGoal> ptGoals = ptGoalService.getAllPtGoalsWithTraineeId(traineeId);
 		String ptGoal = ptGoals.stream().map(PtGoal::getContent).collect(Collectors.joining(", "));
 
 		return new ConnectWithTraineeResponse(trainerMember.getName(), traineeMember.getName(),
@@ -95,11 +97,33 @@ public class PtService {
 			Trainee trainee = ptTrainerTrainee.getTrainee();
 
 			return new Lesson(String.valueOf(ptLesson.getId()),
-				String.valueOf(trainee.getId()), trainee.getMember().getName(), ptTrainerTrainee.getCurrentSession(),
+				String.valueOf(trainee.getId()), trainee.getMember().getName(), ptTrainerTrainee.getCurrentPtSession(),
 				ptLesson.getLessonStart(), ptLesson.getLessonEnd(), ptLesson.getIsCompleted());
 		}).toList();
 
 		return new GetPtLessonsOnDateResponse(ptLessons.size(), date, lessons);
+	}
+
+	public boolean isPtTrainerTraineeExistWithTrainerId(Long trainerId) {
+		return ptTrainerTraineeRepository.existsByTrainerIdAndDeletedAtIsNull(trainerId);
+	}
+
+	public boolean isPtTrainerTraineeExistWithTraineeId(Long traineeId) {
+		return ptTrainerTraineeRepository.existsByTraineeIdAndDeletedAtIsNull(traineeId);
+	}
+
+	public PtTrainerTrainee getPtTrainerTraineeWithTrainerId(Long trainerId) {
+		return ptTrainerTraineeRepository.findByTrainerIdAndDeletedAtIsNull(trainerId)
+			.orElseThrow(() -> new NotFoundException(PT_TRAINER_TRAINEE_NOT_FOUND));
+	}
+
+	public PtTrainerTrainee getPtTrainerTraineeWithTraineeId(Long traineeId) {
+		return ptTrainerTraineeRepository.findByTraineeIdAndDeletedAtIsNull(traineeId)
+			.orElseThrow(() -> new NotFoundException(PT_TRAINER_TRAINEE_NOT_FOUND));
+	}
+
+	public List<PtLesson> getPtLessonWithPtTrainerTrainee(PtTrainerTrainee ptTrainerTrainee) {
+		return ptLessonRepository.findAllByPtTrainerTraineeAndDeletedAtIsNull(ptTrainerTrainee);
 	}
 
 	private void validateNotAlreadyConnected(Long trainerId, Long traineeId) {
@@ -114,7 +138,7 @@ public class PtService {
 
 	private void validateIfNotConnected(Long trainerId, Long traineeId) {
 		if (!ptTrainerTraineeRepository.existsByTrainerIdAndTraineeIdAndDeletedAtIsNull(trainerId, traineeId)) {
-			throw new NotFoundException(ErrorMessage.PT_TRAINER_TRAINEE_NOT_FOUND);
+			throw new NotFoundException(PT_TRAINER_TRAINEE_NOT_FOUND);
 		}
 	}
 }

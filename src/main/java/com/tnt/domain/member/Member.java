@@ -1,12 +1,6 @@
 package com.tnt.domain.member;
 
-import static com.tnt.common.error.model.ErrorMessage.MEMBER_INVALID_COLLECTION_AGREEMENT;
-import static com.tnt.common.error.model.ErrorMessage.MEMBER_INVALID_EMAIL;
-import static com.tnt.common.error.model.ErrorMessage.MEMBER_INVALID_NAME;
-import static com.tnt.common.error.model.ErrorMessage.MEMBER_INVALID_PROFILE_IMAGE_URL;
-import static com.tnt.common.error.model.ErrorMessage.MEMBER_INVALID_SERVICE_AGREEMENT;
-import static com.tnt.common.error.model.ErrorMessage.MEMBER_INVALID_SOCIAL_ID;
-import static com.tnt.common.error.model.ErrorMessage.MEMBER_NULL_ADVERTISEMENT_AGREEMENT;
+import static com.tnt.common.error.model.ErrorMessage.*;
 import static io.micrometer.common.util.StringUtils.isBlank;
 import static java.lang.Boolean.FALSE;
 import static java.util.Objects.isNull;
@@ -106,34 +100,6 @@ public class Member extends BaseTimeEntity {
 		this.memberType = requireNonNull(memberType);
 	}
 
-	public void updateFcmTokenIfExpired(String fcmToken) {
-		if (!isBlank(fcmToken) && !this.fcmToken.equals(fcmToken)) {
-			this.fcmToken = fcmToken;
-		}
-	}
-
-	public void updateProfileImageUrl(String profileImageUrl) {
-		if (!isBlank(profileImageUrl) && !this.profileImageUrl.equals(profileImageUrl)) {
-			this.profileImageUrl = profileImageUrl;
-		}
-	}
-
-	public String getAge() {
-		if (isNull(this.birthday)) {
-			return "비공개";
-		}
-
-		LocalDate currentDate = LocalDate.now();
-		int age = currentDate.getYear() - this.birthday.getYear();
-
-		// 생일이 아직 지나지 않았으면 나이를 1 줄임
-		if (currentDate.isBefore(this.birthday.withYear(currentDate.getYear()))) {
-			age--;
-		}
-
-		return String.valueOf(age);
-	}
-
 	private String validateSocialId(String socialId) {
 		if (isBlank(socialId) || socialId.length() > SOCIAL_ID_LENGTH) {
 			throw new IllegalArgumentException(MEMBER_INVALID_SOCIAL_ID.getMessage());
@@ -173,5 +139,37 @@ public class Member extends BaseTimeEntity {
 		if (isNull(collectionAgreement) || FALSE.equals(collectionAgreement)) {
 			throw new IllegalArgumentException(MEMBER_INVALID_COLLECTION_AGREEMENT.getMessage());
 		}
+	}
+
+	public void updateFcmTokenIfExpired(String fcmToken) {
+		if (!isBlank(fcmToken) && !this.fcmToken.equals(fcmToken)) {
+			this.fcmToken = fcmToken;
+		}
+	}
+
+	public void updateProfileImageUrl(String profileImageUrl) {
+		if (!isBlank(profileImageUrl) && !this.profileImageUrl.equals(profileImageUrl)) {
+			this.profileImageUrl = profileImageUrl;
+		}
+	}
+
+	public void softDelete() {
+		this.deletedAt = LocalDateTime.now();
+	}
+
+	public String getAge() {
+		if (isNull(this.birthday)) {
+			return "비공개";
+		}
+
+		LocalDate currentDate = LocalDate.now();
+		int age = currentDate.getYear() - this.birthday.getYear();
+
+		// 생일이 아직 지나지 않았으면 나이를 1 줄임
+		if (currentDate.isBefore(this.birthday.withYear(currentDate.getYear()))) {
+			age--;
+		}
+
+		return String.valueOf(age);
 	}
 }

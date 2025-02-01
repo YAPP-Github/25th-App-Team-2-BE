@@ -118,7 +118,7 @@ class MemberTest {
 				.email("test@example.com")
 				.name("홍길동")
 				.birthday(LocalDate.parse("2022-01-01"))
-				.profileImageUrl("http://example.com")
+				.profileImageUrl("https://example.com")
 				.serviceAgreement(true)
 				.collectionAgreement(true)
 				.advertisementAgreement(true)

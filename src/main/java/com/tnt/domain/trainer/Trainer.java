@@ -89,4 +89,8 @@ public class Trainer extends BaseTimeEntity {
 
 		return invitationCode;
 	}
+
+	public void softDelete() {
+		this.deletedAt = LocalDateTime.now();
+	}
 }

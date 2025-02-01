@@ -28,7 +28,9 @@ import com.tnt.domain.member.MemberType;
 import com.tnt.infrastructure.s3.S3Adapter;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class S3Service {
@@ -68,6 +70,21 @@ public class S3Service {
 			return s3Adapter.uploadFile(processedImage, folderPath, extension);
 		} catch (Exception e) {
 			return defaultImage;
+		}
+	}
+
+	public void deleteProfileImage(String imageUrl) {
+		if (isDefaultImage(imageUrl)) {
+			return;
+		}
+
+		try {
+			String s3Key = imageUrl.replace(S3Adapter.IMAGE_BASE_URL, "");
+
+			s3Adapter.deleteFile(s3Key);
+		} catch (Exception e) {
+			// S3 삭제 실패해도 회원 탈퇴는 진행되어야 하므로 로그만 남김
+			log.error("이미지 삭제 실패: {}", imageUrl, e);
 		}
 	}
 
@@ -113,5 +130,9 @@ public class S3Service {
 			.toOutputStream(outputStream);
 
 		return outputStream.toByteArray();
+	}
+
+	private boolean isDefaultImage(String imageUrl) {
+		return imageUrl.equals(TRAINER_DEFAULT_IMAGE) || imageUrl.equals(TRAINEE_DEFAULT_IMAGE);
 	}
 }

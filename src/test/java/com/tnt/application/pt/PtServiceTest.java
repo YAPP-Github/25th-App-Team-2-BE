@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -28,9 +29,11 @@ import com.tnt.dto.trainer.ConnectWithTrainerDto;
 import com.tnt.dto.trainer.request.ConnectWithTrainerRequest;
 import com.tnt.dto.trainer.response.GetPtLessonsOnDateResponse;
 import com.tnt.fixture.MemberFixture;
+import com.tnt.fixture.PtLessonsFixture;
 import com.tnt.fixture.PtTrainerTraineeFixture;
 import com.tnt.fixture.TraineeFixture;
 import com.tnt.fixture.TrainerFixture;
+import com.tnt.infrastructure.mysql.repository.pt.PtLessonRepository;
 import com.tnt.infrastructure.mysql.repository.pt.PtLessonSearchRepository;
 import com.tnt.infrastructure.mysql.repository.pt.PtTrainerTraineeRepository;
 
@@ -48,6 +51,9 @@ class PtServiceTest {
 
 	@Mock
 	private PtTrainerTraineeRepository ptTrainerTraineeRepository;
+
+	@Mock
+	private PtLessonRepository ptLessonRepository;
 
 	@Mock
 	private PtLessonSearchRepository ptLessonSearchRepository;
@@ -190,5 +196,72 @@ class PtServiceTest {
 		assertThat(result.count()).isEqualTo(1);
 		assertThat(result.lessons().getFirst().isCompleted()).isTrue();
 		assertThat(result.lessons().getFirst().traineeId()).isEqualTo(String.valueOf(traineeId));
+	}
+
+	@Test
+	@DisplayName("트레이너 id로 PT 트레이너 트레이니 조회 성공")
+	void get_pt_trainer_trainee_with_trainer_id_success() {
+		// given
+		Member trainerMember = MemberFixture.getTrainerMember1WithId();
+		Member traineeMember = MemberFixture.getTraineeMember1WithId();
+
+		Trainer trainer = TrainerFixture.getTrainer2(trainerMember);
+		Trainee trainee = TraineeFixture.getTrainee2(traineeMember);
+
+		PtTrainerTrainee ptTrainerTrainee = PtTrainerTraineeFixture.getPtTrainerTrainee1(trainer, trainee);
+
+		given(ptTrainerTraineeRepository.findByTrainerIdAndDeletedAtIsNull(trainer.getId())).willReturn(
+			Optional.ofNullable(ptTrainerTrainee));
+
+		// when
+		PtTrainerTrainee result = ptService.getPtTrainerTraineeWithTrainerId(trainer.getId());
+
+		// then
+		assertThat(result).isEqualTo(ptTrainerTrainee);
+	}
+
+	@Test
+	@DisplayName("트레이니 id로 PT 트레이너 트레이니 조회 성공")
+	void get_pt_trainer_trainee_with_trainee_id_success() {
+		// given
+		Member trainerMember = MemberFixture.getTrainerMember1WithId();
+		Member traineeMember = MemberFixture.getTraineeMember1WithId();
+
+		Trainer trainer = TrainerFixture.getTrainer2(trainerMember);
+		Trainee trainee = TraineeFixture.getTrainee2(traineeMember);
+
+		PtTrainerTrainee ptTrainerTrainee = PtTrainerTraineeFixture.getPtTrainerTrainee1(trainer, trainee);
+
+		given(ptTrainerTraineeRepository.findByTraineeIdAndDeletedAtIsNull(trainee.getId())).willReturn(
+			Optional.ofNullable(ptTrainerTrainee));
+
+		// when
+		PtTrainerTrainee result = ptService.getPtTrainerTraineeWithTraineeId(trainee.getId());
+
+		// then
+		assertThat(result).isEqualTo(ptTrainerTrainee);
+	}
+
+	@Test
+	@DisplayName("PT 레슨 조회 성공")
+	void get_pt_lessons_success() {
+		// given
+		Member trainerMember = MemberFixture.getTrainerMember1WithId();
+		Member traineeMember = MemberFixture.getTraineeMember1WithId();
+
+		Trainer trainer = TrainerFixture.getTrainer2(trainerMember);
+		Trainee trainee = TraineeFixture.getTrainee2(traineeMember);
+
+		PtTrainerTrainee ptTrainerTrainee = PtTrainerTraineeFixture.getPtTrainerTrainee1(trainer, trainee);
+
+		List<PtLesson> ptLessons = PtLessonsFixture.getPtLessons(ptTrainerTrainee);
+
+		given(ptLessonRepository.findAllByPtTrainerTraineeAndDeletedAtIsNull(ptTrainerTrainee)).willReturn(ptLessons);
+
+		// when
+		List<PtLesson> result = ptService.getPtLessonWithPtTrainerTrainee(ptTrainerTrainee);
+
+		// then
+		assertThat(result).isEqualTo(ptLessons);
 	}
 }

@@ -1,6 +1,6 @@
 package com.tnt.gateway.controller;
 
-import static com.tnt.common.error.model.ErrorMessage.FAILED_TO_FETCH_USER_INFO;
+import static com.tnt.common.error.model.ErrorMessage.KAKAO_SERVER_ERROR;
 import static com.tnt.common.error.model.ErrorMessage.MEMBER_NOT_FOUND;
 import static com.tnt.common.error.model.ErrorMessage.UNSUPPORTED_SOCIAL_TYPE;
 import static com.tnt.domain.member.MemberType.TRAINEE;
@@ -26,8 +26,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import com.tnt.common.error.exception.NotFoundException;
 import com.tnt.common.error.exception.OAuthException;
 import com.tnt.dto.member.response.LogoutResponse;
-import com.tnt.gateway.dto.OAuthLoginRequest;
-import com.tnt.gateway.dto.OAuthLoginResponse;
+import com.tnt.gateway.dto.request.OAuthLoginRequest;
+import com.tnt.gateway.dto.response.OAuthLoginResponse;
 import com.tnt.gateway.service.OAuthService;
 
 @ExtendWith(MockitoExtension.class)
@@ -71,27 +71,11 @@ class AuthenticationControllerTest {
 		}
 
 		@Test
-		@DisplayName("ANDROID - Apple 로그인 성공")
-		void apple_login_with_android_success() {
-			// given
-			OAuthLoginRequest request = new OAuthLoginRequest(APPLE, "fcm", null, null, "test-id-token");
-
-			given(oauthService.oauthLogin(request)).willReturn(
-				new OAuthLoginResponse("123456789", "", "", null, true, TRAINEE));
-
-			// when
-			OAuthLoginResponse response = authenticationController.oauthLogin(request);
-
-			// then
-			assertThat(response.sessionId()).isEqualTo("123456789");
-			verify(oauthService).oauthLogin(request);
-		}
-
-		@Test
-		@DisplayName("iOS - Apple 로그인 성공")
+		@DisplayName("Apple 로그인 성공")
 		void apple_login_with_ios_success() {
 			// given
-			OAuthLoginRequest request = new OAuthLoginRequest(APPLE, "fcm", null, "test-authorization-code", null);
+			OAuthLoginRequest request = new OAuthLoginRequest(APPLE, "fcm", null, "test-authorization-code",
+				"test-id-token");
 
 			given(oauthService.oauthLogin(request)).willReturn(
 				new OAuthLoginResponse("123456789", "", "", null, true, TRAINEE));
@@ -124,12 +108,12 @@ class AuthenticationControllerTest {
 			// given
 			OAuthLoginRequest request = new OAuthLoginRequest(KAKAO, "fcm", "invalid-token", null, null);
 
-			given(oauthService.oauthLogin(request)).willThrow(new OAuthException(FAILED_TO_FETCH_USER_INFO));
+			given(oauthService.oauthLogin(request)).willThrow(new OAuthException(KAKAO_SERVER_ERROR));
 
 			// when & then
 			assertThatThrownBy(() -> authenticationController.oauthLogin(request))
 				.isInstanceOf(OAuthException.class)
-				.hasMessage(FAILED_TO_FETCH_USER_INFO.getMessage());
+				.hasMessage(KAKAO_SERVER_ERROR.getMessage());
 		}
 
 		@Test

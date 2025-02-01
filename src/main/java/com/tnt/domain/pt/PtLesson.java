@@ -83,4 +83,8 @@ public class PtLesson extends BaseTimeEntity {
 
 		this.memo = memo;
 	}
+
+	public void softDelete() {
+		this.deletedAt = LocalDateTime.now();
+	}
 }

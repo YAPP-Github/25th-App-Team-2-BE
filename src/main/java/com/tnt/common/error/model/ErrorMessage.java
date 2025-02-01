@@ -12,6 +12,7 @@ public enum ErrorMessage {
 	IMAGE_PROCESSING_ERROR("이미지 처리 중 오류가 발생했습니다."),
 	IMAGE_LOAD_ERROR("이미지를 읽을 수 없습니다."),
 	S3_UPLOAD_ERROR("S3로 이미지 업로드 중 오류가 발생했습니다."),
+	S3_DELETE_ERROR("S3 이미지 삭제 중 오류가 발생했습니다."),
 	IMAGE_NOT_FOUND("이미지가 존재하지 않습니다."),
 	IMAGE_NOT_SUPPORT("지원하지 않는 이미지 형식입니다. jpg, jpeg, png, svg만 가능합니다."),
 	INVALID_REQUEST_NOT_MATCH("요청자와 요청이 일치하지 않습니다."),
@@ -29,8 +30,7 @@ public enum ErrorMessage {
 	NO_EXIST_SESSION_IN_STORAGE("세션 스토리지에 세션이 존재하지 않습니다."),
 
 	UNSUPPORTED_SOCIAL_TYPE("지원하지 않는 소셜 서비스입니다."),
-	FAILED_TO_FETCH_USER_INFO("소셜 서버로부터 유저 정보 불러오기에 실패했습니다."),
-	APPLE_CLIENT_ERROR("Apple 클라이언트 에러가 발생했습니다."),
+	KAKAO_SERVER_ERROR("Kakao 서버 에러가 발생했습니다."),
 	APPLE_SERVER_ERROR("Apple 서버 에러가 발생했습니다."),
 	APPLE_AUTH_ERROR("Apple 인증에 실패했습니다."),
 	FAILED_TO_FETCH_PRIVATE_KEY("시크릿 키 불러오기에 실패했습니다."),

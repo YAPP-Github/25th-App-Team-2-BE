@@ -42,6 +42,11 @@ public class TrainerService {
 		return new InvitationCodeResponse(trainer.getInvitationCode());
 	}
 
+	@Transactional
+	public Trainer saveTrainer(Trainer trainer) {
+		return trainerRepository.save(trainer);
+	}
+
 	public Trainer getTrainerWithMemberId(Long memberId) {
 		return trainerRepository.findByMemberIdAndDeletedAtIsNull(memberId)
 			.orElseThrow(() -> new NotFoundException(TRAINER_NOT_FOUND));
@@ -51,4 +56,5 @@ public class TrainerService {
 		return trainerSearchRepository.findByInvitationCode(invitationCode)
 			.orElseThrow(() -> new NotFoundException(TRAINER_NOT_FOUND));
 	}
+
 }

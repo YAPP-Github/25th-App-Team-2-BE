@@ -8,5 +8,5 @@ import com.tnt.domain.trainee.PtGoal;
 
 public interface PtGoalRepository extends JpaRepository<PtGoal, Integer> {
 
-	List<PtGoal> findAllByTraineeId(Long traineeId);
+	List<PtGoal> findAllByTraineeIdAndDeletedAtIsNull(Long traineeId);
 }
