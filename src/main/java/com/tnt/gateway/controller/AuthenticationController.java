@@ -2,16 +2,17 @@ package com.tnt.gateway.controller;
 
 import static org.springframework.http.HttpStatus.OK;
 
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.tnt.application.member.MemberService;
 import com.tnt.dto.member.response.LogoutResponse;
 import com.tnt.gateway.config.AuthMember;
 import com.tnt.gateway.dto.request.OAuthLoginRequest;
+import com.tnt.gateway.dto.response.CheckSessionResponse;
 import com.tnt.gateway.dto.response.OAuthLoginResponse;
 import com.tnt.gateway.service.OAuthService;
 
@@ -26,6 +27,7 @@ import lombok.RequiredArgsConstructor;
 public class AuthenticationController {
 
 	private final OAuthService oauthService;
+	private final MemberService memberService;
 
 	@Operation(summary = "소셜 로그인 API")
 	@PostMapping("/login")
@@ -44,7 +46,7 @@ public class AuthenticationController {
 	@Operation(summary = "로그인 세션 유효 확인 API")
 	@GetMapping("/check-session")
 	@ResponseStatus(OK)
-	public ResponseEntity<Void> checkSession() {
-		return new ResponseEntity<>(OK);
+	public CheckSessionResponse checkSession(@AuthMember Long memberId) {
+		return memberService.getMemberType(memberId);
 	}
 }

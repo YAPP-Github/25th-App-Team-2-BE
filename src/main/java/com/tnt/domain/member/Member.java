@@ -1,6 +1,12 @@
 package com.tnt.domain.member;
 
-import static com.tnt.common.error.model.ErrorMessage.*;
+import static com.tnt.common.error.model.ErrorMessage.MEMBER_INVALID_COLLECTION_AGREEMENT;
+import static com.tnt.common.error.model.ErrorMessage.MEMBER_INVALID_EMAIL;
+import static com.tnt.common.error.model.ErrorMessage.MEMBER_INVALID_NAME;
+import static com.tnt.common.error.model.ErrorMessage.MEMBER_INVALID_PROFILE_IMAGE_URL;
+import static com.tnt.common.error.model.ErrorMessage.MEMBER_INVALID_SERVICE_AGREEMENT;
+import static com.tnt.common.error.model.ErrorMessage.MEMBER_INVALID_SOCIAL_ID;
+import static com.tnt.common.error.model.ErrorMessage.MEMBER_NULL_ADVERTISEMENT_AGREEMENT;
 import static io.micrometer.common.util.StringUtils.isBlank;
 import static java.lang.Boolean.FALSE;
 import static java.util.Objects.isNull;
@@ -41,7 +47,7 @@ public class Member extends BaseTimeEntity {
 	@Column(name = "id", nullable = false, unique = true)
 	private Long id;
 
-	@Column(name = "social_id", nullable = false, unique = true, length = SOCIAL_ID_LENGTH)
+	@Column(name = "social_id", nullable = true, unique = true, length = SOCIAL_ID_LENGTH)
 	private String socialId;
 
 	@Column(name = "fcm_token", nullable = false, length = 255)
@@ -154,6 +160,7 @@ public class Member extends BaseTimeEntity {
 	}
 
 	public void softDelete() {
+		this.socialId = null;
 		this.deletedAt = LocalDateTime.now();
 	}
 
