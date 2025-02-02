@@ -27,7 +27,6 @@ import com.tnt.gateway.service.SessionService;
 import lombok.RequiredArgsConstructor;
 
 @Service
-@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class SignUpService {
 

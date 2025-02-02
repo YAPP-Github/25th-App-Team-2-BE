@@ -13,7 +13,6 @@ import com.tnt.infrastructure.mysql.repository.trainee.TraineeSearchRepository;
 import lombok.RequiredArgsConstructor;
 
 @Service
-@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class TraineeService {
 

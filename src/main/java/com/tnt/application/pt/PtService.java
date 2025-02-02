@@ -34,7 +34,6 @@ import com.tnt.infrastructure.mysql.repository.pt.PtTrainerTraineeRepository;
 import lombok.RequiredArgsConstructor;
 
 @Service
-@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class PtService {
 
@@ -69,6 +68,7 @@ public class PtService {
 			trainerMember.getProfileImageUrl(), traineeMember.getProfileImageUrl(), trainer.getId(), trainee.getId());
 	}
 
+	@Transactional(readOnly = true)
 	public ConnectWithTraineeResponse getFirstTrainerTraineeConnect(Long memberId, Long trainerId,
 		Long traineeId) {
 		validateIfNotConnected(trainerId, traineeId);
@@ -87,6 +87,7 @@ public class PtService {
 			trainee.getHeight(), trainee.getWeight(), ptGoal, trainee.getCautionNote());
 	}
 
+	@Transactional(readOnly = true)
 	public GetPtLessonsOnDateResponse getPtLessonsOnDate(Long memberId, LocalDate date) {
 		Trainer trainer = trainerService.getTrainerWithMemberId(memberId);
 

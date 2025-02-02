@@ -15,7 +15,6 @@ import com.tnt.infrastructure.mysql.repository.trainer.TrainerSearchRepository;
 import lombok.RequiredArgsConstructor;
 
 @Service
-@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class TrainerService {
 

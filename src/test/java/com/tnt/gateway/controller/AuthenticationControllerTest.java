@@ -19,34 +19,42 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import com.tnt.application.member.MemberService;
 import com.tnt.common.error.exception.NotFoundException;
 import com.tnt.common.error.exception.OAuthException;
 import com.tnt.dto.member.response.LogoutResponse;
 import com.tnt.gateway.dto.request.OAuthLoginRequest;
+import com.tnt.gateway.dto.response.CheckSessionResponse;
 import com.tnt.gateway.dto.response.OAuthLoginResponse;
 import com.tnt.gateway.service.OAuthService;
 
 @ExtendWith(MockitoExtension.class)
 class AuthenticationControllerTest {
 
+	@InjectMocks
+	private AuthenticationController authenticationController;
+
 	@Mock
 	private OAuthService oauthService;
 
-	@InjectMocks
-	private AuthenticationController authenticationController;
+	@Mock
+	private MemberService memberService;
 
 	@Test
 	@DisplayName("로그인 세션 유효 확인 성공")
 	void is_session_valid_success() {
+		// given
+		Long memberId = 1L;
+
+		given(memberService.getMemberType(memberId)).willReturn(new CheckSessionResponse(TRAINER));
+
 		// when
-		ResponseEntity<Void> voidResponseEntity = authenticationController.checkSession();
+		CheckSessionResponse checkSessionResponse = authenticationController.checkSession(memberId);
 
 		// then
-		assertThat(voidResponseEntity.getStatusCode()).isEqualTo(HttpStatusCode.valueOf(200));
+		assertThat(checkSessionResponse.memberType()).isEqualTo(TRAINER);
 	}
 
 	@Nested

@@ -11,7 +11,6 @@ import com.tnt.infrastructure.mysql.repository.pt.PtGoalRepository;
 import lombok.RequiredArgsConstructor;
 
 @Service
-@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class PtGoalService {
 
@@ -21,6 +20,7 @@ public class PtGoalService {
 		return ptGoalRepository.findAllByTraineeIdAndDeletedAtIsNull(traineeId);
 	}
 
+	@Transactional
 	public List<PtGoal> saveAllPtGoals(List<PtGoal> ptGoals) {
 		return ptGoalRepository.saveAll(ptGoals);
 	}

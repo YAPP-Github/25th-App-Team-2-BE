@@ -10,6 +10,7 @@ import static org.mockito.Mockito.verify;
 
 import java.util.Optional;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,25 +18,27 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.tnt.application.s3.S3Service;
 import com.tnt.common.error.exception.ConflictException;
 import com.tnt.common.error.exception.NotFoundException;
 import com.tnt.domain.member.Member;
 import com.tnt.domain.member.SocialType;
+import com.tnt.dto.member.MemberProjection;
 import com.tnt.fixture.MemberFixture;
+import com.tnt.gateway.dto.response.CheckSessionResponse;
 import com.tnt.infrastructure.mysql.repository.member.MemberRepository;
+import com.tnt.infrastructure.mysql.repository.member.MemberSearchRepository;
 
 @ExtendWith(MockitoExtension.class)
 class MemberServiceTest {
 
-	@Mock
-	private S3Service s3Service;
+	@InjectMocks
+	private MemberService memberService;
 
 	@Mock
 	private MemberRepository memberRepository;
 
-	@InjectMocks
-	private MemberService memberService;
+	@Mock
+	private MemberSearchRepository memberSearchRepository;
 
 	@Test
 	@DisplayName("memberId로 회원 조회 성공")
@@ -130,5 +133,36 @@ class MemberServiceTest {
 		// then
 		assertThat(savedMember).isNotNull().isEqualTo(member);
 		verify(memberRepository).save(member);
+	}
+
+	@Test
+	@DisplayName("memberId로 회원 타입 조회 성공")
+	void get_member_type_success() {
+		// given
+		Member member = MemberFixture.getTrainerMember1WithId();
+		Long memberId = member.getId();
+
+		given(memberSearchRepository.findMemberTypeByMemberId(memberId)).willReturn(
+			Optional.of(new MemberProjection.MemberTypeDto(member.getMemberType())));
+
+		// when
+		CheckSessionResponse checkSessionResponse = memberService.getMemberType(memberId);
+
+		// then
+		assertThat(checkSessionResponse.memberType()).isEqualTo(member.getMemberType());
+	}
+
+	@Test
+	@DisplayName("memberId로 회원 타입 조회 실패")
+	void get_member_type_fail() {
+		// given
+		Member member = MemberFixture.getTrainerMember1WithId();
+		Long memberId = member.getId();
+
+		given(memberSearchRepository.findMemberTypeByMemberId(memberId)).willReturn(Optional.empty());
+
+		// when & then
+		Assertions.assertThatThrownBy(() -> memberService.getMemberType(memberId))
+			.isInstanceOf(NotFoundException.class);
 	}
 }
