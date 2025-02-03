@@ -6,7 +6,6 @@ import static com.tnt.domain.member.SocialType.APPLE;
 import static com.tnt.domain.member.SocialType.KAKAO;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.BDDMockito.*;
 
 import java.io.IOException;
@@ -38,7 +37,6 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.tnt.application.member.MemberService;
 import com.tnt.common.error.exception.OAuthException;
 import com.tnt.domain.member.Member;
-import com.tnt.dto.member.request.WithdrawRequest;
 import com.tnt.dto.member.response.LogoutResponse;
 import com.tnt.gateway.dto.request.OAuthLoginRequest;
 import com.tnt.gateway.dto.response.OAuthLoginResponse;
@@ -87,10 +85,10 @@ class OAuthServiceTest {
 	}
 
 	@Test
-	@DisplayName("Kakao 로그인 실패 시 예외 발생")
+	@DisplayName("Kakao 로그인 실패")
 	void kakao_login_failure_error() {
 		// given
-		OAuthLoginRequest request = new OAuthLoginRequest(KAKAO, "fcm", "invalid-token", null, null);
+		OAuthLoginRequest request = new OAuthLoginRequest(KAKAO, "fcm", "invalid-token", null);
 
 		String errorResponse = "{\"msg\": \"this access token does not exist\", \"code\": -401}";
 
@@ -106,27 +104,10 @@ class OAuthServiceTest {
 	}
 
 	@Test
-	@DisplayName("Apple 클라이언트 인증 실패")
-	void apple_client_authentication_error() {
-		// given
-		OAuthLoginRequest request = new OAuthLoginRequest(APPLE, "fcm", null, "invalid-auth-code", null);
-
-		mockWebServer.enqueue(new MockResponse()
-			.setResponseCode(400)
-			.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-			.setBody("{\"error\": \"invalid_client\"}"));
-
-		// when & then
-		assertThatThrownBy(() -> oAuthService.oauthLogin(request))
-			.isInstanceOf(OAuthException.class)
-			.hasMessage(APPLE_AUTH_ERROR.getMessage());
-	}
-
-	@Test
 	@DisplayName("Apple 로그인 실패")
 	void apple_token_verification_error() {
 		// given
-		OAuthLoginRequest request = new OAuthLoginRequest(APPLE, "fcm", null, "asdf", null);
+		OAuthLoginRequest request = new OAuthLoginRequest(APPLE, "fcm", null, "asdf");
 
 		mockWebServer.enqueue(new MockResponse().setResponseCode(400));
 
@@ -140,7 +121,7 @@ class OAuthServiceTest {
 	@DisplayName("Kakao 로그인 성공")
 	void kakao_login_success() {
 		// given
-		OAuthLoginRequest request = new OAuthLoginRequest(KAKAO, "fcm", "valid-token", null, null);
+		OAuthLoginRequest request = new OAuthLoginRequest(KAKAO, "fcm", "valid-token", null);
 		Member member = mock(Member.class);
 		given(member.getId()).willReturn(1L);
 
@@ -190,7 +171,7 @@ class OAuthServiceTest {
 			.withIssuedAt(new Date())
 			.sign(Algorithm.RSA256(rsaPublicKey, rsaPrivateKey));
 
-		OAuthLoginRequest request = new OAuthLoginRequest(APPLE, "fcm", null, "valid_auth_code", mockIdToken);
+		OAuthLoginRequest request = new OAuthLoginRequest(APPLE, "fcm", null, mockIdToken);
 		Member mockMember = mock(Member.class);
 		given(mockMember.getId()).willReturn(1L);
 
@@ -229,7 +210,7 @@ class OAuthServiceTest {
 			.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
 			.setBody("{\"keys\": [{\"kid\": \"different-kid\"}]}"));
 
-		OAuthLoginRequest request = new OAuthLoginRequest(APPLE, "fcm", null, null, mockIdToken);
+		OAuthLoginRequest request = new OAuthLoginRequest(APPLE, "fcm", null, mockIdToken);
 
 		// when & then
 		assertThatThrownBy(() -> oAuthService.oauthLogin(request))
@@ -241,7 +222,7 @@ class OAuthServiceTest {
 	@DisplayName("다양한 HTTP 상태코드에 따른 에러 처리")
 	void handle_response_with_different_status_error() {
 		// given
-		OAuthLoginRequest request = new OAuthLoginRequest(KAKAO, "fcm", "invalid-token", null, null);
+		OAuthLoginRequest request = new OAuthLoginRequest(KAKAO, "fcm", "invalid-token", null);
 
 		mockWebServer.enqueue(new MockResponse()
 			.setResponseCode(401)
@@ -267,7 +248,7 @@ class OAuthServiceTest {
 			.setResponseCode(500)
 			.setBody("Server Error"));
 
-		OAuthLoginRequest request = new OAuthLoginRequest(APPLE, "fcm", null, null, validToken);
+		OAuthLoginRequest request = new OAuthLoginRequest(APPLE, "fcm", null, validToken);
 
 		// when & then
 		assertThatThrownBy(() -> oAuthService.oauthLogin(request))
@@ -289,7 +270,7 @@ class OAuthServiceTest {
 			.setResponseCode(200)
 			.setBody("invalid json"));
 
-		OAuthLoginRequest request = new OAuthLoginRequest(APPLE, "fcm", null, null, validToken);
+		OAuthLoginRequest request = new OAuthLoginRequest(APPLE, "fcm", null, validToken);
 
 		// when & then
 		assertThatThrownBy(() -> oAuthService.oauthLogin(request))
@@ -312,83 +293,6 @@ class OAuthServiceTest {
 		//then
 		assertThat(response.sessionId()).isEqualTo(sessionId);
 		assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
-	}
-
-	@Test
-	@DisplayName("카카오 연동 해제 성공")
-	void revoke_kakao_success() {
-		// given
-		String socialId = "12345";
-		String accessToken = "valid-token";
-		WithdrawRequest request = new WithdrawRequest(accessToken, "auth-code");
-
-		mockWebServer.enqueue(new MockResponse()
-			.setResponseCode(200)
-			.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-			.setBody("{\"id\":12345}"));
-
-		// when & then
-		assertDoesNotThrow(() -> oAuthService.revoke(socialId, KAKAO, request));
-	}
-
-	@Test
-	@DisplayName("카카오 연동 해제 실패")
-	void revoke_kakao_error() {
-		// given
-		String socialId = "12345";
-		String accessToken = "invalid-token";
-		WithdrawRequest request = new WithdrawRequest(accessToken, "auth-code");
-
-		mockWebServer.enqueue(new MockResponse().setResponseCode(401)
-			.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-			.setBody("{\"msg\": \"invalid token\"}"));
-
-		// when & then
-		assertThatThrownBy(() -> oAuthService.revoke(socialId, KAKAO, request)).isInstanceOf(
-			OAuthException.class).hasMessage(KAKAO_SERVER_ERROR.getMessage());
-	}
-
-	@Test
-	@DisplayName("애플 연동 해제 성공")
-	void revoke_apple_success() throws Exception {
-		// given
-		KeyPairGenerator ecKeyGen = KeyPairGenerator.getInstance("EC");
-		ecKeyGen.initialize(256);
-		KeyPair ecPair = ecKeyGen.generateKeyPair();
-		ECPrivateKey ecPrivateKey = (ECPrivateKey)ecPair.getPrivate();
-
-		ReflectionTestUtils.setField(oAuthService, "privateKey",
-			Base64.getEncoder().encodeToString(ecPrivateKey.getEncoded()));
-		ReflectionTestUtils.setField(oAuthService, "teamId", "test-team-id");
-		ReflectionTestUtils.setField(oAuthService, "clientId", "test-client-id");
-		ReflectionTestUtils.setField(oAuthService, "keyId", "test-key-id");
-
-		String socialId = "12345";
-		String authCode = "auth-code";
-
-		WithdrawRequest request = new WithdrawRequest("access-token", authCode);
-
-		// Auth Token 요청에 대한 응답
-		mockWebServer.enqueue(new MockResponse().setResponseCode(200)
-			.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-			.setBody("""
-				{
-					"access_token": "valid-token",
-					"expires_in": 3600,
-					"id_token": "token",
-					"refresh_token": "refresh-token",
-					"token_type": "Bearer"
-				}
-				"""));
-
-		// Revoke 요청에 대한 응답
-		mockWebServer.enqueue(new MockResponse()
-			.setResponseCode(200)
-			.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-			.setBody(""));
-
-		// when & then
-		assertDoesNotThrow(() -> oAuthService.revoke(socialId, APPLE, request));
 	}
 }
 

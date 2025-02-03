@@ -45,7 +45,6 @@ import com.tnt.domain.trainee.PtGoal;
 import com.tnt.domain.trainee.Trainee;
 import com.tnt.domain.trainer.Trainer;
 import com.tnt.dto.member.request.SignUpRequest;
-import com.tnt.dto.member.request.WithdrawRequest;
 import com.tnt.fixture.MemberFixture;
 import com.tnt.fixture.PtGoalsFixture;
 import com.tnt.fixture.TraineeFixture;
@@ -173,14 +172,9 @@ class MemberControllerTest extends AbstractContainerBaseTest {
 
 		trainerRepository.save(trainer);
 
-		WithdrawRequest request = new WithdrawRequest("test-access-token", "test-authorization-code");
-
-		var jsonRequest = objectMapper.writeValueAsString(request);
-
 		// when & then
 		mockMvc.perform(post("/members/withdraw")
-				.contentType(APPLICATION_JSON_VALUE)
-				.content(jsonRequest))
+				.contentType(APPLICATION_JSON_VALUE))
 			.andExpect(status().isOk());
 	}
 
@@ -204,14 +198,9 @@ class MemberControllerTest extends AbstractContainerBaseTest {
 
 		traineeRepository.save(trainee);
 
-		WithdrawRequest request = new WithdrawRequest("test-access-token", "test-authorization-code");
-
-		var jsonRequest = objectMapper.writeValueAsString(request);
-
 		// when & then
 		mockMvc.perform(post("/members/withdraw")
-				.contentType(APPLICATION_JSON_VALUE)
-				.content(jsonRequest))
+				.contentType(APPLICATION_JSON_VALUE))
 			.andExpect(status().isOk());
 	}
 
