@@ -5,7 +5,6 @@ import static com.tnt.common.constant.ProfileConstant.TRAINER_DEFAULT_IMAGE;
 import static com.tnt.domain.member.MemberType.TRAINEE;
 import static com.tnt.domain.member.MemberType.TRAINER;
 import static io.hypersistence.tsid.TSID.Factory.getTsid;
-import static io.micrometer.common.util.StringUtils.isNotBlank;
 
 import java.util.List;
 
@@ -77,7 +76,7 @@ public class SignUpService {
 			.member(member)
 			.height(request.height())
 			.weight(request.weight())
-			.cautionNote(isNotBlank(request.cautionNote()) ? request.cautionNote() : "")
+			.cautionNote(request.cautionNote())
 			.build();
 
 		trainee = traineeService.saveTrainee(trainee);
