@@ -28,7 +28,7 @@ public record GetMemberInfoResponse(
 	@Schema(description = "소셜 타입", example = "TRAINER", nullable = false)
 	SocialType socialType,
 
-	@Schema(description = "트레이너의 초대 코드 (재발급 포함)", example = "2H9DG4X3", nullable = false)
+	@Schema(description = "트레이너 초대 코드", example = "2H9DG4X3", nullable = true)
 	String invitationCode,
 
 	@Schema(description = "키 (cm)", example = "180.5", nullable = true)
