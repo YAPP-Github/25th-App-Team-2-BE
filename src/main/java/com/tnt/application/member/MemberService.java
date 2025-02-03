@@ -2,6 +2,7 @@ package com.tnt.application.member;
 
 import static com.tnt.common.error.model.ErrorMessage.MEMBER_CONFLICT;
 import static com.tnt.common.error.model.ErrorMessage.MEMBER_NOT_FOUND;
+import static com.tnt.dto.member.MemberProjection.MemberInfoDto;
 import static com.tnt.dto.member.MemberProjection.MemberTypeDto;
 
 import org.springframework.stereotype.Service;
@@ -11,6 +12,7 @@ import com.tnt.common.error.exception.ConflictException;
 import com.tnt.common.error.exception.NotFoundException;
 import com.tnt.domain.member.Member;
 import com.tnt.domain.member.SocialType;
+import com.tnt.dto.member.response.GetMemberInfoResponse;
 import com.tnt.gateway.dto.response.CheckSessionResponse;
 import com.tnt.infrastructure.mysql.repository.member.MemberRepository;
 import com.tnt.infrastructure.mysql.repository.member.MemberSearchRepository;
@@ -24,14 +26,9 @@ public class MemberService {
 	private final MemberRepository memberRepository;
 	private final MemberSearchRepository memberSearchRepository;
 
-	public Member getMemberWithMemberId(Long memberId) {
-		return memberRepository.findByIdAndDeletedAtIsNull(memberId)
-			.orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
-	}
-
-	public Member getMemberWithSocialIdAndSocialType(String socialId, SocialType socialType) {
-		return memberRepository.findBySocialIdAndSocialTypeAndDeletedAtIsNull(socialId, socialType)
-			.orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
+	@Transactional
+	public Member saveMember(Member member) {
+		return memberRepository.save(member);
 	}
 
 	public void validateMemberNotExists(String socialId, SocialType socialType) {
@@ -41,15 +38,29 @@ public class MemberService {
 			});
 	}
 
-	@Transactional
-	public Member saveMember(Member member) {
-		return memberRepository.save(member);
+	public GetMemberInfoResponse getMemberInfo(Long memberId) {
+		MemberInfoDto memberInfo = memberSearchRepository.findMemberInfo(memberId)
+			.orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
+
+		return new GetMemberInfoResponse(memberInfo.name(), memberInfo.email(), memberInfo.profileImageUrl(),
+			memberInfo.birthday(), memberInfo.memberType(), memberInfo.socialType(), memberInfo.invitationCode(),
+			memberInfo.height(), memberInfo.weight(), memberInfo.cautionNote(), memberInfo.goalContents());
 	}
 
 	public CheckSessionResponse getMemberType(Long memberId) {
-		MemberTypeDto memberTypeDto = memberSearchRepository.findMemberTypeByMemberId(memberId)
+		MemberTypeDto memberTypeDto = memberSearchRepository.findMemberType(memberId)
 			.orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
 
 		return new CheckSessionResponse(memberTypeDto.memberType());
+	}
+
+	public Member getMemberWithMemberId(Long memberId) {
+		return memberRepository.findByIdAndDeletedAtIsNull(memberId)
+			.orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
+	}
+
+	public Member getMemberWithSocialIdAndSocialType(String socialId, SocialType socialType) {
+		return memberRepository.findBySocialIdAndSocialTypeAndDeletedAtIsNull(socialId, socialType)
+			.orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
 	}
 }
