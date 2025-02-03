@@ -142,7 +142,7 @@ class MemberServiceTest {
 		Member member = MemberFixture.getTrainerMember1WithId();
 		Long memberId = member.getId();
 
-		given(memberSearchRepository.findMemberTypeByMemberId(memberId)).willReturn(
+		given(memberSearchRepository.findMemberType(memberId)).willReturn(
 			Optional.of(new MemberProjection.MemberTypeDto(member.getMemberType())));
 
 		// when
@@ -159,7 +159,7 @@ class MemberServiceTest {
 		Member member = MemberFixture.getTrainerMember1WithId();
 		Long memberId = member.getId();
 
-		given(memberSearchRepository.findMemberTypeByMemberId(memberId)).willReturn(Optional.empty());
+		given(memberSearchRepository.findMemberType(memberId)).willReturn(Optional.empty());
 
 		// when & then
 		Assertions.assertThatThrownBy(() -> memberService.getMemberType(memberId))

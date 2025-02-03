@@ -8,6 +8,7 @@ import static com.tnt.domain.member.SocialType.KAKAO;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.IMAGE_JPEG_VALUE;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -40,14 +41,18 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tnt.domain.member.Member;
+import com.tnt.domain.trainee.PtGoal;
 import com.tnt.domain.trainee.Trainee;
 import com.tnt.domain.trainer.Trainer;
 import com.tnt.dto.member.request.SignUpRequest;
 import com.tnt.dto.member.request.WithdrawRequest;
 import com.tnt.fixture.MemberFixture;
+import com.tnt.fixture.PtGoalsFixture;
 import com.tnt.fixture.TraineeFixture;
+import com.tnt.fixture.TrainerFixture;
 import com.tnt.gateway.filter.CustomUserDetails;
 import com.tnt.infrastructure.mysql.repository.member.MemberRepository;
+import com.tnt.infrastructure.mysql.repository.pt.PtGoalRepository;
 import com.tnt.infrastructure.mysql.repository.trainee.TraineeRepository;
 import com.tnt.infrastructure.mysql.repository.trainer.TrainerRepository;
 import com.tnt.infrastructure.redis.AbstractContainerBaseTest;
@@ -79,6 +84,9 @@ class MemberControllerTest extends AbstractContainerBaseTest {
 
 	@Autowired
 	private TraineeRepository traineeRepository;
+
+	@Autowired
+	private PtGoalRepository ptGoalRepository;
 
 	@Test
 	@DisplayName("통합 테스트 - 트레이너 회원가입 성공")
@@ -161,9 +169,7 @@ class MemberControllerTest extends AbstractContainerBaseTest {
 
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
-		Trainer trainer = Trainer.builder()
-			.member(trainerMember)
-			.build();
+		Trainer trainer = TrainerFixture.getTrainer2(trainerMember);
 
 		trainerRepository.save(trainer);
 
@@ -207,6 +213,47 @@ class MemberControllerTest extends AbstractContainerBaseTest {
 				.contentType(APPLICATION_JSON_VALUE)
 				.content(jsonRequest))
 			.andExpect(status().isOk());
+	}
+
+	@Test
+	@DisplayName("통합 테스트 - 트레이니 회원 조회 성공")
+	void get_member_info_trainee_success() throws Exception {
+		// given
+		Member traineeMember = MemberFixture.getTraineeMember1();
+
+		Member member = memberRepository.save(traineeMember);
+
+		CustomUserDetails traineeUserDetails = new CustomUserDetails(member.getId(),
+			String.valueOf(member.getId()), List.of(new SimpleGrantedAuthority("ROLE_USER")));
+
+		Authentication authentication = new UsernamePasswordAuthenticationToken(traineeUserDetails, null,
+			authoritiesMapper.mapAuthorities(traineeUserDetails.getAuthorities()));
+
+		SecurityContextHolder.getContext().setAuthentication(authentication);
+
+		Trainee trainee = TraineeFixture.getTrainee2(traineeMember);
+
+		traineeRepository.save(trainee);
+
+		List<PtGoal> ptGoals = PtGoalsFixture.getPtGoals(trainee.getId());
+
+		ptGoalRepository.saveAll(ptGoals);
+
+		// when & then
+		mockMvc.perform(get("/members")
+				.contentType(APPLICATION_JSON_VALUE))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.name").value(member.getName()))
+			.andExpect(jsonPath("$.email").value(member.getEmail()))
+			.andExpect(jsonPath("$.profileImageUrl").value(member.getProfileImageUrl()))
+			.andExpect(jsonPath("$.birthday").value(member.getBirthday().toString()))
+			.andExpect(jsonPath("$.memberType").value(member.getMemberType().name()))
+			.andExpect(jsonPath("$.socialType").value(member.getSocialType().name()))
+			.andExpect(jsonPath("$.height").value(trainee.getHeight()))
+			.andExpect(jsonPath("$.weight").value(trainee.getWeight()))
+			.andExpect(jsonPath("$.cautionNote").value(trainee.getCautionNote()))
+			.andExpect(jsonPath("$.goalContents[0]").exists())
+			.andExpect(jsonPath("$.goalContents[1]").exists());
 	}
 
 	@TestConfiguration
