@@ -40,7 +40,7 @@ public record GetMemberInfoResponse(
 	@Schema(description = "주의사항", example = "가냘퍼요", nullable = true)
 	String cautionNote,
 
-	@Schema(description = "PT 목적들", example = "[\"체중 감량\", \"근력 향상\"]", nullable = true)
+	@Schema(description = "PT 목적들", example = "[\"체중 감량\", \"근력 향상\"]", nullable = false)
 	List<String> goalContents
 ) {
 
