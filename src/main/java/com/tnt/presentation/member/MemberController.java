@@ -6,7 +6,6 @@ import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -19,7 +18,6 @@ import com.tnt.application.member.WithdrawService;
 import com.tnt.application.s3.S3Service;
 import com.tnt.dto.member.WithdrawDto;
 import com.tnt.dto.member.request.SignUpRequest;
-import com.tnt.dto.member.request.WithdrawRequest;
 import com.tnt.dto.member.response.GetMemberInfoResponse;
 import com.tnt.dto.member.response.SignUpResponse;
 import com.tnt.gateway.config.AuthMember;
@@ -63,10 +61,9 @@ public class MemberController {
 	@Operation(summary = "회원 탈퇴 API")
 	@PostMapping("/withdraw")
 	@ResponseStatus(OK)
-	public void withdraw(@AuthMember Long memberId, @RequestBody @Valid WithdrawRequest request) {
+	public void withdraw(@AuthMember Long memberId) {
 		WithdrawDto withdrawDto = withdrawService.withdraw(memberId);
 
 		s3Service.deleteProfileImage(withdrawDto.profileImageUrl());
-		oAuthService.revoke(withdrawDto.socialId(), withdrawDto.socialType(), request);
 	}
 }

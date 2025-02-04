@@ -17,9 +17,6 @@ public record OAuthLoginRequest(
 	@Schema(description = "소셜 액세스 토큰 (카카오 로그인 시)", example = "atweroiuhoresihsgfkn", nullable = true)
 	String socialAccessToken,
 
-	@Schema(description = "인가 코드 (애플 로그인 시)", example = "1231231231231", nullable = true)
-	String authorizationCode,
-
 	@Schema(description = "ID 토큰 (애플 로그인 시)", example = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...", nullable = true)
 	String idToken
 ) {
