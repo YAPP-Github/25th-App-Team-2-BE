@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.tnt.application.pt.PtService;
 import com.tnt.application.trainer.TrainerService;
 import com.tnt.dto.trainer.response.ConnectWithTraineeResponse;
+import com.tnt.dto.trainer.response.GetCalendarPtLessonCountResponse;
 import com.tnt.dto.trainer.response.GetPtLessonsOnDateResponse;
 import com.tnt.dto.trainer.response.InvitationCodeResponse;
 import com.tnt.dto.trainer.response.InvitationCodeVerifyResponse;
@@ -59,7 +60,7 @@ public class TrainerController {
 	@ResponseStatus(OK)
 	@GetMapping("/first-connected-trainee")
 	public ConnectWithTraineeResponse getFirstConnectedTrainee(@AuthMember Long memberId,
-		@RequestParam("trainerId") Long trainerId, @RequestParam Long traineeId) {
+		@RequestParam("trainerId") Long trainerId, @RequestParam("traineeId") Long traineeId) {
 		return ptService.getFirstTrainerTraineeConnect(memberId, trainerId, traineeId);
 	}
 
@@ -69,5 +70,13 @@ public class TrainerController {
 	public GetPtLessonsOnDateResponse getPtLessonsOnDate(@AuthMember Long memberId,
 		@PathVariable("date") LocalDate date) {
 		return ptService.getPtLessonsOnDate(memberId, date);
+	}
+
+	@Operation(summary = "달력 스케쥴 개수 표시에 필요한 데이터 요청 API")
+	@ResponseStatus(OK)
+	@GetMapping("/lessons/calendar")
+	public GetCalendarPtLessonCountResponse getCalendarPtLessonCount(@AuthMember Long memberId,
+		@RequestParam("year") Integer year, @RequestParam("month") Integer month) {
+		return ptService.getCalendarPtLessonCount(memberId, year, month);
 	}
 }

@@ -5,7 +5,9 @@ import static com.tnt.common.error.model.ErrorMessage.PT_TRAINER_TRAINEE_ALREADY
 import static com.tnt.common.error.model.ErrorMessage.PT_TRAINER_TRAINEE_NOT_FOUND;
 
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -25,6 +27,8 @@ import com.tnt.domain.trainer.Trainer;
 import com.tnt.dto.trainer.ConnectWithTrainerDto;
 import com.tnt.dto.trainer.request.ConnectWithTrainerRequest;
 import com.tnt.dto.trainer.response.ConnectWithTraineeResponse;
+import com.tnt.dto.trainer.response.GetCalendarPtLessonCountResponse;
+import com.tnt.dto.trainer.response.GetCalendarPtLessonCountResponse.CalendarPtLessonCount;
 import com.tnt.dto.trainer.response.GetPtLessonsOnDateResponse;
 import com.tnt.dto.trainer.response.GetPtLessonsOnDateResponse.Lesson;
 import com.tnt.infrastructure.mysql.repository.pt.PtLessonRepository;
@@ -103,6 +107,26 @@ public class PtService {
 		}).toList();
 
 		return new GetPtLessonsOnDateResponse(ptLessons.size(), date, lessons);
+	}
+
+	@Transactional(readOnly = true)
+	public GetCalendarPtLessonCountResponse getCalendarPtLessonCount(Long memberId, Integer year, Integer month) {
+		Trainer trainer = trainerService.getTrainerWithMemberId(memberId);
+
+		List<PtLesson> ptLessons = ptLessonSearchRepository.findAllByTraineeIdForCalendar(trainer.getId(), year, month);
+
+		Map<LocalDate, Long> lessonCounts = ptLessons.stream()
+			.collect(Collectors.groupingBy(
+				lesson -> lesson.getLessonStart().toLocalDate(),
+				Collectors.counting()
+			));
+
+		List<CalendarPtLessonCount> counts = lessonCounts.entrySet().stream()
+			.map(entry -> new CalendarPtLessonCount(entry.getKey(), entry.getValue().intValue()))
+			.sorted(Comparator.comparing(CalendarPtLessonCount::date))
+			.toList();
+
+		return new GetCalendarPtLessonCountResponse(counts);
 	}
 
 	public boolean isPtTrainerTraineeExistWithTrainerId(Long trainerId) {
