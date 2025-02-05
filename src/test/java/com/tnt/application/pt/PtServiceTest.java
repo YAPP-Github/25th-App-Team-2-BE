@@ -27,6 +27,7 @@ import com.tnt.domain.trainee.Trainee;
 import com.tnt.domain.trainer.Trainer;
 import com.tnt.dto.trainer.ConnectWithTrainerDto;
 import com.tnt.dto.trainer.request.ConnectWithTrainerRequest;
+import com.tnt.dto.trainer.response.GetCalendarPtLessonCountResponse;
 import com.tnt.dto.trainer.response.GetPtLessonsOnDateResponse;
 import com.tnt.fixture.MemberFixture;
 import com.tnt.fixture.PtLessonsFixture;
@@ -263,5 +264,55 @@ class PtServiceTest {
 
 		// then
 		assertThat(result).isEqualTo(ptLessons);
+	}
+
+	@Test
+	@DisplayName("특정 월의 캘린더 PT 레슨 수 조회 성공")
+	void get_calendar_pt_lesson_count_success() {
+		// given
+		Member trainerMember = MemberFixture.getTrainerMember1WithId();
+		Member traineeMember = MemberFixture.getTraineeMember1WithId();
+
+		Trainer trainer = TrainerFixture.getTrainer2(trainerMember);
+		Trainee trainee = TraineeFixture.getTrainee2(traineeMember);
+
+		PtTrainerTrainee ptTrainerTrainee = PtTrainerTraineeFixture.getPtTrainerTrainee1(trainer, trainee);
+
+		int year = 2025;
+		int month = 1;
+		LocalDateTime date = LocalDate.of(year, month, 1).atTime(10, 0);
+
+		List<PtLesson> ptLessons = List.of(PtLesson.builder()
+				.id(1L)
+				.ptTrainerTrainee(ptTrainerTrainee)
+				.lessonStart(date)
+				.lessonEnd(date.plusHours(1))
+				.build(),
+			PtLesson.builder()
+				.id(2L)
+				.ptTrainerTrainee(ptTrainerTrainee)
+				.lessonStart(date.plusHours(4))
+				.lessonEnd(date.plusHours(5))
+				.build(),
+			PtLesson.builder()
+				.id(3L)
+				.ptTrainerTrainee(ptTrainerTrainee)
+				.lessonStart(date.plusDays(1))
+				.lessonEnd(date.plusDays(1).plusHours(1))
+				.build());
+
+		given(trainerService.getTrainerWithMemberId(trainer.getId())).willReturn(trainer);
+		given(ptLessonSearchRepository.findAllByTraineeIdForCalendar(trainer.getId(), year, month))
+			.willReturn(ptLessons);
+
+		// when
+		GetCalendarPtLessonCountResponse result = ptService.getCalendarPtLessonCount(trainer.getId(), year, month);
+
+		// then
+		assertThat(result.calendarPtLessonCounts()).hasSize(2);
+		assertThat(result.calendarPtLessonCounts().getFirst().date()).isEqualTo(LocalDate.of(year, month, 1));
+		assertThat(result.calendarPtLessonCounts().getFirst().count()).isEqualTo(2);
+		assertThat(result.calendarPtLessonCounts().getLast().date()).isEqualTo(LocalDate.of(year, month, 2));
+		assertThat(result.calendarPtLessonCounts().getLast().count()).isEqualTo(1);
 	}
 }

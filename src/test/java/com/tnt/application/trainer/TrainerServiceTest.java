@@ -158,6 +158,8 @@ class TrainerServiceTest {
 
 		given(trainerRepository.findByInvitationCodeAndDeletedAtIsNull(code))
 			.willReturn(java.util.Optional.of(Trainer.builder().member(member).build()));
+		given(trainerSearchRepository.findByInvitationCode(code))
+			.willReturn(java.util.Optional.of(Trainer.builder().member(member).build()));
 
 		// when
 		InvitationCodeVerifyResponse response = trainerService.verifyInvitationCode(code);
