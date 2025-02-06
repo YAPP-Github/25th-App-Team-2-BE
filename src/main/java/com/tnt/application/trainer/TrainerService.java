@@ -28,7 +28,7 @@ public class TrainerService {
 	}
 
 	public InvitationCodeVerifyResponse verifyInvitationCode(String invitationCode) {
-		boolean isVerified = trainerRepository.findByInvitationCodeAndDeletedAtIsNull(invitationCode).isPresent();
+		boolean isVerified = trainerRepository.existsByInvitationCodeAndDeletedAtIsNull(invitationCode);
 		String trainerName = isVerified ? getTrainerWithInvitationCode(invitationCode).getMember().getName() : null;
 
 		return new InvitationCodeVerifyResponse(isVerified, trainerName);

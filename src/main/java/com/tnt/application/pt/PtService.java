@@ -5,9 +5,8 @@ import static com.tnt.common.error.model.ErrorMessage.PT_TRAINER_TRAINEE_ALREADY
 import static com.tnt.common.error.model.ErrorMessage.PT_TRAINER_TRAINEE_NOT_FOUND;
 
 import java.time.LocalDate;
-import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -115,15 +114,14 @@ public class PtService {
 
 		List<PtLesson> ptLessons = ptLessonSearchRepository.findAllByTraineeIdForCalendar(trainer.getId(), year, month);
 
-		Map<LocalDate, Long> lessonCounts = ptLessons.stream()
+		List<CalendarPtLessonCount> counts = ptLessons.stream()
 			.collect(Collectors.groupingBy(
 				lesson -> lesson.getLessonStart().toLocalDate(),
+				LinkedHashMap::new,
 				Collectors.counting()
-			));
-
-		List<CalendarPtLessonCount> counts = lessonCounts.entrySet().stream()
+			))
+			.entrySet().stream()
 			.map(entry -> new CalendarPtLessonCount(entry.getKey(), entry.getValue().intValue()))
-			.sorted(Comparator.comparing(CalendarPtLessonCount::date))
 			.toList();
 
 		return new GetCalendarPtLessonCountResponse(counts);

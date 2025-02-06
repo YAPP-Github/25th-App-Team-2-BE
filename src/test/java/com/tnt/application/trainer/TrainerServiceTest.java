@@ -156,8 +156,8 @@ class TrainerServiceTest {
 			.memberType(TRAINER)
 			.build();
 
-		given(trainerRepository.findByInvitationCodeAndDeletedAtIsNull(code))
-			.willReturn(java.util.Optional.of(Trainer.builder().member(member).build()));
+		given(trainerRepository.existsByInvitationCodeAndDeletedAtIsNull(code))
+			.willReturn(true);
 		given(trainerSearchRepository.findByInvitationCode(code))
 			.willReturn(java.util.Optional.of(Trainer.builder().member(member).build()));
 

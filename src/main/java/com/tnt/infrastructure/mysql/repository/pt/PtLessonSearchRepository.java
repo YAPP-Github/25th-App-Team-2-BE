@@ -53,6 +53,7 @@ public class PtLessonSearchRepository {
 				ptLesson.lessonStart.between(startDate, endDate),
 				ptLesson.deletedAt.isNull()
 			)
+			.orderBy(ptLesson.lessonStart.asc())
 			.fetch();
 	}
 }
