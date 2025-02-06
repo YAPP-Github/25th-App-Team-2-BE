@@ -28,9 +28,10 @@ public class TrainerService {
 	}
 
 	public InvitationCodeVerifyResponse verifyInvitationCode(String invitationCode) {
-		boolean isVerified = trainerRepository.findByInvitationCodeAndDeletedAtIsNull(invitationCode).isPresent();
+		boolean isVerified = trainerRepository.existsByInvitationCodeAndDeletedAtIsNull(invitationCode);
+		String trainerName = isVerified ? getTrainerWithInvitationCode(invitationCode).getMember().getName() : null;
 
-		return new InvitationCodeVerifyResponse(isVerified);
+		return new InvitationCodeVerifyResponse(isVerified, trainerName);
 	}
 
 	@Transactional
@@ -55,5 +56,4 @@ public class TrainerService {
 		return trainerSearchRepository.findByInvitationCode(invitationCode)
 			.orElseThrow(() -> new NotFoundException(TRAINER_NOT_FOUND));
 	}
-
 }

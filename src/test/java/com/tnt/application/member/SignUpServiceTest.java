@@ -6,6 +6,7 @@ import static com.tnt.domain.member.MemberType.TRAINER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doThrow;
@@ -89,7 +90,7 @@ class SignUpServiceTest {
 		given(memberService.saveMember(any(Member.class))).willReturn(traineeMember);
 		given(traineeService.saveTrainee(any(Trainee.class))).willReturn(
 			Trainee.builder().id(1L).member(traineeMember).height(180.0).weight(75.0).build());
-		given(ptGoalService.saveAllPtGoals(any(List.class))).willReturn(Stream.of("목표1", "목표2")
+		given(ptGoalService.saveAllPtGoals(anyList())).willReturn(Stream.of("목표1", "목표2")
 			.map(content -> PtGoal.builder().traineeId(traineeMember.getId()).content(content).build())
 			.toList());
 

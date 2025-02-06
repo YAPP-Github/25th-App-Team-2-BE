@@ -164,9 +164,9 @@ public class Member extends BaseTimeEntity {
 		this.deletedAt = LocalDateTime.now();
 	}
 
-	public String getAge() {
+	public Integer getAge() {
 		if (isNull(this.birthday)) {
-			return "비공개";
+			return null;
 		}
 
 		LocalDate currentDate = LocalDate.now();
@@ -177,6 +177,6 @@ public class Member extends BaseTimeEntity {
 			age--;
 		}
 
-		return String.valueOf(age);
+		return age;
 	}
 }

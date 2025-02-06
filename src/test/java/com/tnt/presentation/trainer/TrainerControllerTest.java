@@ -4,9 +4,11 @@ import static com.tnt.domain.member.MemberType.TRAINER;
 import static com.tnt.domain.member.SocialType.KAKAO;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -24,7 +26,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tnt.annotation.WithMockCustomUser;
 import com.tnt.domain.member.Member;
 import com.tnt.domain.pt.PtLesson;
@@ -53,9 +54,6 @@ class TrainerControllerTest {
 
 	@Autowired
 	private MockMvc mockMvc;
-
-	@Autowired
-	private ObjectMapper objectMapper;
 
 	@Autowired
 	private TrainerRepository trainerRepository;
@@ -181,17 +179,16 @@ class TrainerControllerTest {
 	@DisplayName("통합 테스트 - 트레이너 초대 코드 인증 성공")
 	void verify_invitation_code_success() throws Exception {
 		// given
-		Long memberId = 4L;
 		String socialId = "1234567890";
 		String email = "abc@gmail.com";
 		String name = "김영명";
 		String profileImageUrl = "https://profile.com/1234567890";
 
 		Member member = Member.builder()
-			.id(memberId)
 			.socialId(socialId)
 			.email(email)
 			.name(name)
+			.fcmToken("fcmToken")
 			.profileImageUrl(profileImageUrl)
 			.serviceAgreement(true)
 			.collectionAgreement(true)
@@ -204,6 +201,7 @@ class TrainerControllerTest {
 			.member(member)
 			.build();
 
+		memberRepository.save(member);
 		trainerRepository.save(trainer);
 
 		String invitationCode = trainer.getInvitationCode();
@@ -211,24 +209,24 @@ class TrainerControllerTest {
 		// when & then
 		mockMvc.perform(get("/trainers/invitation-code/verify/" + invitationCode))
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.isVerified").value(true));
+			.andExpect(jsonPath("$.isVerified").value(true))
+			.andExpect(jsonPath("$.trainerName").value(name));
 	}
 
 	@Test
 	@DisplayName("통합 테스트 - 트레이너 초대 코드 인증 실패")
 	void verify_invitation_code_fail() throws Exception {
 		// given
-		Long memberId = 5L;
 		String socialId = "1234567890";
 		String email = "abc@gmail.com";
 		String name = "김영명";
 		String profileImageUrl = "https://profile.com/1234567890";
 
 		Member member = Member.builder()
-			.id(memberId)
 			.socialId(socialId)
 			.email(email)
 			.name(name)
+			.fcmToken("fcmToken")
 			.profileImageUrl(profileImageUrl)
 			.serviceAgreement(true)
 			.collectionAgreement(true)
@@ -241,6 +239,7 @@ class TrainerControllerTest {
 			.member(member)
 			.build();
 
+		memberRepository.save(member);
 		trainerRepository.save(trainer);
 
 		String invitationCode = "noExistCode";
@@ -248,7 +247,8 @@ class TrainerControllerTest {
 		// when & then
 		mockMvc.perform(get("/trainers/invitation-code/verify/" + invitationCode))
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.isVerified").value(false));
+			.andExpect(jsonPath("$.isVerified").value(false))
+			.andExpect(jsonPath("$.trainerName").doesNotExist());
 	}
 
 	@Test
@@ -349,5 +349,73 @@ class TrainerControllerTest {
 			.andExpect(jsonPath("$.count").value(1))
 			.andExpect(jsonPath("$.date").value("2025-01-01"))
 			.andExpect(jsonPath("$.lessons[0].ptLessonId").value(ptLesson.getId()));
+	}
+
+	@Test
+	@DisplayName("통합 테스트 - 특정 월의 캘린더 PT 레슨 수 조회 성공")
+	void get_calendar_pt_lesson_count_success() throws Exception {
+		Member trainerMember = MemberFixture.getTrainerMember1();
+		Member traineeMember = MemberFixture.getTraineeMember1();
+
+		trainerMember = memberRepository.save(trainerMember);
+		traineeMember = memberRepository.save(traineeMember);
+
+		CustomUserDetails trainerUserDetails = new CustomUserDetails(trainerMember.getId(),
+			trainerMember.getId().toString(),
+			authoritiesMapper.mapAuthorities(List.of(new SimpleGrantedAuthority("ROLE_USER"))));
+
+		Authentication authentication = new UsernamePasswordAuthenticationToken(trainerUserDetails, null,
+			authoritiesMapper.mapAuthorities(trainerUserDetails.getAuthorities()));
+
+		SecurityContextHolder.getContext().setAuthentication(authentication);
+
+		Trainer trainer = TrainerFixture.getTrainer2(trainerMember);
+		Trainee trainee = TraineeFixture.getTrainee2(traineeMember);
+		trainer = trainerRepository.save(trainer);
+		trainee = traineeRepository.save(trainee);
+
+		PtTrainerTrainee ptTrainerTrainee = PtTrainerTraineeFixture.getPtTrainerTrainee1(trainer, trainee);
+		ptTrainerTraineeRepository.save(ptTrainerTrainee);
+
+		int year = 2025;
+		int month = 1;
+		LocalDateTime date = LocalDate.of(year, month, 1).atTime(10, 0);
+
+		List<PtLesson> ptLessons = List.of(PtLesson.builder()
+				.ptTrainerTrainee(ptTrainerTrainee)
+				.lessonStart(date)
+				.lessonEnd(date.plusHours(1))
+				.build(),
+			PtLesson.builder()
+				.ptTrainerTrainee(ptTrainerTrainee)
+				.lessonStart(date.plusHours(4))
+				.lessonEnd(date.plusHours(5))
+				.build(),
+			PtLesson.builder()
+				.ptTrainerTrainee(ptTrainerTrainee)
+				.lessonStart(date.plusDays(1))
+				.lessonEnd(date.plusDays(1).plusHours(1))
+				.build(),
+			PtLesson.builder()
+				.ptTrainerTrainee(ptTrainerTrainee)
+				.lessonStart(date.plusDays(4).plusHours(4))
+				.lessonEnd(date.plusDays(4).plusHours(5))
+				.build());
+
+		ptLessonRepository.saveAll(ptLessons);
+
+		// when & then
+		mockMvc.perform(get("/trainers/lessons/calendar")
+				.param("year", String.valueOf(year))
+				.param("month", String.valueOf(month)))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.calendarPtLessonCounts").isArray())
+			.andExpect(jsonPath("$.calendarPtLessonCounts[0].date").value("2025-01-01"))
+			.andExpect(jsonPath("$.calendarPtLessonCounts[0].count").value(2))
+			.andExpect(jsonPath("$.calendarPtLessonCounts[1].date").value("2025-01-02"))
+			.andExpect(jsonPath("$.calendarPtLessonCounts[1].count").value(1))
+			.andExpect(jsonPath("$.calendarPtLessonCounts[2].date").value("2025-01-05"))
+			.andExpect(jsonPath("$.calendarPtLessonCounts[2].count").value(1))
+			.andDo(print());
 	}
 }

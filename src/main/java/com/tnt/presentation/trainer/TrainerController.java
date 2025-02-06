@@ -16,13 +16,17 @@ import org.springframework.web.bind.annotation.RestController;
 import com.tnt.application.pt.PtService;
 import com.tnt.application.trainer.TrainerService;
 import com.tnt.dto.trainer.response.ConnectWithTraineeResponse;
+import com.tnt.dto.trainer.response.GetCalendarPtLessonCountResponse;
 import com.tnt.dto.trainer.response.GetPtLessonsOnDateResponse;
 import com.tnt.dto.trainer.response.InvitationCodeResponse;
 import com.tnt.dto.trainer.response.InvitationCodeVerifyResponse;
 import com.tnt.gateway.config.AuthMember;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 
 @Tag(name = "트레이너", description = "트레이너 관련 API")
@@ -59,7 +63,7 @@ public class TrainerController {
 	@ResponseStatus(OK)
 	@GetMapping("/first-connected-trainee")
 	public ConnectWithTraineeResponse getFirstConnectedTrainee(@AuthMember Long memberId,
-		@RequestParam("trainerId") Long trainerId, @RequestParam Long traineeId) {
+		@RequestParam("trainerId") Long trainerId, @RequestParam("traineeId") Long traineeId) {
 		return ptService.getFirstTrainerTraineeConnect(memberId, trainerId, traineeId);
 	}
 
@@ -67,7 +71,16 @@ public class TrainerController {
 	@ResponseStatus(OK)
 	@GetMapping("/lessons/{date}")
 	public GetPtLessonsOnDateResponse getPtLessonsOnDate(@AuthMember Long memberId,
-		@PathVariable("date") LocalDate date) {
+		@Parameter(description = "날짜", example = "2025-01-03") @PathVariable("date") LocalDate date) {
 		return ptService.getPtLessonsOnDate(memberId, date);
+	}
+
+	@Operation(summary = "달력 스케쥴 개수 표시에 필요한 데이터 요청 API")
+	@ResponseStatus(OK)
+	@GetMapping("/lessons/calendar")
+	public GetCalendarPtLessonCountResponse getCalendarPtLessonCount(@AuthMember Long memberId,
+		@Parameter(description = "년도", example = "2021") @RequestParam("year") @Min(1900) @Max(2100) Integer year,
+		@Parameter(description = "월", example = "3") @RequestParam("month") @Min(1) @Max(12) Integer month) {
+		return ptService.getCalendarPtLessonCount(memberId, year, month);
 	}
 }

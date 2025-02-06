@@ -7,6 +7,7 @@ import static com.tnt.domain.trainee.QTrainee.trainee;
 import static com.tnt.domain.trainer.QTrainer.trainer;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -33,6 +34,23 @@ public class PtLessonSearchRepository {
 			.where(
 				trainer.id.eq(trainerId),
 				ptLesson.lessonStart.between(date.atStartOfDay(), date.atTime(LocalTime.MAX)),
+				ptLesson.deletedAt.isNull()
+			)
+			.orderBy(ptLesson.lessonStart.asc())
+			.fetch();
+	}
+
+	public List<PtLesson> findAllByTraineeIdForCalendar(Long traineeId, Integer year, Integer month) {
+		LocalDateTime startDate = LocalDateTime.of(year, month, 1, 0, 0);
+		LocalDateTime endDate = startDate.plusMonths(1).minusNanos(1);
+
+		return jpaQueryFactory
+			.selectFrom(ptLesson)
+			.join(ptLesson.ptTrainerTrainee, ptTrainerTrainee).fetchJoin()
+			.join(ptTrainerTrainee.trainer, trainer).fetchJoin()
+			.where(
+				trainer.id.eq(traineeId),
+				ptLesson.lessonStart.between(startDate, endDate),
 				ptLesson.deletedAt.isNull()
 			)
 			.orderBy(ptLesson.lessonStart.asc())
