@@ -16,8 +16,8 @@ public record ConnectWithTraineeResponse(
 	@Schema(description = "트레이니 프로필 이미지 URL", example = "https://images.tntapp.co.kr/3h4f.jpg", nullable = false)
 	String traineeProfileImageUrl,
 
-	@Schema(description = "트레이니 나이", examples = {"20세", "비공개"}, nullable = false)
-	String traineeAge,
+	@Schema(description = "트레이니 나이", example = "25", nullable = true)
+	Integer traineeAge,
 
 	@Schema(description = "트레이니 키", example = "178.6cm", nullable = false)
 	Double height,
