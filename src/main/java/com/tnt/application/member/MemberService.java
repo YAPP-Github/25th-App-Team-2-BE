@@ -42,8 +42,8 @@ public class MemberService {
 
 		return new GetMemberInfoResponse(memberInfo.name(), memberInfo.email(), memberInfo.profileImageUrl(),
 			memberInfo.birthday(), memberInfo.memberType(), memberInfo.socialType(), memberInfo.managementMember(),
-			memberInfo.fellowMember(), memberInfo.invitationCode(), memberInfo.height(), memberInfo.weight(),
-			memberInfo.cautionNote(), memberInfo.goalContents());
+			memberInfo.fellowMember(), memberInfo.invitationCode(), memberInfo.trainerId(), memberInfo.height(),
+			memberInfo.weight(), memberInfo.cautionNote(), memberInfo.goalContents());
 	}
 
 	public CheckSessionResponse getMemberType(Long memberId) {

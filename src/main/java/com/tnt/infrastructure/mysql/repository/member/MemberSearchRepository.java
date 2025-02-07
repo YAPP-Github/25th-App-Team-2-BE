@@ -61,7 +61,7 @@ public class MemberSearchRepository {
 							),
 						"fellowMember"
 					),
-					trainer.invitationCode, trainee.height, trainee.weight, trainee.cautionNote,
+					trainer.invitationCode, trainer.id, trainee.height, trainee.weight, trainee.cautionNote,
 					GroupBy.list(ptGoal.content)
 				)
 			));

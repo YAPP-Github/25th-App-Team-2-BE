@@ -37,6 +37,9 @@ public record GetMemberInfoResponse(
 	@Schema(description = "트레이너 초대 코드", example = "2H9DG4X3", nullable = true)
 	String invitationCode,
 
+	@Schema(description = "트레이너 ID", example = "124778142", nullable = false)
+	Long trainerId,
+
 	@Schema(description = "키 (cm)", example = "180.5", nullable = true)
 	Double height,
 

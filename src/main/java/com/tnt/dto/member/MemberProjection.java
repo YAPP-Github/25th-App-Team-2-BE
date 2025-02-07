@@ -29,6 +29,7 @@ public class MemberProjection {
 		Integer managementMember,
 		Integer fellowMember,
 		String invitationCode,
+		Long trainerId,
 		Double height,
 		Double weight,
 		String cautionNote,
