@@ -1,9 +1,7 @@
 package com.tnt.application.member;
 
-import static com.tnt.common.error.model.ErrorMessage.MEMBER_CONFLICT;
-import static com.tnt.common.error.model.ErrorMessage.MEMBER_NOT_FOUND;
-import static com.tnt.dto.member.MemberProjection.MemberInfoDto;
-import static com.tnt.dto.member.MemberProjection.MemberTypeDto;
+import static com.tnt.common.error.model.ErrorMessage.*;
+import static com.tnt.dto.member.MemberProjection.*;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,8 +41,9 @@ public class MemberService {
 			.orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
 
 		return new GetMemberInfoResponse(memberInfo.name(), memberInfo.email(), memberInfo.profileImageUrl(),
-			memberInfo.birthday(), memberInfo.memberType(), memberInfo.socialType(), memberInfo.invitationCode(),
-			memberInfo.height(), memberInfo.weight(), memberInfo.cautionNote(), memberInfo.goalContents());
+			memberInfo.birthday(), memberInfo.memberType(), memberInfo.socialType(), memberInfo.managementMember(),
+			memberInfo.fellowMember(), memberInfo.invitationCode(), memberInfo.height(), memberInfo.weight(),
+			memberInfo.cautionNote(), memberInfo.goalContents());
 	}
 
 	public CheckSessionResponse getMemberType(Long memberId) {

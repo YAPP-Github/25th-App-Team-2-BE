@@ -26,6 +26,8 @@ public class MemberProjection {
 		LocalDate birthday,
 		MemberType memberType,
 		SocialType socialType,
+		Integer managementMember,
+		Integer fellowMember,
 		String invitationCode,
 		Double height,
 		Double weight,
@@ -34,5 +36,4 @@ public class MemberProjection {
 	) {
 
 	}
-
 }
