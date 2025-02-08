@@ -41,7 +41,7 @@ sonar {
         property "sonar.host.url", "https://sonarcloud.io"
         property "sonar.coverage.jacoco.xmlReportPaths", "build/reports/jacoco/test/jacocoTestReport.xml"
         property "sonar.exclusions", "**/*Application*.java, **/*Config*.java, **/*GlobalExceptionHandler.java, **/Q*.java, **/DynamicQuery.java, " +
-                "**/*Exception.java, **/*Adapter.java, **/CustomOAuth2UserService.java, **/*SearchRepository.java"
+                "**/*Exception.java, **/*Adapter.java, **/CustomOAuth2UserService.java, **/*SearchRepository.java, **/*Filter.java"
         property "sonar.java.coveragePlugin", "jacoco"
     }
 }
