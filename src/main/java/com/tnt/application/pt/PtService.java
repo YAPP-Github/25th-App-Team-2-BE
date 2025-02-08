@@ -101,7 +101,8 @@ public class PtService {
 			Trainee trainee = ptTrainerTrainee.getTrainee();
 
 			return new Lesson(String.valueOf(ptLesson.getId()),
-				String.valueOf(trainee.getId()), trainee.getMember().getName(), ptTrainerTrainee.getCurrentPtSession(),
+				String.valueOf(trainee.getId()), trainee.getMember().getName(),
+				trainee.getMember().getProfileImageUrl(), ptTrainerTrainee.getCurrentPtSession(),
 				ptLesson.getLessonStart(), ptLesson.getLessonEnd(), ptLesson.getIsCompleted());
 		}).toList();
 

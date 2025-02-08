@@ -4,7 +4,11 @@ import static com.tnt.common.error.model.ErrorMessage.INPUT_VALUE_IS_INVALID;
 import static com.tnt.common.error.model.ErrorMessage.MISSING_REQUIRED_PARAMETER_ERROR;
 import static com.tnt.common.error.model.ErrorMessage.PARAMETER_FORMAT_NOT_CORRECT;
 import static com.tnt.common.error.model.ErrorMessage.SERVER_ERROR;
-import static org.springframework.http.HttpStatus.*;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.CONFLICT;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
 import java.security.SecureRandom;
 import java.time.DateTimeException;
@@ -149,7 +153,7 @@ public class GlobalExceptionHandler {
 	// 기타 500 예외
 	@ResponseStatus(INTERNAL_SERVER_ERROR)
 	@ExceptionHandler(RuntimeException.class)
-	protected ErrorResponse handleRuntimeException(TnTException exception) {
+	protected ErrorResponse handleRuntimeException(RuntimeException exception) {
 		StringBuilder sb = new StringBuilder();
 
 		for (int i = 0; i < ERROR_KEY_LENGTH; i++) {
