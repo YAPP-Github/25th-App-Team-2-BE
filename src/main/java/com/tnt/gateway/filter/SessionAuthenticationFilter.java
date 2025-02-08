@@ -1,5 +1,7 @@
 package com.tnt.gateway.filter;
 
+import static jakarta.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
+
 import java.io.IOException;
 import java.util.List;
 
@@ -12,6 +14,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tnt.common.error.exception.UnauthorizedException;
+import com.tnt.common.error.model.ErrorResponse;
 import com.tnt.gateway.service.SessionService;
 
 import jakarta.servlet.FilterChain;
@@ -25,10 +30,13 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class SessionAuthenticationFilter extends OncePerRequestFilter {
 
+	private static final String AUTHORIZATION_HEADER = "Authorization";
+
 	private final GrantedAuthoritiesMapper authoritiesMapper = new NullAuthoritiesMapper();
 	private final AntPathMatcher pathMatcher = new AntPathMatcher();
 	private final List<String> allowedUris;
 	private final SessionService sessionService;
+	private final ObjectMapper objectMapper;
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
@@ -44,7 +52,16 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
 			return;
 		}
 
-		saveAuthentication(sessionService.authenticate(request));
+		try {
+			saveAuthentication(sessionService.authenticate(request.getHeader(AUTHORIZATION_HEADER)));
+		} catch (UnauthorizedException e) {
+			response.setContentType("application/json;charset=UTF-8");
+			response.setStatus(SC_BAD_REQUEST);
+			response.getWriter().write(objectMapper.writeValueAsString(new ErrorResponse(e.getMessage())));
+
+			return;
+		}
+
 		filterChain.doFilter(request, response);
 	}
 

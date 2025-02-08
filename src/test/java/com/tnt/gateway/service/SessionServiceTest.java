@@ -44,7 +44,7 @@ class SessionServiceTest {
 		given(request.getHeader("Authorization")).willReturn(null, " ");
 
 		// when & then
-		assertThatThrownBy(() -> sessionService.authenticate(request))
+		assertThatThrownBy(() -> sessionService.authenticate(request.getHeader("Authorization")))
 			.isInstanceOf(UnauthorizedException.class)
 			.hasMessage(AUTHORIZATION_HEADER_ERROR.getMessage());
 	}
@@ -56,7 +56,7 @@ class SessionServiceTest {
 		given(request.getHeader("Authorization")).willReturn("Invalid 12345");
 
 		// when & then
-		assertThatThrownBy(() -> sessionService.authenticate(request))
+		assertThatThrownBy(() -> sessionService.authenticate(request.getHeader("Authorization")))
 			.isInstanceOf(UnauthorizedException.class)
 			.hasMessage(AUTHORIZATION_HEADER_ERROR.getMessage());
 	}
@@ -73,7 +73,7 @@ class SessionServiceTest {
 		given(valueOperations.get(sessionId)).willReturn(memberId);
 
 		// when
-		String extractedSessionId = sessionService.authenticate(request);
+		String extractedSessionId = sessionService.authenticate(request.getHeader("Authorization"));
 
 		// then
 		assertThat(extractedSessionId).isEqualTo(memberId);
@@ -90,7 +90,7 @@ class SessionServiceTest {
 		given(valueOperations.get(sessionId)).willReturn(null);
 
 		// when & then
-		assertThatThrownBy(() -> sessionService.authenticate(request))
+		assertThatThrownBy(() -> sessionService.authenticate(request.getHeader("Authorization")))
 			.isInstanceOf(UnauthorizedException.class)
 			.hasMessage(NO_EXIST_SESSION_IN_STORAGE.getMessage());
 	}

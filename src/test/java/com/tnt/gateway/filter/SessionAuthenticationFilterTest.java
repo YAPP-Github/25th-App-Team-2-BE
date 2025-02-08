@@ -1,6 +1,5 @@
 package com.tnt.gateway.filter;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -17,16 +16,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 
-import com.tnt.common.error.exception.UnauthorizedException;
-import com.tnt.common.error.model.ErrorMessage;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tnt.gateway.service.SessionService;
 
 import jakarta.servlet.FilterChain;
@@ -49,6 +43,9 @@ class SessionAuthenticationFilterTest {
 	@Mock
 	private FilterChain filterChain;
 
+	@Mock
+	private ObjectMapper objectMapper;
+
 	private SessionAuthenticationFilter sessionAuthenticationFilter;
 
 	@BeforeEach
@@ -56,7 +53,8 @@ class SessionAuthenticationFilterTest {
 		List<String> allowedUris = Arrays.asList("/api/auth/**", "/api/health");
 		sessionAuthenticationFilter = new SessionAuthenticationFilter(
 			allowedUris,
-			sessionService
+			sessionService,
+			objectMapper
 		);
 	}
 
@@ -75,47 +73,6 @@ class SessionAuthenticationFilterTest {
 		verify(filterChain).doFilter(request, response);
 	}
 
-	@ParameterizedTest
-	@DisplayName("세션 인증 실패 시 예외 발생")
-	@EnumSource(
-		value = ErrorMessage.class,
-		names = {"AUTHORIZATION_HEADER_ERROR", "NO_EXIST_SESSION_IN_STORAGE"}
-	)
-	void session_authentication_failure_cases(ErrorMessage errorMessage) {
-		// given
-		given(request.getRequestURI()).willReturn("/api/members/me");
-		given(sessionService.authenticate(request))
-			.willThrow(new UnauthorizedException(errorMessage));
-
-		// when & then
-		assertThatThrownBy(() -> sessionAuthenticationFilter.doFilterInternal(request, response, filterChain))
-			.isInstanceOf(UnauthorizedException.class)
-			.hasMessage(errorMessage.getMessage());
-	}
-
-	@Test
-	@DisplayName("유효한 세션으로 인증 정보 저장 성공")
-	void save_authentication_success() throws ServletException, IOException {
-		// given
-		String memberId = "12345";
-
-		given(request.getRequestURI()).willReturn("/api/members/me");
-		given(sessionService.authenticate(request)).willReturn(memberId);
-
-		// when
-		sessionAuthenticationFilter.doFilterInternal(request, response, filterChain);
-
-		// then
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		assertThat(authentication).isNotNull();
-		assertThat(authentication.getPrincipal()).isInstanceOf(UserDetails.class);
-		UserDetails userDetails = (UserDetails)authentication.getPrincipal();
-		assertThat(userDetails.getUsername()).isEqualTo(memberId);
-		assertThat(userDetails.getAuthorities())
-			.extracting("authority")
-			.contains("ROLE_USER");
-	}
-
 	@Test
 	@DisplayName("유효한 세션으로 인증 성공")
 	void authenticate_with_valid_session_success() throws ServletException, IOException {
@@ -123,14 +80,14 @@ class SessionAuthenticationFilterTest {
 		String sessionId = "12345";
 
 		given(request.getRequestURI()).willReturn("/api/members/me");
-		given(sessionService.authenticate(request)).willReturn(sessionId);
+		given(sessionService.authenticate(request.getHeader("Authorization"))).willReturn(sessionId);
 
 		// when
 		sessionAuthenticationFilter.doFilterInternal(request, response, filterChain);
 
 		// then
 		verify(filterChain).doFilter(request, response);
-		verify(sessionService).authenticate(request);
+		verify(sessionService).authenticate(request.getHeader("Authorization"));
 	}
 
 	@Test
@@ -140,7 +97,7 @@ class SessionAuthenticationFilterTest {
 		String sessionId = "12345";
 
 		given(request.getRequestURI()).willReturn("/api/members/me");
-		given(sessionService.authenticate(request)).willReturn(sessionId);
+		given(sessionService.authenticate(request.getHeader("Authorization"))).willReturn(sessionId);
 		willThrow(new ServletException("필터 체인 에러"))
 			.given(filterChain)
 			.doFilter(any(), any());

@@ -1,5 +1,7 @@
 package com.tnt.gateway.config;
 
+import static jakarta.servlet.http.HttpServletResponse.SC_NOT_FOUND;
+
 import java.util.Arrays;
 
 import org.springframework.context.annotation.Bean;
@@ -14,12 +16,11 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
 
-import com.tnt.gateway.filter.ServletExceptionFilter;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tnt.common.error.model.ErrorResponse;
 import com.tnt.gateway.filter.SessionAuthenticationFilter;
-import com.tnt.gateway.service.CustomOAuth2UserService;
 import com.tnt.gateway.service.SessionService;
 
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -40,7 +41,7 @@ public class SecurityConfig {
 		"/members/sign-up"
 	};
 
-	private final CustomOAuth2UserService customOAuth2UserService;
+	private final ObjectMapper objectMapper;
 	private final SessionService sessionService;
 
 	@Bean
@@ -54,30 +55,23 @@ public class SecurityConfig {
 			.headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
 			.sessionManagement(sessionManagement ->
 				sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-			.oauth2Login(oauth2 -> oauth2.userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService)))
 			.authorizeHttpRequests(request -> request
 				.requestMatchers(ALLOWED_URIS).permitAll().anyRequest().authenticated())
-			.addFilterBefore(servletExceptionFilter(), LogoutFilter.class)
 			.addFilterAfter(sessionAuthenticationFilter(), LogoutFilter.class)
-			.exceptionHandling(exceptionHandling ->
-				exceptionHandling.authenticationEntryPoint((request, response, authException) -> {
-					log.error("SecurityFilter Exception.", authException);
-					response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-					response.setContentType("application/json;charset=UTF-8");
-					response.getWriter().write("{\"message\":\"Security 사용자 인증에 실패했습니다.\"}");
-				})
-			);
+			.exceptionHandling(e -> e.authenticationEntryPoint((request, response, authException) -> {
+				log.error("(Invalid URL) Security Filter Error: {}", authException.getMessage(), authException);
+
+				response.setStatus(SC_NOT_FOUND);
+				response.setContentType("application/json;charset=UTF-8");
+				response.getWriter()
+					.write(objectMapper.writeValueAsString(new ErrorResponse("Invalid URL")));
+			}));
 
 		return http.build();
 	}
 
 	@Bean
-	public ServletExceptionFilter servletExceptionFilter() {
-		return new ServletExceptionFilter();
-	}
-
-	@Bean
 	public SessionAuthenticationFilter sessionAuthenticationFilter() {
-		return new SessionAuthenticationFilter(Arrays.asList(ALLOWED_URIS), sessionService);
+		return new SessionAuthenticationFilter(Arrays.asList(ALLOWED_URIS), sessionService, objectMapper);
 	}
 }
