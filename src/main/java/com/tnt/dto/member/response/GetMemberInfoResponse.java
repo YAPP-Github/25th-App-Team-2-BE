@@ -29,10 +29,10 @@ public record GetMemberInfoResponse(
 	SocialType socialType,
 
 	@Schema(description = "관리 중인 회원", example = "23", nullable = true)
-	Integer managementMember,
+	Integer activeTraineeCount,
 
 	@Schema(description = "함께했던 회원", example = "50", nullable = true)
-	Integer fellowMember,
+	Integer previousTraineeCount,
 
 	@Schema(description = "트레이너 초대 코드", example = "2H9DG4X3", nullable = true)
 	String invitationCode,

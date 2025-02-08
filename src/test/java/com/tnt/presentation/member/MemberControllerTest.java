@@ -1,18 +1,11 @@
 package com.tnt.presentation.member;
 
-import static com.tnt.common.constant.ProfileConstant.TRAINEE_DEFAULT_IMAGE;
-import static com.tnt.common.constant.ProfileConstant.TRAINER_DEFAULT_IMAGE;
-import static com.tnt.domain.member.MemberType.TRAINEE;
-import static com.tnt.domain.member.MemberType.TRAINER;
-import static com.tnt.domain.member.SocialType.KAKAO;
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.http.MediaType.IMAGE_JPEG_VALUE;
-import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static com.tnt.common.constant.ProfileConstant.*;
+import static com.tnt.domain.member.MemberType.*;
+import static com.tnt.domain.member.SocialType.*;
+import static org.springframework.http.MediaType.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -41,17 +34,20 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tnt.domain.member.Member;
+import com.tnt.domain.pt.PtTrainerTrainee;
 import com.tnt.domain.trainee.PtGoal;
 import com.tnt.domain.trainee.Trainee;
 import com.tnt.domain.trainer.Trainer;
 import com.tnt.dto.member.request.SignUpRequest;
 import com.tnt.fixture.MemberFixture;
 import com.tnt.fixture.PtGoalsFixture;
+import com.tnt.fixture.PtTrainerTraineeFixture;
 import com.tnt.fixture.TraineeFixture;
 import com.tnt.fixture.TrainerFixture;
 import com.tnt.gateway.filter.CustomUserDetails;
 import com.tnt.infrastructure.mysql.repository.member.MemberRepository;
 import com.tnt.infrastructure.mysql.repository.pt.PtGoalRepository;
+import com.tnt.infrastructure.mysql.repository.pt.PtTrainerTraineeRepository;
 import com.tnt.infrastructure.mysql.repository.trainee.TraineeRepository;
 import com.tnt.infrastructure.mysql.repository.trainer.TrainerRepository;
 import com.tnt.infrastructure.redis.AbstractContainerBaseTest;
@@ -86,6 +82,9 @@ class MemberControllerTest extends AbstractContainerBaseTest {
 
 	@Autowired
 	private PtGoalRepository ptGoalRepository;
+
+	@Autowired
+	private PtTrainerTraineeRepository ptTrainerTraineeRepository;
 
 	@Test
 	@DisplayName("통합 테스트 - 트레이너 회원가입 성공")
@@ -205,44 +204,49 @@ class MemberControllerTest extends AbstractContainerBaseTest {
 	}
 
 	@Test
-	@DisplayName("통합 테스트 - 트레이니 회원 조회 성공")
+	@DisplayName("통합 테스트 - 트레이너 회원 조회 성공")
 	void get_member_info_trainee_success() throws Exception {
 		// given
+		Member trainerMember = MemberFixture.getTrainerMember1();
 		Member traineeMember = MemberFixture.getTraineeMember1();
 
-		Member member = memberRepository.save(traineeMember);
+		Member member1 = memberRepository.save(trainerMember);
+		memberRepository.save(traineeMember);
 
-		CustomUserDetails traineeUserDetails = new CustomUserDetails(member.getId(),
-			String.valueOf(member.getId()), List.of(new SimpleGrantedAuthority("ROLE_USER")));
+		CustomUserDetails traineeUserDetails = new CustomUserDetails(member1.getId(),
+			String.valueOf(member1.getId()), List.of(new SimpleGrantedAuthority("ROLE_USER")));
 
 		Authentication authentication = new UsernamePasswordAuthenticationToken(traineeUserDetails, null,
 			authoritiesMapper.mapAuthorities(traineeUserDetails.getAuthorities()));
 
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
+		Trainer trainer = TrainerFixture.getTrainer2(trainerMember);
 		Trainee trainee = TraineeFixture.getTrainee2(traineeMember);
 
+		trainerRepository.save(trainer);
 		traineeRepository.save(trainee);
 
 		List<PtGoal> ptGoals = PtGoalsFixture.getPtGoals(trainee.getId());
 
 		ptGoalRepository.saveAll(ptGoals);
 
+		PtTrainerTrainee ptTrainerTrainee = PtTrainerTraineeFixture.getPtTrainerTrainee1(trainer, trainee);
+
+		ptTrainerTraineeRepository.save(ptTrainerTrainee);
+
 		// when & then
 		mockMvc.perform(get("/members")
 				.contentType(APPLICATION_JSON_VALUE))
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.name").value(member.getName()))
-			.andExpect(jsonPath("$.email").value(member.getEmail()))
-			.andExpect(jsonPath("$.profileImageUrl").value(member.getProfileImageUrl()))
-			.andExpect(jsonPath("$.birthday").value(member.getBirthday().toString()))
-			.andExpect(jsonPath("$.memberType").value(member.getMemberType().name()))
-			.andExpect(jsonPath("$.socialType").value(member.getSocialType().name()))
-			.andExpect(jsonPath("$.height").value(trainee.getHeight()))
-			.andExpect(jsonPath("$.weight").value(trainee.getWeight()))
-			.andExpect(jsonPath("$.cautionNote").value(trainee.getCautionNote()))
-			.andExpect(jsonPath("$.goalContents[0]").exists())
-			.andExpect(jsonPath("$.goalContents[1]").exists());
+			.andExpect(jsonPath("$.name").value(member1.getName()))
+			.andExpect(jsonPath("$.email").value(member1.getEmail()))
+			.andExpect(jsonPath("$.profileImageUrl").value(member1.getProfileImageUrl()))
+			.andExpect(jsonPath("$.birthday").value(member1.getBirthday().toString()))
+			.andExpect(jsonPath("$.memberType").value(member1.getMemberType().name()))
+			.andExpect(jsonPath("$.socialType").value(member1.getSocialType().name()))
+			.andExpect(jsonPath("$.activeTraineeCount").exists())
+			.andExpect(jsonPath("$.previousTraineeCount").exists());
 	}
 
 	@TestConfiguration

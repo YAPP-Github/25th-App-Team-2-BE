@@ -41,8 +41,8 @@ public class MemberService {
 			.orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
 
 		return new GetMemberInfoResponse(memberInfo.name(), memberInfo.email(), memberInfo.profileImageUrl(),
-			memberInfo.birthday(), memberInfo.memberType(), memberInfo.socialType(), memberInfo.managementMember(),
-			memberInfo.fellowMember(), memberInfo.invitationCode(), memberInfo.trainerId(), memberInfo.height(),
+			memberInfo.birthday(), memberInfo.memberType(), memberInfo.socialType(), memberInfo.activeTraineeCount(),
+			memberInfo.previousTraineeCount(), memberInfo.invitationCode(), memberInfo.trainerId(), memberInfo.height(),
 			memberInfo.weight(), memberInfo.cautionNote(), memberInfo.goalContents());
 	}
 

@@ -46,20 +46,18 @@ public class MemberSearchRepository {
 							.from(ptTrainerTrainee)
 							.where(
 								ptTrainerTrainee.trainer.eq(trainer),
-								ptTrainerTrainee.finishedPtCount.lt(ptTrainerTrainee.totalPtCount),
 								ptTrainerTrainee.deletedAt.isNull()
 							),
-						"managementMember"
+						"activeTraineeCount"
 					),
 					Expressions.as(
 						JPAExpressions.select(ptTrainerTrainee.trainee.countDistinct().intValue())
 							.from(ptTrainerTrainee)
 							.where(
 								ptTrainerTrainee.trainer.eq(trainer),
-								ptTrainerTrainee.finishedPtCount.eq(ptTrainerTrainee.totalPtCount),
-								ptTrainerTrainee.deletedAt.isNull()
+								ptTrainerTrainee.deletedAt.isNotNull()
 							),
-						"fellowMember"
+						"previousTraineeCount"
 					),
 					trainer.invitationCode, trainer.id, trainee.height, trainee.weight, trainee.cautionNote,
 					GroupBy.list(ptGoal.content)
