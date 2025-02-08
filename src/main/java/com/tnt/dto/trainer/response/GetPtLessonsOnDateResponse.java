@@ -28,6 +28,9 @@ public record GetPtLessonsOnDateResponse(
 		@Schema(description = "트레이니 이름", example = "김정호", nullable = false)
 		String traineeName,
 
+		@Schema(description = "트레이니 프로필 사진 URL", example = "https://images.tntapp.co.kr/abc.jpg", nullable = false)
+		String traineeProfileImageUrl,
+
 		@Schema(description = "PT 회차", example = "6", nullable = false)
 		Integer session,
 
