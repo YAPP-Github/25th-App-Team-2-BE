@@ -3,14 +3,12 @@ package com.tnt.common.error.handler;
 import static com.tnt.common.error.model.ErrorMessage.INPUT_VALUE_IS_INVALID;
 import static com.tnt.common.error.model.ErrorMessage.MISSING_REQUIRED_PARAMETER_ERROR;
 import static com.tnt.common.error.model.ErrorMessage.PARAMETER_FORMAT_NOT_CORRECT;
-import static com.tnt.common.error.model.ErrorMessage.SERVER_ERROR;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.CONFLICT;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
-import java.security.SecureRandom;
 import java.time.DateTimeException;
 import java.util.List;
 
@@ -36,12 +34,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-
-	private static final String ERROR_KEY_FORMAT = "%n error key : %s";
-	private static final String CHARACTERS = "abcdefghijklmnopqrstuvwxyz";
-	private static final int ERROR_KEY_LENGTH = 5;
-	private static final String EXCEPTION_CLASS_TYPE_MESSAGE_FORMANT = "%n class type : %s";
-	private final SecureRandom secureRandom = new SecureRandom();
 
 	// 필수 파라미터 예외
 	@ResponseStatus(BAD_REQUEST)
@@ -154,17 +146,8 @@ public class GlobalExceptionHandler {
 	@ResponseStatus(INTERNAL_SERVER_ERROR)
 	@ExceptionHandler(RuntimeException.class)
 	protected ErrorResponse handleRuntimeException(RuntimeException exception) {
-		StringBuilder sb = new StringBuilder();
+		log.error(exception.getMessage(), exception);
 
-		for (int i = 0; i < ERROR_KEY_LENGTH; i++) {
-			sb.append(CHARACTERS.charAt(secureRandom.nextInt(CHARACTERS.length())));
-		}
-
-		String errorKeyInfo = String.format(ERROR_KEY_FORMAT, sb);
-		String exceptionTypeInfo = String.format(EXCEPTION_CLASS_TYPE_MESSAGE_FORMANT, exception.getClass());
-
-		log.error("{} {} {}", exception.getMessage(), errorKeyInfo, exceptionTypeInfo, exception);
-
-		return new ErrorResponse(SERVER_ERROR + errorKeyInfo);
+		return new ErrorResponse(exception.getMessage());
 	}
 }

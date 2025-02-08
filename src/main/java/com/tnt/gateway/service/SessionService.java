@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 
 import com.tnt.common.error.exception.UnauthorizedException;
 
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -22,13 +21,11 @@ import lombok.extern.slf4j.Slf4j;
 public class SessionService {
 
 	private static final long SESSION_DURATION = 7L * 24 * 60 * 60; // 24시간 * 7일
-	private static final String AUTHORIZATION_HEADER = "Authorization";
 	private static final String SESSION_ID_PREFIX = "SESSION-ID ";
 
 	private final StringRedisTemplate redisTemplate;
 
-	public String authenticate(HttpServletRequest request) {
-		String authHeader = request.getHeader(AUTHORIZATION_HEADER);
+	public String authenticate(String authHeader) {
 
 		if (isBlank(authHeader) || !authHeader.startsWith(SESSION_ID_PREFIX)) {
 			log.error("Authorization Header Error: [{}]", authHeader);
