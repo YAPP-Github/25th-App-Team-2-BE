@@ -25,6 +25,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tnt.common.error.exception.UnauthorizedException;
 import com.tnt.common.error.model.ErrorMessage;
 import com.tnt.gateway.service.SessionService;
@@ -49,6 +50,9 @@ class SessionAuthenticationFilterTest {
 	@Mock
 	private FilterChain filterChain;
 
+	@Mock
+	private ObjectMapper objectMapper;
+
 	private SessionAuthenticationFilter sessionAuthenticationFilter;
 
 	@BeforeEach
@@ -56,7 +60,8 @@ class SessionAuthenticationFilterTest {
 		List<String> allowedUris = Arrays.asList("/api/auth/**", "/api/health");
 		sessionAuthenticationFilter = new SessionAuthenticationFilter(
 			allowedUris,
-			sessionService
+			sessionService,
+			objectMapper
 		);
 	}
 
@@ -84,7 +89,7 @@ class SessionAuthenticationFilterTest {
 	void session_authentication_failure_cases(ErrorMessage errorMessage) {
 		// given
 		given(request.getRequestURI()).willReturn("/api/members/me");
-		given(sessionService.authenticate(request))
+		given(sessionService.authenticate(request.getHeader("Authorization")))
 			.willThrow(new UnauthorizedException(errorMessage));
 
 		// when & then
@@ -100,7 +105,7 @@ class SessionAuthenticationFilterTest {
 		String memberId = "12345";
 
 		given(request.getRequestURI()).willReturn("/api/members/me");
-		given(sessionService.authenticate(request)).willReturn(memberId);
+		given(sessionService.authenticate(request.getHeader("Authorization"))).willReturn(memberId);
 
 		// when
 		sessionAuthenticationFilter.doFilterInternal(request, response, filterChain);
@@ -123,14 +128,14 @@ class SessionAuthenticationFilterTest {
 		String sessionId = "12345";
 
 		given(request.getRequestURI()).willReturn("/api/members/me");
-		given(sessionService.authenticate(request)).willReturn(sessionId);
+		given(sessionService.authenticate(request.getHeader("Authorization"))).willReturn(sessionId);
 
 		// when
 		sessionAuthenticationFilter.doFilterInternal(request, response, filterChain);
 
 		// then
 		verify(filterChain).doFilter(request, response);
-		verify(sessionService).authenticate(request);
+		verify(sessionService).authenticate(request.getHeader("Authorization"));
 	}
 
 	@Test
@@ -140,7 +145,7 @@ class SessionAuthenticationFilterTest {
 		String sessionId = "12345";
 
 		given(request.getRequestURI()).willReturn("/api/members/me");
-		given(sessionService.authenticate(request)).willReturn(sessionId);
+		given(sessionService.authenticate(request.getHeader("Authorization"))).willReturn(sessionId);
 		willThrow(new ServletException("필터 체인 에러"))
 			.given(filterChain)
 			.doFilter(any(), any());
