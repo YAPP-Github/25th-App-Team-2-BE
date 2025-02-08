@@ -1,9 +1,7 @@
 package com.tnt.fixture;
 
-import static com.tnt.domain.member.MemberType.TRAINEE;
-import static com.tnt.domain.member.MemberType.TRAINER;
-import static com.tnt.domain.member.MemberType.UNREGISTERED;
-import static com.tnt.domain.member.SocialType.KAKAO;
+import static com.tnt.domain.member.MemberType.*;
+import static com.tnt.domain.member.SocialType.*;
 
 import java.time.LocalDate;
 
@@ -149,6 +147,52 @@ public final class MemberFixture {
 			.advertisementAgreement(true)
 			.socialType(KAKAO)
 			.memberType(UNREGISTERED)
+			.build();
+	}
+
+	public static Member getTraineeMember3() {
+		String socialId = "9876765540";
+		String email = "zcsdf@gmail.com";
+		String name = "홍길동";
+		String fcmToken = "fcmToken";
+		LocalDate birthday = LocalDate.of(2010, 12, 12);
+		String profileImageUrl = "https://profile.com/120844510";
+
+		return Member.builder()
+			.socialId(socialId)
+			.email(email)
+			.name(name)
+			.fcmToken(fcmToken)
+			.birthday(birthday)
+			.profileImageUrl(profileImageUrl)
+			.serviceAgreement(true)
+			.collectionAgreement(true)
+			.advertisementAgreement(true)
+			.socialType(APPLE)
+			.memberType(TRAINEE)
+			.build();
+	}
+
+	public static Member getTraineeMember4() {
+		String socialId = "76765540";
+		String email = "bvfdf@gmail.com";
+		String name = "김철수";
+		String fcmToken = "fcmToken";
+		LocalDate birthday = LocalDate.of(2000, 12, 12);
+		String profileImageUrl = "https://profile.com/645344510";
+
+		return Member.builder()
+			.socialId(socialId)
+			.email(email)
+			.name(name)
+			.fcmToken(fcmToken)
+			.birthday(birthday)
+			.profileImageUrl(profileImageUrl)
+			.serviceAgreement(true)
+			.collectionAgreement(true)
+			.advertisementAgreement(true)
+			.socialType(APPLE)
+			.memberType(TRAINEE)
 			.build();
 	}
 }
