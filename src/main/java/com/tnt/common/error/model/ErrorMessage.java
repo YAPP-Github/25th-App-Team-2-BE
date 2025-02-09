@@ -16,6 +16,7 @@ public enum ErrorMessage {
 	IMAGE_NOT_FOUND("이미지가 존재하지 않습니다."),
 	IMAGE_NOT_SUPPORT("지원하지 않는 이미지 형식입니다. jpg, jpeg, png, svg만 가능합니다."),
 	INVALID_REQUEST_NOT_MATCH("요청자와 요청이 일치하지 않습니다."),
+	INVALID_REQUEST_BODY("요청 바디가 올바르지 않습니다."),
 
 	CLIENT_BAD_REQUEST("잘못된 요청입니다."),
 	FAILED_TO_PROCESS_REQUEST("요청 진행에 실패했습니다."),
@@ -27,6 +28,7 @@ public enum ErrorMessage {
 	INVALID_FORMAT_DATETIME("DateTime 형식이 잘못되었습니다."),
 
 	AUTHORIZATION_HEADER_ERROR("Authorization 헤더가 존재하지 않거나 올바르지 않은 형식입니다."),
+	UNAUTHORIZED("인증되지 않은 사용자입니다."),
 	NO_EXIST_SESSION_IN_STORAGE("세션 스토리지에 세션이 존재하지 않습니다."),
 
 	UNSUPPORTED_SOCIAL_TYPE("지원하지 않는 소셜 서비스입니다."),
@@ -73,7 +75,8 @@ public enum ErrorMessage {
 	PT_TRAINER_TRAINEE_NOT_FOUND("존재하지 않는 연결 정보입니다."),
 	PT_TRAINER_TRAINEE_NULL("트레이너 - 트레이니 연결 정보가 null 입니다."),
 
-	PT_LESSON_INVALID_MEMO("수업 메모의 길이는 공백 포함 30자 이하이어야 합니다.");
+	PT_LESSON_INVALID_MEMO("수업 메모의 길이는 공백 포함 30자 이하이어야 합니다."),
+	PT_LESSON_DUPLICATE_TIME("이미 예약된 시간대입니다.");
 
 	private final String message;
 }
