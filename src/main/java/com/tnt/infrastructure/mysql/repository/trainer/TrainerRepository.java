@@ -10,7 +10,7 @@ public interface TrainerRepository extends JpaRepository<Trainer, Long> {
 
 	Optional<Trainer> findByMemberIdAndDeletedAtIsNull(Long memberId);
 
-	Optional<Trainer> findByInvitationCodeAndDeletedAtIsNull(String invitationCode);
+	boolean existsByMemberIdAndDeletedAtIsNull(Long memberId);
 
 	boolean existsByInvitationCodeAndDeletedAtIsNull(String invitationCode);
 }
