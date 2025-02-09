@@ -35,7 +35,7 @@ public final class MemberFixture {
 	}
 
 	public static Member getTrainerMember1WithId() {
-		String socialId = "1234567890";
+		String socialId = "123456789011";
 		String email = "abc@gmail.com";
 		String name = "김영명";
 		String fcmToken = "fcmToken";
@@ -59,9 +59,9 @@ public final class MemberFixture {
 	}
 
 	public static Member getTraineeMember1() {
-		String socialId = "9876765541";
+		String socialId = "987676554122";
 		String email = "wqert@gmail.com";
-		String name = "조만제";
+		String name = "김영명";
 		String fcmToken = "fcmToken";
 		LocalDate birthday = LocalDate.of(2019, 12, 12);
 		String profileImageUrl = "https://profile.com/120847210";
@@ -107,7 +107,7 @@ public final class MemberFixture {
 
 	public static Member getTraineeMember2() {
 		String socialId = "9876765541";
-		String email = "wqert@gmail.com";
+		String email = "wqertaa@gmail.com";
 		String name = "조만제";
 		String fcmToken = "fcmToken";
 		LocalDate birthday = LocalDate.of(2019, 12, 12);

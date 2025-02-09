@@ -2,7 +2,9 @@ package com.tnt.presentation.trainer;
 
 import static com.tnt.domain.member.MemberType.TRAINER;
 import static com.tnt.domain.member.SocialType.KAKAO;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -26,6 +28,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tnt.annotation.WithMockCustomUser;
 import com.tnt.domain.member.Member;
 import com.tnt.domain.pt.PtLesson;
@@ -33,6 +36,7 @@ import com.tnt.domain.pt.PtTrainerTrainee;
 import com.tnt.domain.trainee.PtGoal;
 import com.tnt.domain.trainee.Trainee;
 import com.tnt.domain.trainer.Trainer;
+import com.tnt.dto.trainer.request.CreatePtLessonRequest;
 import com.tnt.fixture.MemberFixture;
 import com.tnt.fixture.PtTrainerTraineeFixture;
 import com.tnt.fixture.TraineeFixture;
@@ -54,6 +58,9 @@ class TrainerControllerTest {
 
 	@Autowired
 	private MockMvc mockMvc;
+
+	@Autowired
+	private ObjectMapper objectMapper;
 
 	@Autowired
 	private TrainerRepository trainerRepository;
@@ -327,7 +334,7 @@ class TrainerControllerTest {
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
 		Trainer trainer = TrainerFixture.getTrainer2(trainerMember);
-		Trainee trainee = TraineeFixture.getTrainee2(traineeMember);
+		Trainee trainee = TraineeFixture.getTrainee1(traineeMember);
 		trainer = trainerRepository.save(trainer);
 		trainee = traineeRepository.save(trainee);
 
@@ -370,7 +377,7 @@ class TrainerControllerTest {
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
 		Trainer trainer = TrainerFixture.getTrainer2(trainerMember);
-		Trainee trainee = TraineeFixture.getTrainee2(traineeMember);
+		Trainee trainee = TraineeFixture.getTrainee1(traineeMember);
 		trainer = trainerRepository.save(trainer);
 		trainee = traineeRepository.save(trainee);
 
@@ -417,5 +424,189 @@ class TrainerControllerTest {
 			.andExpect(jsonPath("$.calendarPtLessonCounts[2].date").value("2025-01-05"))
 			.andExpect(jsonPath("$.calendarPtLessonCounts[2].count").value(1))
 			.andDo(print());
+	}
+
+	@Test
+	@DisplayName("통합 테스트 - 관리중인 회원 목록 조회 성공")
+	void get_active_trainees_success() throws Exception {
+		// given
+		Member trainerMember = MemberFixture.getTrainerMember1();
+		Member traineeMember1 = MemberFixture.getTraineeMember1();
+		Member traineeMember2 = MemberFixture.getTraineeMember2();
+
+		trainerMember = memberRepository.save(trainerMember);
+		traineeMember1 = memberRepository.save(traineeMember1);
+		traineeMember2 = memberRepository.save(traineeMember2);
+
+		CustomUserDetails trainerUserDetails = new CustomUserDetails(trainerMember.getId(),
+			trainerMember.getId().toString(),
+			authoritiesMapper.mapAuthorities(List.of(new SimpleGrantedAuthority("ROLE_USER"))));
+
+		Authentication authentication = new UsernamePasswordAuthenticationToken(trainerUserDetails, null,
+			authoritiesMapper.mapAuthorities(trainerUserDetails.getAuthorities()));
+
+		SecurityContextHolder.getContext().setAuthentication(authentication);
+
+		Trainer trainer = TrainerFixture.getTrainer2(trainerMember);
+		Trainee trainee1 = TraineeFixture.getTrainee1(traineeMember1);
+		Trainee trainee2 = TraineeFixture.getTrainee2(traineeMember2);
+
+		trainer = trainerRepository.save(trainer);
+		trainee1 = traineeRepository.save(trainee1);
+		trainee2 = traineeRepository.save(trainee2);
+
+		PtTrainerTrainee ptTrainerTrainee1 = PtTrainerTraineeFixture.getPtTrainerTrainee1(trainer, trainee1);
+		PtTrainerTrainee ptTrainerTrainee2 = PtTrainerTraineeFixture.getPtTrainerTrainee2(trainer, trainee2);
+
+		ptTrainerTraineeRepository.save(ptTrainerTrainee1);
+		ptTrainerTraineeRepository.save(ptTrainerTrainee2);
+
+		// when & then
+		mockMvc.perform(get("/trainers/active-trainees"))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.trainees").isArray())
+			.andExpect(jsonPath("$.trainees[0].id").value(trainee1.getId()))
+			.andExpect(jsonPath("$.trainees[0].name").value(traineeMember1.getName()))
+			.andExpect(jsonPath("$.trainees[1].id").value(trainee2.getId()))
+			.andExpect(jsonPath("$.trainees[1].name").value(traineeMember2.getName()))
+			.andDo(print());
+	}
+
+	@Test
+	@DisplayName("통합 테스트 - PT 수업 추가 성공")
+	void add_pt_lesson_success() throws Exception {
+		// given
+		Member trainerMember = MemberFixture.getTrainerMember1();
+		Member traineeMember = MemberFixture.getTraineeMember1();
+
+		trainerMember = memberRepository.save(trainerMember);
+		traineeMember = memberRepository.save(traineeMember);
+
+		CustomUserDetails trainerUserDetails = new CustomUserDetails(trainerMember.getId(),
+			trainerMember.getId().toString(),
+			authoritiesMapper.mapAuthorities(List.of(new SimpleGrantedAuthority("ROLE_USER"))));
+
+		Authentication authentication = new UsernamePasswordAuthenticationToken(trainerUserDetails, null,
+			authoritiesMapper.mapAuthorities(trainerUserDetails.getAuthorities()));
+
+		SecurityContextHolder.getContext().setAuthentication(authentication);
+
+		Trainer trainer = Trainer.builder()
+			.member(trainerMember)
+			.build();
+
+		Trainee trainee = Trainee.builder()
+			.member(traineeMember)
+			.height(180.5)
+			.weight(78.4)
+			.cautionNote("주의사항")
+			.build();
+
+		trainer = trainerRepository.save(trainer);
+		trainee = traineeRepository.save(trainee);
+
+		PtTrainerTrainee ptTrainerTrainee = PtTrainerTraineeFixture.getPtTrainerTrainee1(trainer, trainee);
+
+		ptTrainerTraineeRepository.save(ptTrainerTrainee);
+
+		PtGoal ptGoal1 = PtGoal.builder()
+			.traineeId(trainee.getId())
+			.content("다이어트")
+			.build();
+
+		PtGoal ptGoal2 = PtGoal.builder()
+			.traineeId(trainee.getId())
+			.content("체중 감량")
+			.build();
+
+		ptGoalRepository.saveAll(List.of(ptGoal1, ptGoal2));
+
+		LocalDateTime start = LocalDateTime.of(2025, 1, 1, 10, 0);
+		LocalDateTime end = LocalDateTime.of(2025, 1, 1, 11, 0);
+		String memo = "THIS IS MEMO";
+
+		CreatePtLessonRequest request = new CreatePtLessonRequest(start, end, memo, trainee.getId());
+
+		// when & then
+		mockMvc.perform(post("/trainers/lessons")
+				.contentType("application/json")
+				.content(objectMapper.writeValueAsString(request)))
+			.andExpect(status().isCreated());
+
+		List<PtLesson> ptLessons = ptLessonRepository.findAll();
+		assertThat(ptLessons).hasSize(1);
+		assertThat(ptLessons.getFirst().getLessonStart()).isEqualTo(start);
+		assertThat(ptLessons.getFirst().getLessonEnd()).isEqualTo(end);
+		assertThat(ptLessons.getFirst().getMemo()).isEqualTo(memo);
+		assertThat(ptLessons.getFirst().getPtTrainerTrainee()).isEqualTo(ptTrainerTrainee);
+	}
+
+	@Test
+	@DisplayName("통합 테스트 - PT 수업 추가 실패: 중복된 시간이 겹치는 경우")
+	void add_pt_lesson_fail() throws Exception {
+		// given
+		Member trainerMember = MemberFixture.getTrainerMember1();
+		Member traineeMember = MemberFixture.getTraineeMember1();
+
+		trainerMember = memberRepository.save(trainerMember);
+		traineeMember = memberRepository.save(traineeMember);
+
+		CustomUserDetails trainerUserDetails = new CustomUserDetails(trainerMember.getId(),
+			trainerMember.getId().toString(),
+			authoritiesMapper.mapAuthorities(List.of(new SimpleGrantedAuthority("ROLE_USER"))));
+
+		Authentication authentication = new UsernamePasswordAuthenticationToken(trainerUserDetails, null,
+			authoritiesMapper.mapAuthorities(trainerUserDetails.getAuthorities()));
+
+		SecurityContextHolder.getContext().setAuthentication(authentication);
+
+		Trainer trainer = Trainer.builder()
+			.member(trainerMember)
+			.build();
+
+		Trainee trainee = Trainee.builder()
+			.member(traineeMember)
+			.height(180.5)
+			.weight(78.4)
+			.cautionNote("주의사항")
+			.build();
+
+		trainer = trainerRepository.save(trainer);
+		trainee = traineeRepository.save(trainee);
+
+		PtTrainerTrainee ptTrainerTrainee = PtTrainerTraineeFixture.getPtTrainerTrainee1(trainer, trainee);
+
+		ptTrainerTraineeRepository.save(ptTrainerTrainee);
+
+		PtGoal ptGoal1 = PtGoal.builder()
+			.traineeId(trainee.getId())
+			.content("다이어트")
+			.build();
+
+		PtGoal ptGoal2 = PtGoal.builder()
+			.traineeId(trainee.getId())
+			.content("체중 감량")
+			.build();
+
+		ptGoalRepository.saveAll(List.of(ptGoal1, ptGoal2));
+
+		LocalDateTime createdStart = LocalDateTime.of(2025, 1, 1, 10, 0);
+		LocalDateTime createdEnd = LocalDateTime.of(2025, 1, 1, 11, 0);
+
+		LocalDateTime start = LocalDateTime.of(2025, 1, 1, 10, 30);
+		LocalDateTime end = LocalDateTime.of(2025, 1, 1, 11, 30);
+
+		ptLessonRepository.save(PtLesson.builder()
+			.ptTrainerTrainee(ptTrainerTrainee)
+			.lessonStart(createdStart)
+			.lessonEnd(createdEnd)
+			.build());
+
+		CreatePtLessonRequest request = new CreatePtLessonRequest(start, end, null, trainee.getId());
+
+		mockMvc.perform(post("/trainers/lessons")
+				.contentType("application/json")
+				.content(objectMapper.writeValueAsString(request)))
+			.andExpect(status().is4xxClientError());
 	}
 }
