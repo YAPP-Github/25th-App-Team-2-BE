@@ -102,4 +102,12 @@ public class TrainerController {
 	public GetActiveTraineesResponse getActiveTrainees(@AuthMember Long memberId) {
 		return ptService.getActiveTrainees(memberId);
 	}
+
+	@Operation(summary = "PT 수업 완료 처리 API")
+	@ResponseStatus(OK)
+	@PutMapping("/lessons/{ptLessonId}/complete")
+	public void completePtLesson(@AuthMember Long memberId,
+		@Parameter(description = "PT 수업 ID", example = "123456789") @PathVariable("ptLessonId") Long ptLessonId) {
+		ptService.completePtLesson(memberId, ptLessonId);
+	}
 }
