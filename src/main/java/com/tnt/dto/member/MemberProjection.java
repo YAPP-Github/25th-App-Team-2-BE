@@ -27,7 +27,7 @@ public class MemberProjection {
 		MemberType memberType,
 		SocialType socialType,
 		Integer activeTraineeCount,
-		Integer previousTraineeCount,
+		Integer totalTraineeCount,
 		String invitationCode,
 		Long trainerId,
 		Double height,

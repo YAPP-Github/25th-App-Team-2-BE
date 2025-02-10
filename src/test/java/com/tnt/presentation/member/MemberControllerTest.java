@@ -1,11 +1,18 @@
 package com.tnt.presentation.member;
 
-import static com.tnt.common.constant.ProfileConstant.*;
-import static com.tnt.domain.member.MemberType.*;
-import static com.tnt.domain.member.SocialType.*;
-import static org.springframework.http.MediaType.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static com.tnt.common.constant.ProfileConstant.TRAINEE_DEFAULT_IMAGE;
+import static com.tnt.common.constant.ProfileConstant.TRAINER_DEFAULT_IMAGE;
+import static com.tnt.domain.member.MemberType.TRAINEE;
+import static com.tnt.domain.member.MemberType.TRAINER;
+import static com.tnt.domain.member.SocialType.KAKAO;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.http.MediaType.IMAGE_JPEG_VALUE;
+import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -259,7 +266,7 @@ class MemberControllerTest extends AbstractContainerBaseTest {
 			.andExpect(jsonPath("$.memberType").value(member1.getMemberType().name()))
 			.andExpect(jsonPath("$.socialType").value(member1.getSocialType().name()))
 			.andExpect(jsonPath("$.activeTraineeCount").value(2))
-			.andExpect(jsonPath("$.previousTraineeCount").value(1));
+			.andExpect(jsonPath("$.totalTraineeCount").value(3));
 	}
 
 	@Test

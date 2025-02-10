@@ -1,10 +1,10 @@
 package com.tnt.infrastructure.mysql.repository.member;
 
-import static com.tnt.domain.member.QMember.*;
-import static com.tnt.domain.pt.QPtTrainerTrainee.*;
-import static com.tnt.domain.trainee.QPtGoal.*;
-import static com.tnt.domain.trainee.QTrainee.*;
-import static com.tnt.domain.trainer.QTrainer.*;
+import static com.tnt.domain.member.QMember.member;
+import static com.tnt.domain.pt.QPtTrainerTrainee.ptTrainerTrainee;
+import static com.tnt.domain.trainee.QPtGoal.ptGoal;
+import static com.tnt.domain.trainee.QTrainee.trainee;
+import static com.tnt.domain.trainer.QTrainer.trainer;
 
 import java.util.Map;
 import java.util.Optional;
@@ -53,11 +53,8 @@ public class MemberSearchRepository {
 					Expressions.as(
 						JPAExpressions.select(ptTrainerTrainee.trainee.countDistinct().intValue())
 							.from(ptTrainerTrainee)
-							.where(
-								ptTrainerTrainee.trainer.eq(trainer),
-								ptTrainerTrainee.deletedAt.isNotNull()
-							),
-						"previousTraineeCount"
+							.where(ptTrainerTrainee.trainer.eq(trainer)),
+						"totalTraineeCount"
 					),
 					trainer.invitationCode, trainer.id, trainee.height, trainee.weight, trainee.cautionNote,
 					GroupBy.list(ptGoal.content)

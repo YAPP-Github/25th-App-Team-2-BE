@@ -1,7 +1,9 @@
 package com.tnt.application.member;
 
-import static com.tnt.common.error.model.ErrorMessage.*;
-import static com.tnt.dto.member.MemberProjection.*;
+import static com.tnt.common.error.model.ErrorMessage.MEMBER_CONFLICT;
+import static com.tnt.common.error.model.ErrorMessage.MEMBER_NOT_FOUND;
+import static com.tnt.dto.member.MemberProjection.MemberInfoDto;
+import static com.tnt.dto.member.MemberProjection.MemberTypeDto;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,7 +44,7 @@ public class MemberService {
 
 		return new GetMemberInfoResponse(memberInfo.name(), memberInfo.email(), memberInfo.profileImageUrl(),
 			memberInfo.birthday(), memberInfo.memberType(), memberInfo.socialType(), memberInfo.activeTraineeCount(),
-			memberInfo.previousTraineeCount(), memberInfo.invitationCode(), memberInfo.trainerId(), memberInfo.height(),
+			memberInfo.totalTraineeCount(), memberInfo.invitationCode(), memberInfo.trainerId(), memberInfo.height(),
 			memberInfo.weight(), memberInfo.cautionNote(), memberInfo.goalContents());
 	}
 
