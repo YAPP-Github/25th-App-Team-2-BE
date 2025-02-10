@@ -25,7 +25,7 @@ services:
       TZ: Asia/Seoul
       MYSQL_DATABASE: ${DEV_MYSQL_DATABASE}
       MYSQL_ROOT_PASSWORD: ${DEV_MYSQL_PASSWORD}
-      MYSQL_USERNAME: ${DEV_MYSQL_USERNAME}
+      MYSQL_USER: ${DEV_MYSQL_USER}
       MYSQL_PASSWORD: ${DEV_MYSQL_PASSWORD}
     command:
       - --skip-character-set-client-handshake
