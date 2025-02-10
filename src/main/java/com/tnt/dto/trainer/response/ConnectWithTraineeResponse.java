@@ -5,13 +5,13 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(description = "트레이니와 연결 응답 - 트레이너의 화면")
 public record ConnectWithTraineeResponse(
 	@Schema(description = "트레이너 정보", nullable = false)
-	TrainerInfo trainer,
+	ConnectTrainerInfo trainer,
 
 	@Schema(description = "트레이니 정보", nullable = false)
-	TraineeInfo trainee
+	ConnectTraineeInfo trainee
 ) {
 
-	public record TrainerInfo(
+	public record ConnectTrainerInfo(
 		@Schema(description = "트레이너 이름", example = "김철수", nullable = false)
 		String trainerName,
 
@@ -21,7 +21,7 @@ public record ConnectWithTraineeResponse(
 
 	}
 
-	public record TraineeInfo(
+	public record ConnectTraineeInfo(
 		@Schema(description = "트레이니 이름", example = "홍길동", nullable = false)
 		String traineeName,
 

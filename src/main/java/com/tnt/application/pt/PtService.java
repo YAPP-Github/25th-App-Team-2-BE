@@ -30,8 +30,8 @@ import com.tnt.dto.trainer.ConnectWithTrainerDto;
 import com.tnt.dto.trainer.request.ConnectWithTrainerRequest;
 import com.tnt.dto.trainer.request.CreatePtLessonRequest;
 import com.tnt.dto.trainer.response.ConnectWithTraineeResponse;
-import com.tnt.dto.trainer.response.ConnectWithTraineeResponse.TraineeInfo;
-import com.tnt.dto.trainer.response.ConnectWithTraineeResponse.TrainerInfo;
+import com.tnt.dto.trainer.response.ConnectWithTraineeResponse.ConnectTraineeInfo;
+import com.tnt.dto.trainer.response.ConnectWithTraineeResponse.ConnectTrainerInfo;
 import com.tnt.dto.trainer.response.GetActiveTraineesResponse;
 import com.tnt.dto.trainer.response.GetActiveTraineesResponse.TraineeDto;
 import com.tnt.dto.trainer.response.GetCalendarPtLessonCountResponse;
@@ -96,8 +96,8 @@ public class PtService {
 		String ptGoal = ptGoals.stream().map(PtGoal::getContent).collect(Collectors.joining(", "));
 
 		return new ConnectWithTraineeResponse(
-			new TrainerInfo(trainerMember.getName(), trainerMember.getProfileImageUrl()),
-			new TraineeInfo(traineeMember.getName(), traineeMember.getProfileImageUrl(),
+			new ConnectTrainerInfo(trainerMember.getName(), trainerMember.getProfileImageUrl()),
+			new ConnectTraineeInfo(traineeMember.getName(), traineeMember.getProfileImageUrl(),
 				traineeMember.getAge(), trainee.getHeight(), trainee.getWeight(), ptGoal, trainee.getCautionNote())
 		);
 	}

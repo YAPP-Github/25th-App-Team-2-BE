@@ -48,7 +48,7 @@ class AuthenticationControllerTest {
 		// given
 		Long memberId = 1L;
 
-		given(memberService.getMemberType(memberId)).willReturn(new CheckSessionResponse(TRAINER));
+		given(memberService.getMemberType(memberId)).willReturn(new CheckSessionResponse(TRAINER, true));
 
 		// when
 		CheckSessionResponse checkSessionResponse = authenticationController.checkSession(memberId);

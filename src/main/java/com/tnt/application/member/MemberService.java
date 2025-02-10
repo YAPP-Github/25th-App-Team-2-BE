@@ -91,11 +91,22 @@ public class MemberService {
 		return memberInfo;
 	}
 
+	@Transactional(readOnly = true)
 	public CheckSessionResponse getMemberType(Long memberId) {
 		MemberTypeDto memberTypeDto = memberSearchRepository.findMemberType(memberId)
 			.orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
 
-		return new CheckSessionResponse(memberTypeDto.memberType());
+		boolean isConnected = false;
+
+		if (memberTypeDto.memberType() == TRAINER) {
+			Trainer trainer = trainerService.getTrainerWithMemberId(memberId);
+			isConnected = ptService.isPtTrainerTraineeExistWithTrainerId(trainer.getId());
+		} else if (memberTypeDto.memberType() == TRAINEE) {
+			Trainee trainee = traineeService.getTraineeWithMemberId(memberId);
+			isConnected = ptService.isPtTrainerTraineeExistWithTraineeId(trainee.getId());
+		}
+
+		return new CheckSessionResponse(memberTypeDto.memberType(), isConnected);
 	}
 
 	public Member getMemberWithMemberId(Long memberId) {

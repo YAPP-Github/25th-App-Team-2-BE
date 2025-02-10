@@ -18,12 +18,16 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.tnt.application.pt.PtService;
+import com.tnt.application.trainer.TrainerService;
 import com.tnt.common.error.exception.ConflictException;
 import com.tnt.common.error.exception.NotFoundException;
 import com.tnt.domain.member.Member;
 import com.tnt.domain.member.SocialType;
+import com.tnt.domain.trainer.Trainer;
 import com.tnt.dto.member.MemberProjection;
 import com.tnt.fixture.MemberFixture;
+import com.tnt.fixture.TrainerFixture;
 import com.tnt.gateway.dto.response.CheckSessionResponse;
 import com.tnt.infrastructure.mysql.repository.member.MemberRepository;
 import com.tnt.infrastructure.mysql.repository.member.MemberSearchRepository;
@@ -39,6 +43,12 @@ class MemberServiceTest {
 
 	@Mock
 	private MemberSearchRepository memberSearchRepository;
+
+	@Mock
+	private PtService ptService;
+
+	@Mock
+	private TrainerService trainerService;
 
 	@Test
 	@DisplayName("memberId로 회원 조회 성공")
@@ -142,8 +152,12 @@ class MemberServiceTest {
 		Member member = MemberFixture.getTrainerMember1WithId();
 		Long memberId = member.getId();
 
+		Trainer trainer = TrainerFixture.getTrainer2(member);
+
 		given(memberSearchRepository.findMemberType(memberId)).willReturn(
 			Optional.of(new MemberProjection.MemberTypeDto(member.getMemberType())));
+		given(trainerService.getTrainerWithMemberId(memberId)).willReturn(trainer);
+		given(ptService.isPtTrainerTraineeExistWithTrainerId(trainer.getId())).willReturn(true);
 
 		// when
 		CheckSessionResponse checkSessionResponse = memberService.getMemberType(memberId);
