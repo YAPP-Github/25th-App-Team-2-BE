@@ -1,10 +1,6 @@
 package com.tnt.application.pt;
 
-import static com.tnt.common.error.model.ErrorMessage.PT_LESSON_DUPLICATE_TIME;
-import static com.tnt.common.error.model.ErrorMessage.PT_LESSON_NOT_FOUND;
-import static com.tnt.common.error.model.ErrorMessage.PT_TRAINEE_ALREADY_EXIST;
-import static com.tnt.common.error.model.ErrorMessage.PT_TRAINER_TRAINEE_ALREADY_EXIST;
-import static com.tnt.common.error.model.ErrorMessage.PT_TRAINER_TRAINEE_NOT_FOUND;
+import static com.tnt.common.error.model.ErrorMessage.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
