@@ -76,7 +76,8 @@ public enum ErrorMessage {
 	PT_TRAINER_TRAINEE_NULL("트레이너 - 트레이니 연결 정보가 null 입니다."),
 
 	PT_LESSON_INVALID_MEMO("수업 메모의 길이는 공백 포함 30자 이하이어야 합니다."),
-	PT_LESSON_DUPLICATE_TIME("이미 예약된 시간대입니다.");
+	PT_LESSON_DUPLICATE_TIME("이미 예약된 시간대입니다."),
+	PT_LESSON_NOT_FOUND("존재하지 않는 수업입니다.");
 
 	private final String message;
 }

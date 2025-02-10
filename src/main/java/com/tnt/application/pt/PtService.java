@@ -1,6 +1,10 @@
 package com.tnt.application.pt;
 
-import static com.tnt.common.error.model.ErrorMessage.*;
+import static com.tnt.common.error.model.ErrorMessage.PT_LESSON_DUPLICATE_TIME;
+import static com.tnt.common.error.model.ErrorMessage.PT_LESSON_NOT_FOUND;
+import static com.tnt.common.error.model.ErrorMessage.PT_TRAINEE_ALREADY_EXIST;
+import static com.tnt.common.error.model.ErrorMessage.PT_TRAINER_TRAINEE_ALREADY_EXIST;
+import static com.tnt.common.error.model.ErrorMessage.PT_TRAINER_TRAINEE_NOT_FOUND;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -26,6 +30,8 @@ import com.tnt.dto.trainer.ConnectWithTrainerDto;
 import com.tnt.dto.trainer.request.ConnectWithTrainerRequest;
 import com.tnt.dto.trainer.request.CreatePtLessonRequest;
 import com.tnt.dto.trainer.response.ConnectWithTraineeResponse;
+import com.tnt.dto.trainer.response.ConnectWithTraineeResponse.ConnectTraineeInfo;
+import com.tnt.dto.trainer.response.ConnectWithTraineeResponse.ConnectTrainerInfo;
 import com.tnt.dto.trainer.response.GetActiveTraineesResponse;
 import com.tnt.dto.trainer.response.GetActiveTraineesResponse.TraineeInfo;
 import com.tnt.dto.trainer.response.GetCalendarPtLessonCountResponse;
@@ -89,9 +95,11 @@ public class PtService {
 		List<PtGoal> ptGoals = ptGoalService.getAllPtGoalsWithTraineeId(traineeId);
 		String ptGoal = ptGoals.stream().map(PtGoal::getContent).collect(Collectors.joining(", "));
 
-		return new ConnectWithTraineeResponse(trainerMember.getName(), traineeMember.getName(),
-			trainerMember.getProfileImageUrl(), traineeMember.getProfileImageUrl(), traineeMember.getAge(),
-			trainee.getHeight(), trainee.getWeight(), ptGoal, trainee.getCautionNote());
+		return new ConnectWithTraineeResponse(
+			new ConnectTrainerInfo(trainerMember.getName(), trainerMember.getProfileImageUrl()),
+			new ConnectTraineeInfo(traineeMember.getName(), traineeMember.getProfileImageUrl(),
+				traineeMember.getAge(), trainee.getHeight(), trainee.getWeight(), ptGoal, trainee.getCautionNote())
+		);
 	}
 
 	@Transactional(readOnly = true)
@@ -175,12 +183,28 @@ public class PtService {
 		ptLessonRepository.save(ptLesson);
 	}
 
+	@Transactional
+	public void completePtLesson(Long memberId, Long ptLessonId) {
+		trainerService.validateTrainerRegistration(memberId);
+
+		PtLesson ptLesson = getPtLessonWithId(ptLessonId);
+		ptLesson.completeLesson();
+	}
+
 	public boolean isPtTrainerTraineeExistWithTrainerId(Long trainerId) {
 		return ptTrainerTraineeRepository.existsByTrainerIdAndDeletedAtIsNull(trainerId);
 	}
 
 	public boolean isPtTrainerTraineeExistWithTraineeId(Long traineeId) {
 		return ptTrainerTraineeRepository.existsByTraineeIdAndDeletedAtIsNull(traineeId);
+	}
+
+	public List<PtTrainerTrainee> getAllPtTrainerTraineeWithTrainerId(Long trainerId) {
+		return ptTrainerTraineeRepository.findAllByTrainerIdAndDeletedAtIsNull(trainerId);
+	}
+
+	public List<PtTrainerTrainee> getAllPtTrainerTraineeWithTrainerIdWithDeleted(Long trainerId) {
+		return ptTrainerTraineeRepository.findAllByTrainerId(trainerId);
 	}
 
 	public PtTrainerTrainee getPtTrainerTraineeWithTrainerId(Long trainerId) {
@@ -195,6 +219,11 @@ public class PtService {
 
 	public List<PtLesson> getPtLessonWithPtTrainerTrainee(PtTrainerTrainee ptTrainerTrainee) {
 		return ptLessonRepository.findAllByPtTrainerTraineeAndDeletedAtIsNull(ptTrainerTrainee);
+	}
+
+	public PtLesson getPtLessonWithId(Long ptLessonId) {
+		return ptLessonRepository.findByIdAndDeletedAtIsNull(ptLessonId)
+			.orElseThrow(() -> new NotFoundException(PT_LESSON_NOT_FOUND));
 	}
 
 	private void validateNotAlreadyConnected(Long trainerId, Long traineeId) {
