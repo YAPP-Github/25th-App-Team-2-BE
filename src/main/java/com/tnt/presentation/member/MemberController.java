@@ -21,7 +21,6 @@ import com.tnt.dto.member.request.SignUpRequest;
 import com.tnt.dto.member.response.GetMemberInfoResponse;
 import com.tnt.dto.member.response.SignUpResponse;
 import com.tnt.gateway.config.AuthMember;
-import com.tnt.gateway.service.OAuthService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -37,7 +36,6 @@ public class MemberController {
 	private final S3Service s3Service;
 	private final SignUpService signUpService;
 	private final WithdrawService withdrawService;
-	private final OAuthService oAuthService;
 	private final MemberService memberService;
 
 	@Operation(summary = "회원가입 API")

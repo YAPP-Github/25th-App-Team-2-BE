@@ -311,7 +311,9 @@ class TrainerControllerTest {
 		mockMvc.perform(get("/trainers/first-connected-trainee")
 				.param("trainerId", trainer.getId().toString())
 				.param("traineeId", trainee.getId().toString()))
-			.andExpect(status().isOk());
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.trainer.trainerName").value(trainerMember.getName()))
+			.andDo(print());
 	}
 
 	@Test
@@ -608,5 +610,71 @@ class TrainerControllerTest {
 				.contentType("application/json")
 				.content(objectMapper.writeValueAsString(request)))
 			.andExpect(status().is4xxClientError());
+	}
+
+	@Test
+	@DisplayName("통합 테스트 - PT 수업 완료 성공")
+	void complete_pt_lesson_success() throws Exception {
+		// given
+		Member trainerMember = MemberFixture.getTrainerMember1();
+		Member traineeMember = MemberFixture.getTraineeMember1();
+
+		trainerMember = memberRepository.save(trainerMember);
+		traineeMember = memberRepository.save(traineeMember);
+
+		CustomUserDetails trainerUserDetails = new CustomUserDetails(trainerMember.getId(),
+			trainerMember.getId().toString(),
+			authoritiesMapper.mapAuthorities(List.of(new SimpleGrantedAuthority("ROLE_USER"))));
+
+		Authentication authentication = new UsernamePasswordAuthenticationToken(trainerUserDetails, null,
+			authoritiesMapper.mapAuthorities(trainerUserDetails.getAuthorities()));
+
+		SecurityContextHolder.getContext().setAuthentication(authentication);
+
+		Trainer trainer = Trainer.builder()
+			.member(trainerMember)
+			.build();
+
+		Trainee trainee = Trainee.builder()
+			.member(traineeMember)
+			.height(180.5)
+			.weight(78.4)
+			.cautionNote("주의사항")
+			.build();
+
+		trainer = trainerRepository.save(trainer);
+		trainee = traineeRepository.save(trainee);
+
+		PtTrainerTrainee ptTrainerTrainee = PtTrainerTraineeFixture.getPtTrainerTrainee1(trainer, trainee);
+
+		ptTrainerTraineeRepository.save(ptTrainerTrainee);
+
+		PtGoal ptGoal1 = PtGoal.builder()
+			.traineeId(trainee.getId())
+			.content("다이어트")
+			.build();
+
+		PtGoal ptGoal2 = PtGoal.builder()
+			.traineeId(trainee.getId())
+			.content("체중 감량")
+			.build();
+
+		ptGoalRepository.saveAll(List.of(ptGoal1, ptGoal2));
+
+		PtLesson ptLesson = PtLesson.builder()
+			.ptTrainerTrainee(ptTrainerTrainee)
+			.lessonStart(LocalDateTime.of(2025, 1, 1, 10, 0))
+			.lessonEnd(LocalDateTime.of(2025, 1, 1, 11, 0))
+			.memo("THIS IS MEMO")
+			.build();
+
+		ptLesson = ptLessonRepository.save(ptLesson);
+
+		// when & then
+		assertThat(ptLesson.getIsCompleted()).isFalse();
+		mockMvc.perform(put("/trainers/lessons/{ptLessonId}/complete", ptLesson.getId()))
+			.andExpect(status().isOk());
+		//noinspection OptionalGetWithoutIsPresent
+		assertThat(ptLessonRepository.findById(ptLesson.getId()).get().getIsCompleted()).isTrue();
 	}
 }

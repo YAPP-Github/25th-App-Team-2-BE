@@ -148,6 +148,7 @@ jobs:
             docker-compose -f $COMPOSE down --rmi all
             docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO }}
             docker-compose -f $COMPOSE up -d
+            docker volume prune -f
             echo "##### EC2 배포 완료 #####"
 
       - name: Github Actions IP 보안그룹 삭제

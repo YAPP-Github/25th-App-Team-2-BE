@@ -112,7 +112,7 @@ class WithdrawServiceTest {
 		given(memberService.getMemberWithMemberId(trainerMember.getId())).willReturn(trainerMember);
 		given(trainerService.getTrainerWithMemberId(trainerMember.getId())).willReturn(trainer);
 		given(ptService.isPtTrainerTraineeExistWithTrainerId(trainer.getId())).willReturn(true);
-		given(ptService.getPtTrainerTraineeWithTrainerId(trainer.getId())).willReturn(ptTrainerTrainee);
+		given(ptService.getAllPtTrainerTraineeWithTrainerId(trainer.getId())).willReturn(List.of(ptTrainerTrainee));
 		given(ptService.getPtLessonWithPtTrainerTrainee(ptTrainerTrainee)).willReturn(ptLessons);
 
 		// when
@@ -163,7 +163,6 @@ class WithdrawServiceTest {
 		given(memberService.getMemberWithMemberId(trainerMember.getId())).willReturn(trainerMember);
 		given(trainerService.getTrainerWithMemberId(trainerMember.getId())).willReturn(trainer);
 		given(ptService.isPtTrainerTraineeExistWithTrainerId(trainer.getId())).willReturn(true);
-		given(ptService.getPtTrainerTraineeWithTrainerId(trainer.getId())).willThrow(NotFoundException.class);
 
 		// when
 		withdrawService.withdraw(trainerMember.getId());
