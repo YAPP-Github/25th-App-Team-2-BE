@@ -31,6 +31,7 @@ public class PtTrainerTraineeSearchRepository {
 				ptTrainerTrainee.trainer.id.eq(trainerId),
 				ptTrainerTrainee.deletedAt.isNull()
 			)
+			.limit(10)
 			.fetch();
 	}
 }

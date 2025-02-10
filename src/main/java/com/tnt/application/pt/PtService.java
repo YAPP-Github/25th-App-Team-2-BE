@@ -1,9 +1,6 @@
 package com.tnt.application.pt;
 
-import static com.tnt.common.error.model.ErrorMessage.PT_LESSON_DUPLICATE_TIME;
-import static com.tnt.common.error.model.ErrorMessage.PT_TRAINEE_ALREADY_EXIST;
-import static com.tnt.common.error.model.ErrorMessage.PT_TRAINER_TRAINEE_ALREADY_EXIST;
-import static com.tnt.common.error.model.ErrorMessage.PT_TRAINER_TRAINEE_NOT_FOUND;
+import static com.tnt.common.error.model.ErrorMessage.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -30,7 +27,7 @@ import com.tnt.dto.trainer.request.ConnectWithTrainerRequest;
 import com.tnt.dto.trainer.request.CreatePtLessonRequest;
 import com.tnt.dto.trainer.response.ConnectWithTraineeResponse;
 import com.tnt.dto.trainer.response.GetActiveTraineesResponse;
-import com.tnt.dto.trainer.response.GetActiveTraineesResponse.TraineeDto;
+import com.tnt.dto.trainer.response.GetActiveTraineesResponse.TraineeInfo;
 import com.tnt.dto.trainer.response.GetCalendarPtLessonCountResponse;
 import com.tnt.dto.trainer.response.GetCalendarPtLessonCountResponse.CalendarPtLessonCount;
 import com.tnt.dto.trainer.response.GetPtLessonsOnDateResponse;
@@ -140,11 +137,23 @@ public class PtService {
 		Trainer trainer = trainerService.getTrainerWithMemberId(memberId);
 
 		List<Trainee> trainees = ptTrainerTraineeSearchRepository.findAllTrainees(trainer.getId());
-		List<TraineeDto> traineeDto = trainees.stream()
-			.map(trainee -> new TraineeDto(trainee.getId(), trainee.getMember().getName()))
-			.toList();
 
-		return new GetActiveTraineesResponse(traineeDto);
+		List<TraineeInfo> traineeInfo = trainees.stream().map(trainee -> {
+			PtTrainerTrainee ptTrainerTrainee = ptTrainerTraineeRepository.findByTraineeIdAndDeletedAtIsNull(
+					trainee.getId())
+				.orElseThrow(() -> new NotFoundException(TRAINEE_NOT_FOUND));
+
+			List<String> ptGoals = ptGoalService.getAllPtGoalsWithTraineeId(trainee.getId())
+				.stream()
+				.map(PtGoal::getContent)
+				.toList();
+
+			return new TraineeInfo(trainee.getId(), trainee.getMember().getName(),
+				ptTrainerTrainee.getFinishedPtCount(), ptTrainerTrainee.getTotalPtCount(), trainee.getCautionNote(),
+				ptGoals);
+		}).toList();
+
+		return new GetActiveTraineesResponse(trainees.size(), traineeInfo);
 	}
 
 	@Transactional
