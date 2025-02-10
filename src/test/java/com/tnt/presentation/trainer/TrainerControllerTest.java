@@ -38,6 +38,7 @@ import com.tnt.domain.trainee.Trainee;
 import com.tnt.domain.trainer.Trainer;
 import com.tnt.dto.trainer.request.CreatePtLessonRequest;
 import com.tnt.fixture.MemberFixture;
+import com.tnt.fixture.PtGoalsFixture;
 import com.tnt.fixture.PtTrainerTraineeFixture;
 import com.tnt.fixture.TraineeFixture;
 import com.tnt.fixture.TrainerFixture;
@@ -457,6 +458,12 @@ class TrainerControllerTest {
 		trainee1 = traineeRepository.save(trainee1);
 		trainee2 = traineeRepository.save(trainee2);
 
+		List<PtGoal> ptGoals1 = PtGoalsFixture.getPtGoals(trainee1.getId());
+		List<PtGoal> ptGoals2 = PtGoalsFixture.getPtGoals(trainee2.getId());
+
+		ptGoalRepository.saveAll(ptGoals1);
+		ptGoalRepository.saveAll(ptGoals2);
+
 		PtTrainerTrainee ptTrainerTrainee1 = PtTrainerTraineeFixture.getPtTrainerTrainee1(trainer, trainee1);
 		PtTrainerTrainee ptTrainerTrainee2 = PtTrainerTraineeFixture.getPtTrainerTrainee2(trainer, trainee2);
 
@@ -469,8 +476,14 @@ class TrainerControllerTest {
 			.andExpect(jsonPath("$.trainees").isArray())
 			.andExpect(jsonPath("$.trainees[0].id").value(trainee1.getId()))
 			.andExpect(jsonPath("$.trainees[0].name").value(traineeMember1.getName()))
+			.andExpect(jsonPath("$.trainees[0].finishedPtCount").value(ptTrainerTrainee1.getFinishedPtCount()))
+			.andExpect(jsonPath("$.trainees[0].totalPtCount").value(ptTrainerTrainee1.getTotalPtCount()))
+			.andExpect(jsonPath("$.trainees[0].cautionNote").value(trainee1.getCautionNote()))
 			.andExpect(jsonPath("$.trainees[1].id").value(trainee2.getId()))
 			.andExpect(jsonPath("$.trainees[1].name").value(traineeMember2.getName()))
+			.andExpect(jsonPath("$.trainees[1].finishedPtCount").value(ptTrainerTrainee2.getFinishedPtCount()))
+			.andExpect(jsonPath("$.trainees[1].totalPtCount").value(ptTrainerTrainee2.getTotalPtCount()))
+			.andExpect(jsonPath("$.trainees[1].cautionNote").value(trainee2.getCautionNote()))
 			.andDo(print());
 	}
 

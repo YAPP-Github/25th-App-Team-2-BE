@@ -11,6 +11,7 @@ import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -70,7 +71,7 @@ class MemberControllerTest extends AbstractContainerBaseTest {
 	private final GrantedAuthoritiesMapper authoritiesMapper = new NullAuthoritiesMapper();
 
 	private final MockMultipartFile profileImage = new MockMultipartFile("profileImage", "test.jpg",
-		IMAGE_JPEG_VALUE, "test image content" .getBytes());
+		IMAGE_JPEG_VALUE, "test image content".getBytes());
 
 	@Autowired
 	private MockMvc mockMvc;
@@ -267,7 +268,7 @@ class MemberControllerTest extends AbstractContainerBaseTest {
 			.andExpect(jsonPath("$.socialType").value(trainerMember.getSocialType().name()))
 			.andExpect(jsonPath("$.trainer.activeTraineeCount").value(2))
 			.andExpect(jsonPath("$.trainer.totalTraineeCount").value(3))
-			.andExpect(jsonPath("$.trainer.invitationCode").value(trainer.getInvitationCode()));
+			.andDo(print());
 	}
 
 	@Test

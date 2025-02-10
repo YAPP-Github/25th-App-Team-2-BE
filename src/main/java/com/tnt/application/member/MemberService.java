@@ -71,8 +71,7 @@ public class MemberService {
 
 			int totalTraineeCount = ptTrainerTrainees.size();
 
-			TrainerInfo trainerInfo = new TrainerInfo(activeTraineeCount,
-				totalTraineeCount, trainer.getInvitationCode());
+			TrainerInfo trainerInfo = new TrainerInfo(activeTraineeCount, totalTraineeCount);
 
 			memberInfo = new GetMemberInfoResponse(member.getName(), member.getEmail(), member.getProfileImageUrl(),
 				member.getMemberType(), member.getSocialType(), trainerInfo, null);
