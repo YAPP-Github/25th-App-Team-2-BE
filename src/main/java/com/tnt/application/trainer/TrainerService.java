@@ -56,4 +56,10 @@ public class TrainerService {
 		return trainerSearchRepository.findByInvitationCode(invitationCode)
 			.orElseThrow(() -> new NotFoundException(TRAINER_NOT_FOUND));
 	}
+
+	public void validateTrainerRegistration(Long memberId) {
+		if (!trainerRepository.existsByMemberIdAndDeletedAtIsNull(memberId)) {
+			throw new NotFoundException(TRAINER_NOT_FOUND);
+		}
+	}
 }

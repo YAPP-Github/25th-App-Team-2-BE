@@ -200,7 +200,7 @@ class MemberControllerTest extends AbstractContainerBaseTest {
 
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
-		Trainee trainee = TraineeFixture.getTrainee2(traineeMember);
+		Trainee trainee = TraineeFixture.getTrainee1(traineeMember);
 
 		traineeRepository.save(trainee);
 

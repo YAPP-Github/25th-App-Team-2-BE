@@ -7,7 +7,9 @@ import java.time.LocalDate;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -15,7 +17,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.tnt.application.pt.PtService;
 import com.tnt.application.trainer.TrainerService;
+import com.tnt.dto.trainer.request.CreatePtLessonRequest;
 import com.tnt.dto.trainer.response.ConnectWithTraineeResponse;
+import com.tnt.dto.trainer.response.GetActiveTraineesResponse;
 import com.tnt.dto.trainer.response.GetCalendarPtLessonCountResponse;
 import com.tnt.dto.trainer.response.GetPtLessonsOnDateResponse;
 import com.tnt.dto.trainer.response.InvitationCodeResponse;
@@ -25,6 +29,7 @@ import com.tnt.gateway.config.AuthMember;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
@@ -82,5 +87,19 @@ public class TrainerController {
 		@Parameter(description = "년도", example = "2021") @RequestParam("year") @Min(1900) @Max(2100) Integer year,
 		@Parameter(description = "월", example = "3") @RequestParam("month") @Min(1) @Max(12) Integer month) {
 		return ptService.getCalendarPtLessonCount(memberId, year, month);
+	}
+
+	@Operation(summary = "PT 수업 추가 API")
+	@ResponseStatus(CREATED)
+	@PostMapping("/lessons")
+	public void addPtLesson(@AuthMember Long memberId, @RequestBody @Valid CreatePtLessonRequest request) {
+		ptService.addPtLesson(memberId, request);
+	}
+
+	@Operation(summary = "관리중인 회원 목록 요청 API")
+	@ResponseStatus(OK)
+	@GetMapping("/active-trainees")
+	public GetActiveTraineesResponse getActiveTrainees(@AuthMember Long memberId) {
+		return ptService.getActiveTrainees(memberId);
 	}
 }

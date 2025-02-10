@@ -15,6 +15,7 @@ import org.springframework.stereotype.Repository;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.tnt.domain.pt.PtLesson;
+import com.tnt.domain.pt.PtTrainerTrainee;
 
 import lombok.RequiredArgsConstructor;
 
@@ -55,5 +56,19 @@ public class PtLessonSearchRepository {
 			)
 			.orderBy(ptLesson.lessonStart.asc())
 			.fetch();
+	}
+
+	public boolean existsByStartAndEnd(PtTrainerTrainee pt, LocalDateTime start, LocalDateTime end) {
+		return jpaQueryFactory
+			.selectOne()
+			.from(ptLesson)
+			.join(ptLesson.ptTrainerTrainee, ptTrainerTrainee)
+			.where(
+				ptTrainerTrainee.eq(pt),
+				ptLesson.lessonStart.lt(end),
+				ptLesson.lessonEnd.gt(start),
+				ptLesson.deletedAt.isNull()
+			)
+			.fetchFirst() != null;
 	}
 }

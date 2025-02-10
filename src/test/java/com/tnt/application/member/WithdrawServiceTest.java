@@ -80,7 +80,7 @@ class WithdrawServiceTest {
 	void withdraw_trainee_success() {
 		// given
 		Member traineeMember = MemberFixture.getTraineeMember1WithId();
-		Trainee trainee = TraineeFixture.getTrainee1(1L, traineeMember);
+		Trainee trainee = TraineeFixture.getTrainee1WithId(1L, traineeMember);
 
 		List<PtGoal> ptGoals = List.of(PtGoal.builder().id(1L).traineeId(trainee.getId()).content("test").build());
 
@@ -103,7 +103,7 @@ class WithdrawServiceTest {
 		Member traineeMember = MemberFixture.getTraineeMember2WithId();
 
 		Trainer trainer = TrainerFixture.getTrainer1(1L, trainerMember);
-		Trainee trainee = TraineeFixture.getTrainee1(1L, traineeMember);
+		Trainee trainee = TraineeFixture.getTrainee1WithId(1L, traineeMember);
 
 		PtTrainerTrainee ptTrainerTrainee = PtTrainerTraineeFixture.getPtTrainerTrainee1(trainer, trainee);
 
@@ -130,7 +130,7 @@ class WithdrawServiceTest {
 		Member traineeMember = MemberFixture.getTraineeMember1WithId();
 
 		Trainer trainer = TrainerFixture.getTrainer1(1L, trainerMember);
-		Trainee trainee = TraineeFixture.getTrainee1(1L, traineeMember);
+		Trainee trainee = TraineeFixture.getTrainee1WithId(1L, traineeMember);
 
 		PtTrainerTrainee ptTrainerTrainee = PtTrainerTraineeFixture.getPtTrainerTrainee1(trainer, trainee);
 
@@ -178,7 +178,7 @@ class WithdrawServiceTest {
 		// given
 		Member traineeMember = MemberFixture.getTraineeMember1WithId();
 
-		Trainee trainee = TraineeFixture.getTrainee1(1L, traineeMember);
+		Trainee trainee = TraineeFixture.getTrainee1WithId(1L, traineeMember);
 
 		List<PtGoal> ptGoals = List.of(PtGoal.builder().id(1L).traineeId(trainee.getId()).content("test").build());
 

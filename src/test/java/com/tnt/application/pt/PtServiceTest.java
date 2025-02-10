@@ -72,7 +72,7 @@ class PtServiceTest {
 		Member traineeMember = MemberFixture.getTraineeMember1();
 
 		Trainer trainer = TrainerFixture.getTrainer1(trainerId, trainerMember);
-		Trainee trainee = TraineeFixture.getTrainee1(traineeId, traineeMember);
+		Trainee trainee = TraineeFixture.getTrainee1WithId(traineeId, traineeMember);
 
 		String invitationCode = "1A2V3C4D";
 		LocalDate startDate = LocalDate.of(2025, 1, 1);
@@ -108,7 +108,7 @@ class PtServiceTest {
 		Member traineeMember = MemberFixture.getTraineeMember1();
 
 		Trainer trainer = TrainerFixture.getTrainer1(trainerId, trainerMember);
-		Trainee trainee = TraineeFixture.getTrainee1(traineeId, traineeMember);
+		Trainee trainee = TraineeFixture.getTrainee1WithId(traineeId, traineeMember);
 
 		String invitationCode = "1A2V3C4D";
 		LocalDate startDate = LocalDate.of(2025, 1, 1);
@@ -140,7 +140,7 @@ class PtServiceTest {
 		Member traineeMember = MemberFixture.getTraineeMember1();
 
 		Trainer trainer = TrainerFixture.getTrainer1(trainerId, trainerMember);
-		Trainee trainee = TraineeFixture.getTrainee1(traineeId, traineeMember);
+		Trainee trainee = TraineeFixture.getTrainee1WithId(traineeId, traineeMember);
 
 		String invitationCode = "1A2V3C4D";
 		LocalDate startDate = LocalDate.of(2025, 1, 1);
@@ -174,7 +174,7 @@ class PtServiceTest {
 		Member traineeMember = MemberFixture.getTraineeMember1();
 
 		Trainer trainer = TrainerFixture.getTrainer1(trainerId, trainerMember);
-		Trainee trainee = TraineeFixture.getTrainee1(traineeId, traineeMember);
+		Trainee trainee = TraineeFixture.getTrainee1WithId(traineeId, traineeMember);
 
 		PtTrainerTrainee ptTrainerTrainee = PtTrainerTraineeFixture.getPtTrainerTrainee1(trainer, trainee);
 
@@ -207,7 +207,7 @@ class PtServiceTest {
 		Member traineeMember = MemberFixture.getTraineeMember1WithId();
 
 		Trainer trainer = TrainerFixture.getTrainer2(trainerMember);
-		Trainee trainee = TraineeFixture.getTrainee2(traineeMember);
+		Trainee trainee = TraineeFixture.getTrainee1(traineeMember);
 
 		PtTrainerTrainee ptTrainerTrainee = PtTrainerTraineeFixture.getPtTrainerTrainee1(trainer, trainee);
 
@@ -229,7 +229,7 @@ class PtServiceTest {
 		Member traineeMember = MemberFixture.getTraineeMember1WithId();
 
 		Trainer trainer = TrainerFixture.getTrainer2(trainerMember);
-		Trainee trainee = TraineeFixture.getTrainee2(traineeMember);
+		Trainee trainee = TraineeFixture.getTrainee1(traineeMember);
 
 		PtTrainerTrainee ptTrainerTrainee = PtTrainerTraineeFixture.getPtTrainerTrainee1(trainer, trainee);
 
@@ -251,7 +251,7 @@ class PtServiceTest {
 		Member traineeMember = MemberFixture.getTraineeMember1WithId();
 
 		Trainer trainer = TrainerFixture.getTrainer2(trainerMember);
-		Trainee trainee = TraineeFixture.getTrainee2(traineeMember);
+		Trainee trainee = TraineeFixture.getTrainee1(traineeMember);
 
 		PtTrainerTrainee ptTrainerTrainee = PtTrainerTraineeFixture.getPtTrainerTrainee1(trainer, trainee);
 
@@ -274,7 +274,7 @@ class PtServiceTest {
 		Member traineeMember = MemberFixture.getTraineeMember1WithId();
 
 		Trainer trainer = TrainerFixture.getTrainer2(trainerMember);
-		Trainee trainee = TraineeFixture.getTrainee2(traineeMember);
+		Trainee trainee = TraineeFixture.getTrainee1(traineeMember);
 
 		PtTrainerTrainee ptTrainerTrainee = PtTrainerTraineeFixture.getPtTrainerTrainee1(trainer, trainee);
 

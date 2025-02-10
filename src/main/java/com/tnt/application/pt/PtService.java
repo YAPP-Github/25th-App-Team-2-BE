@@ -1,10 +1,12 @@
 package com.tnt.application.pt;
 
+import static com.tnt.common.error.model.ErrorMessage.PT_LESSON_DUPLICATE_TIME;
 import static com.tnt.common.error.model.ErrorMessage.PT_TRAINEE_ALREADY_EXIST;
 import static com.tnt.common.error.model.ErrorMessage.PT_TRAINER_TRAINEE_ALREADY_EXIST;
 import static com.tnt.common.error.model.ErrorMessage.PT_TRAINER_TRAINEE_NOT_FOUND;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -25,7 +27,10 @@ import com.tnt.domain.trainee.Trainee;
 import com.tnt.domain.trainer.Trainer;
 import com.tnt.dto.trainer.ConnectWithTrainerDto;
 import com.tnt.dto.trainer.request.ConnectWithTrainerRequest;
+import com.tnt.dto.trainer.request.CreatePtLessonRequest;
 import com.tnt.dto.trainer.response.ConnectWithTraineeResponse;
+import com.tnt.dto.trainer.response.GetActiveTraineesResponse;
+import com.tnt.dto.trainer.response.GetActiveTraineesResponse.TraineeDto;
 import com.tnt.dto.trainer.response.GetCalendarPtLessonCountResponse;
 import com.tnt.dto.trainer.response.GetCalendarPtLessonCountResponse.CalendarPtLessonCount;
 import com.tnt.dto.trainer.response.GetPtLessonsOnDateResponse;
@@ -33,6 +38,7 @@ import com.tnt.dto.trainer.response.GetPtLessonsOnDateResponse.Lesson;
 import com.tnt.infrastructure.mysql.repository.pt.PtLessonRepository;
 import com.tnt.infrastructure.mysql.repository.pt.PtLessonSearchRepository;
 import com.tnt.infrastructure.mysql.repository.pt.PtTrainerTraineeRepository;
+import com.tnt.infrastructure.mysql.repository.pt.PtTrainerTraineeSearchRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -46,6 +52,7 @@ public class PtService {
 	private final PtTrainerTraineeRepository ptTrainerTraineeRepository;
 	private final PtLessonRepository ptLessonRepository;
 	private final PtLessonSearchRepository ptLessonSearchRepository;
+	private final PtTrainerTraineeSearchRepository ptTrainerTraineeSearchRepository;
 
 	@Transactional
 	public ConnectWithTrainerDto connectWithTrainer(Long memberId, ConnectWithTrainerRequest request) {
@@ -128,6 +135,37 @@ public class PtService {
 		return new GetCalendarPtLessonCountResponse(counts);
 	}
 
+	@Transactional(readOnly = true)
+	public GetActiveTraineesResponse getActiveTrainees(Long memberId) {
+		Trainer trainer = trainerService.getTrainerWithMemberId(memberId);
+
+		List<Trainee> trainees = ptTrainerTraineeSearchRepository.findAllTrainees(trainer.getId());
+		List<TraineeDto> traineeDto = trainees.stream()
+			.map(trainee -> new TraineeDto(trainee.getId(), trainee.getMember().getName()))
+			.toList();
+
+		return new GetActiveTraineesResponse(traineeDto);
+	}
+
+	@Transactional
+	public void addPtLesson(Long memberId, CreatePtLessonRequest request) {
+		trainerService.validateTrainerRegistration(memberId);
+
+		PtTrainerTrainee ptTrainerTrainee = getPtTrainerTraineeWithTraineeId(request.traineeId());
+
+		// 트레이너의 기존 pt 수업중에 중복되는 시간대가 있는지 확인
+		validateLessonTime(ptTrainerTrainee, request.start(), request.end());
+
+		PtLesson ptLesson = PtLesson.builder()
+			.ptTrainerTrainee(ptTrainerTrainee)
+			.lessonStart(request.start())
+			.lessonEnd(request.end())
+			.memo(request.memo())
+			.build();
+
+		ptLessonRepository.save(ptLesson);
+	}
+
 	public boolean isPtTrainerTraineeExistWithTrainerId(Long trainerId) {
 		return ptTrainerTraineeRepository.existsByTrainerIdAndDeletedAtIsNull(trainerId);
 	}
@@ -163,6 +201,12 @@ public class PtService {
 	private void validateIfNotConnected(Long trainerId, Long traineeId) {
 		if (!ptTrainerTraineeRepository.existsByTrainerIdAndTraineeIdAndDeletedAtIsNull(trainerId, traineeId)) {
 			throw new NotFoundException(PT_TRAINER_TRAINEE_NOT_FOUND);
+		}
+	}
+
+	private void validateLessonTime(PtTrainerTrainee ptTrainerTrainee, LocalDateTime start, LocalDateTime end) {
+		if (ptLessonSearchRepository.existsByStartAndEnd(ptTrainerTrainee, start, end)) {
+			throw new ConflictException(PT_LESSON_DUPLICATE_TIME);
 		}
 	}
 }

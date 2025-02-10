@@ -30,7 +30,7 @@ class PtLessonTest {
 		Member traineeMember = MemberFixture.getTraineeMember1();
 
 		Trainer trainer = TrainerFixture.getTrainer1(trainerId, trainerMember);
-		Trainee trainee = TraineeFixture.getTrainee1(traineeId, traineeMember);
+		Trainee trainee = TraineeFixture.getTrainee1WithId(traineeId, traineeMember);
 
 		PtTrainerTrainee ptTrainerTrainee = PtTrainerTraineeFixture.getPtTrainerTrainee1(trainer, trainee);
 
