@@ -25,11 +25,20 @@ public record GetMemberInfoResponse(
 	@Schema(description = "회원 타입", example = "TRAINER", nullable = false)
 	MemberType memberType,
 
-	@Schema(description = "소셜 타입", example = "TRAINER", nullable = false)
+	@Schema(description = "소셜 타입", example = "APPLE", nullable = false)
 	SocialType socialType,
+
+	@Schema(description = "관리 중인 회원", example = "23", nullable = true)
+	Integer activeTraineeCount,
+
+	@Schema(description = "함께했던 회원", example = "50", nullable = true)
+	Integer totalTraineeCount,
 
 	@Schema(description = "트레이너 초대 코드", example = "2H9DG4X3", nullable = true)
 	String invitationCode,
+
+	@Schema(description = "트레이너 ID", example = "124778142", nullable = false)
+	Long trainerId,
 
 	@Schema(description = "키 (cm)", example = "180.5", nullable = true)
 	Double height,

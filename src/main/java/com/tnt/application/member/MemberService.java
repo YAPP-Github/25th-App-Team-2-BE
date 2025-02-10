@@ -43,8 +43,9 @@ public class MemberService {
 			.orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
 
 		return new GetMemberInfoResponse(memberInfo.name(), memberInfo.email(), memberInfo.profileImageUrl(),
-			memberInfo.birthday(), memberInfo.memberType(), memberInfo.socialType(), memberInfo.invitationCode(),
-			memberInfo.height(), memberInfo.weight(), memberInfo.cautionNote(), memberInfo.goalContents());
+			memberInfo.birthday(), memberInfo.memberType(), memberInfo.socialType(), memberInfo.activeTraineeCount(),
+			memberInfo.totalTraineeCount(), memberInfo.invitationCode(), memberInfo.trainerId(), memberInfo.height(),
+			memberInfo.weight(), memberInfo.cautionNote(), memberInfo.goalContents());
 	}
 
 	public CheckSessionResponse getMemberType(Long memberId) {
