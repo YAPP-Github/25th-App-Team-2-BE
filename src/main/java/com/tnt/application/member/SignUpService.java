@@ -1,7 +1,7 @@
 package com.tnt.application.member;
 
-import static com.tnt.common.constant.ProfileConstant.TRAINEE_DEFAULT_IMAGE;
-import static com.tnt.common.constant.ProfileConstant.TRAINER_DEFAULT_IMAGE;
+import static com.tnt.common.constant.ImageConstant.TRAINEE_DEFAULT_IMAGE;
+import static com.tnt.common.constant.ImageConstant.TRAINER_DEFAULT_IMAGE;
 import static com.tnt.domain.member.MemberType.TRAINEE;
 import static com.tnt.domain.member.MemberType.TRAINER;
 import static io.hypersistence.tsid.TSID.Factory.getTsid;

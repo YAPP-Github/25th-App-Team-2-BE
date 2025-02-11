@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.tnt.application.trainee.DietService;
 import com.tnt.application.trainee.PtGoalService;
 import com.tnt.application.trainee.TraineeService;
 import com.tnt.application.trainer.TrainerService;
@@ -19,11 +20,13 @@ import com.tnt.common.error.exception.NotFoundException;
 import com.tnt.domain.member.Member;
 import com.tnt.domain.pt.PtLesson;
 import com.tnt.domain.pt.PtTrainerTrainee;
+import com.tnt.domain.trainee.Diet;
 import com.tnt.domain.trainee.PtGoal;
 import com.tnt.domain.trainee.Trainee;
 import com.tnt.domain.trainer.Trainer;
+import com.tnt.dto.trainee.request.ConnectWithTrainerRequest;
+import com.tnt.dto.trainee.request.CreateDietRequest;
 import com.tnt.dto.trainer.ConnectWithTrainerDto;
-import com.tnt.dto.trainer.request.ConnectWithTrainerRequest;
 import com.tnt.dto.trainer.request.CreatePtLessonRequest;
 import com.tnt.dto.trainer.response.ConnectWithTraineeResponse;
 import com.tnt.dto.trainer.response.ConnectWithTraineeResponse.ConnectTraineeInfo;
@@ -45,13 +48,15 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class PtService {
 
-	private final TraineeService traineeService;
 	private final TrainerService trainerService;
+	private final TraineeService traineeService;
 	private final PtGoalService ptGoalService;
+	private final DietService dietService;
+
 	private final PtTrainerTraineeRepository ptTrainerTraineeRepository;
+	private final PtTrainerTraineeSearchRepository ptTrainerTraineeSearchRepository;
 	private final PtLessonRepository ptLessonRepository;
 	private final PtLessonSearchRepository ptLessonSearchRepository;
-	private final PtTrainerTraineeSearchRepository ptTrainerTraineeSearchRepository;
 
 	@Transactional
 	public ConnectWithTrainerDto connectWithTrainer(Long memberId, ConnectWithTrainerRequest request) {
@@ -152,9 +157,10 @@ public class PtService {
 				.map(PtGoal::getContent)
 				.toList();
 
+			// Memo 추가 구현 필요
 			return new TraineeInfo(trainee.getId(), trainee.getMember().getName(),
-				ptTrainerTrainee.getFinishedPtCount(), ptTrainerTrainee.getTotalPtCount(), trainee.getCautionNote(),
-				ptGoals);
+				trainee.getMember().getProfileImageUrl(), ptTrainerTrainee.getFinishedPtCount(),
+				ptTrainerTrainee.getTotalPtCount(), "", ptGoals);
 		}).toList();
 
 		return new GetActiveTraineesResponse(trainees.size(), traineeInfo);
@@ -185,6 +191,21 @@ public class PtService {
 
 		PtLesson ptLesson = getPtLessonWithId(ptLessonId);
 		ptLesson.completeLesson();
+	}
+
+	@Transactional
+	public void createDiet(Long memberId, CreateDietRequest request, String dietImageUrl) {
+		Trainee trainee = traineeService.getTraineeWithMemberId(memberId);
+
+		Diet diet = Diet.builder()
+			.traineeId(trainee.getId())
+			.date(request.date())
+			.dietImageUrl(dietImageUrl)
+			.memo(request.memo())
+			.dietType(request.dietType())
+			.build();
+
+		dietService.save(diet);
 	}
 
 	public boolean isPtTrainerTraineeExistWithTrainerId(Long trainerId) {

@@ -1,9 +1,9 @@
 package com.tnt.application.s3;
 
-import static com.tnt.common.constant.ProfileConstant.TRAINEE_DEFAULT_IMAGE;
-import static com.tnt.common.constant.ProfileConstant.TRAINEE_S3_PROFILE_PATH;
-import static com.tnt.common.constant.ProfileConstant.TRAINER_DEFAULT_IMAGE;
-import static com.tnt.common.constant.ProfileConstant.TRAINER_S3_PROFILE_PATH;
+import static com.tnt.common.constant.ImageConstant.TRAINEE_DEFAULT_IMAGE;
+import static com.tnt.common.constant.ImageConstant.TRAINEE_S3_PROFILE_IMAGE_PATH;
+import static com.tnt.common.constant.ImageConstant.TRAINER_DEFAULT_IMAGE;
+import static com.tnt.common.constant.ImageConstant.TRAINER_S3_PROFILE_IMAGE_PATH;
 import static com.tnt.common.error.model.ErrorMessage.IMAGE_NOT_FOUND;
 import static com.tnt.common.error.model.ErrorMessage.IMAGE_NOT_SUPPORT;
 import static com.tnt.common.error.model.ErrorMessage.UNSUPPORTED_MEMBER_TYPE;
@@ -49,23 +49,27 @@ public class S3Service {
 		switch (memberType) {
 			case TRAINER -> {
 				defaultImage = TRAINER_DEFAULT_IMAGE;
-				folderPath = TRAINER_S3_PROFILE_PATH;
+				folderPath = TRAINER_S3_PROFILE_IMAGE_PATH;
 			}
 			case TRAINEE -> {
 				defaultImage = TRAINEE_DEFAULT_IMAGE;
-				folderPath = TRAINEE_S3_PROFILE_PATH;
+				folderPath = TRAINEE_S3_PROFILE_IMAGE_PATH;
 			}
 			default -> throw new IllegalArgumentException(UNSUPPORTED_MEMBER_TYPE.getMessage());
 		}
 
-		if (isNull(profileImage)) {
+		return uploadImage(defaultImage, folderPath, profileImage);
+	}
+
+	public String uploadImage(String defaultImage, String folderPath, @Nullable MultipartFile image) {
+		if (isNull(image)) {
 			return defaultImage;
 		}
 
-		String extension = validateImageFormat(profileImage);
+		String extension = validateImageFormat(image);
 
 		try {
-			byte[] processedImage = processImage(profileImage, extension);
+			byte[] processedImage = processImage(image, extension);
 
 			return s3Adapter.uploadFile(processedImage, folderPath, extension);
 		} catch (Exception e) {
@@ -126,6 +130,7 @@ public class S3Service {
 			.size(MAX_WIDTH, MAX_HEIGHT)
 			.keepAspectRatio(true)
 			.outputQuality(IMAGE_QUALITY)
+			.useExifOrientation(true)
 			.outputFormat(extension)
 			.toOutputStream(outputStream);
 
