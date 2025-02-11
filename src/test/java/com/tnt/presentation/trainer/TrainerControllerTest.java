@@ -430,7 +430,7 @@ class TrainerControllerTest {
 	}
 
 	@Test
-	@DisplayName("통합 테스트 - 관리중인 회원 목록 조회 성공")
+	@DisplayName("통합 테스트 - 관리 중인 회원 목록 조회 성공")
 	void get_active_trainees_success() throws Exception {
 		// given
 		Member trainerMember = MemberFixture.getTrainerMember1();
@@ -476,11 +476,13 @@ class TrainerControllerTest {
 			.andExpect(jsonPath("$.trainees").isArray())
 			.andExpect(jsonPath("$.trainees[0].id").value(trainee1.getId()))
 			.andExpect(jsonPath("$.trainees[0].name").value(traineeMember1.getName()))
+			.andExpect(jsonPath("$.trainees[0].profileImageUrl").value(traineeMember1.getProfileImageUrl()))
 			.andExpect(jsonPath("$.trainees[0].finishedPtCount").value(ptTrainerTrainee1.getFinishedPtCount()))
 			.andExpect(jsonPath("$.trainees[0].totalPtCount").value(ptTrainerTrainee1.getTotalPtCount()))
 			.andExpect(jsonPath("$.trainees[0].cautionNote").value(trainee1.getCautionNote()))
 			.andExpect(jsonPath("$.trainees[1].id").value(trainee2.getId()))
 			.andExpect(jsonPath("$.trainees[1].name").value(traineeMember2.getName()))
+			.andExpect(jsonPath("$.trainees[1].profileImageUrl").value(traineeMember2.getProfileImageUrl()))
 			.andExpect(jsonPath("$.trainees[1].finishedPtCount").value(ptTrainerTrainee2.getFinishedPtCount()))
 			.andExpect(jsonPath("$.trainees[1].totalPtCount").value(ptTrainerTrainee2.getTotalPtCount()))
 			.andExpect(jsonPath("$.trainees[1].cautionNote").value(trainee2.getCautionNote()))

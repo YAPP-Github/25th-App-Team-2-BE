@@ -153,8 +153,8 @@ public class PtService {
 				.toList();
 
 			return new TraineeInfo(trainee.getId(), trainee.getMember().getName(),
-				ptTrainerTrainee.getFinishedPtCount(), ptTrainerTrainee.getTotalPtCount(), trainee.getCautionNote(),
-				ptGoals);
+				trainee.getMember().getProfileImageUrl(), ptTrainerTrainee.getFinishedPtCount(),
+				ptTrainerTrainee.getTotalPtCount(), trainee.getCautionNote(), ptGoals);
 		}).toList();
 
 		return new GetActiveTraineesResponse(trainees.size(), traineeInfo);
