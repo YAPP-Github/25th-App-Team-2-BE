@@ -1,4 +1,4 @@
-package com.tnt.dto.trainer.response;
+package com.tnt.dto.trainee.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
