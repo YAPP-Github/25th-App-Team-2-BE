@@ -255,7 +255,7 @@ class PtServiceTest {
 
 		PtTrainerTrainee ptTrainerTrainee = PtTrainerTraineeFixture.getPtTrainerTrainee1(trainer, trainee);
 
-		List<PtLesson> ptLessons = PtLessonsFixture.getPtLessons(ptTrainerTrainee);
+		List<PtLesson> ptLessons = PtLessonsFixture.getPtLessons1WithId(ptTrainerTrainee);
 
 		given(ptLessonRepository.findAllByPtTrainerTraineeAndDeletedAtIsNull(ptTrainerTrainee)).willReturn(ptLessons);
 
@@ -302,7 +302,7 @@ class PtServiceTest {
 				.build());
 
 		given(trainerService.getTrainerWithMemberId(trainer.getId())).willReturn(trainer);
-		given(ptLessonSearchRepository.findAllByTraineeIdForCalendar(trainer.getId(), year, month))
+		given(ptLessonSearchRepository.findAllByTraineeIdForTrainerCalendar(trainer.getId(), year, month))
 			.willReturn(ptLessons);
 
 		// when
