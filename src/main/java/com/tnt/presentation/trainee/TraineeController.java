@@ -53,7 +53,7 @@ public class TraineeController {
 	@PostMapping(value = "/diets", consumes = MULTIPART_FORM_DATA_VALUE)
 	public void createDiet(@AuthMember Long memberId, @RequestPart("request") @Valid CreateDietRequest request,
 		@RequestPart(value = "dietImage", required = false) MultipartFile dietImage) {
-		String dietImageUrl = s3Service.uploadImage("", DIET_S3_IMAGE_PATH, dietImage);
+		String dietImageUrl = s3Service.uploadImage(null, DIET_S3_IMAGE_PATH, dietImage);
 
 		ptService.createDiet(memberId, request, dietImageUrl);
 	}

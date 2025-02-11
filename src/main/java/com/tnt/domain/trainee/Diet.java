@@ -43,7 +43,7 @@ public class Diet extends BaseTimeEntity {
 	@Column(name = "date", nullable = false)
 	private LocalDateTime date;
 
-	@Column(name = "diet_image_url", nullable = false, length = DIET_IMAGE_URL_LENGTH)
+	@Column(name = "diet_image_url", nullable = true, length = DIET_IMAGE_URL_LENGTH)
 	private String dietImageUrl;
 
 	@Column(name = "memo", nullable = false, length = MEMO_LENGTH)
@@ -67,7 +67,7 @@ public class Diet extends BaseTimeEntity {
 	}
 
 	private String validateDietImageUrl(String dietImageUrl) {
-		if (dietImageUrl.length() > DIET_IMAGE_URL_LENGTH) {
+		if (!isBlank(dietImageUrl) && dietImageUrl.length() > DIET_IMAGE_URL_LENGTH) {
 			throw new IllegalArgumentException(DIET_INVALID_IMAGE_URL.getMessage());
 		}
 

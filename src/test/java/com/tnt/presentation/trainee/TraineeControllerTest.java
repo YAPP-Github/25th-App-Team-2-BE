@@ -157,4 +157,46 @@ class TraineeControllerTest {
 		result.andExpect(status().isCreated())
 			.andDo(print());
 	}
+
+	@Test
+	@DisplayName("통합 테스트 - 사진 없이 식단 등록 성공")
+	void create_diet_without_image_success() throws Exception {
+		// given
+		Member trainerMember = MemberFixture.getTrainerMember1();
+		Member traineeMember = MemberFixture.getTraineeMember2();
+
+		trainerMember = memberRepository.save(trainerMember);
+		traineeMember = memberRepository.save(traineeMember);
+
+		CustomUserDetails traineeUserDetails = new CustomUserDetails(traineeMember.getId(),
+			traineeMember.getId().toString(),
+			authoritiesMapper.mapAuthorities(List.of(new SimpleGrantedAuthority("ROLE_USER"))));
+
+		Authentication authentication = new UsernamePasswordAuthenticationToken(traineeUserDetails, null,
+			authoritiesMapper.mapAuthorities(traineeUserDetails.getAuthorities()));
+
+		SecurityContextHolder.getContext().setAuthentication(authentication);
+
+		Trainer trainer = TrainerFixture.getTrainer2(trainerMember);
+		Trainee trainee = TraineeFixture.getTrainee1(traineeMember);
+
+		trainerRepository.save(trainer);
+		traineeRepository.save(trainee);
+
+		LocalDateTime date = LocalDateTime.now();
+		String memo = "배부르다";
+
+		CreateDietRequest request = new CreateDietRequest(date, DINNER, memo);
+
+		// when
+		var jsonRequest = new MockMultipartFile("request", "", APPLICATION_JSON_VALUE,
+			objectMapper.writeValueAsString(request).getBytes());
+		var result = mockMvc.perform(multipart("/trainees/diets")
+			.file(jsonRequest)
+			.contentType(MULTIPART_FORM_DATA_VALUE));
+
+		// then
+		result.andExpect(status().isCreated())
+			.andDo(print());
+	}
 }
