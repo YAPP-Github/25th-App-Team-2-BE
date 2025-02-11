@@ -1,6 +1,11 @@
 package com.tnt.application.pt;
 
-import static com.tnt.common.error.model.ErrorMessage.*;
+import static com.tnt.common.error.model.ErrorMessage.PT_LESSON_DUPLICATE_TIME;
+import static com.tnt.common.error.model.ErrorMessage.PT_LESSON_NOT_FOUND;
+import static com.tnt.common.error.model.ErrorMessage.PT_TRAINEE_ALREADY_EXIST;
+import static com.tnt.common.error.model.ErrorMessage.PT_TRAINER_TRAINEE_ALREADY_EXIST;
+import static com.tnt.common.error.model.ErrorMessage.PT_TRAINER_TRAINEE_NOT_FOUND;
+import static com.tnt.common.error.model.ErrorMessage.TRAINEE_NOT_FOUND;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -26,6 +31,7 @@ import com.tnt.domain.trainee.Trainee;
 import com.tnt.domain.trainer.Trainer;
 import com.tnt.dto.trainee.request.ConnectWithTrainerRequest;
 import com.tnt.dto.trainee.request.CreateDietRequest;
+import com.tnt.dto.trainee.response.GetTraineeCalendarPtLessonCountResponse;
 import com.tnt.dto.trainer.ConnectWithTrainerDto;
 import com.tnt.dto.trainer.request.CreatePtLessonRequest;
 import com.tnt.dto.trainer.response.ConnectWithTraineeResponse;
@@ -126,7 +132,8 @@ public class PtService {
 	public GetCalendarPtLessonCountResponse getCalendarPtLessonCount(Long memberId, Integer year, Integer month) {
 		Trainer trainer = trainerService.getTrainerWithMemberId(memberId);
 
-		List<PtLesson> ptLessons = ptLessonSearchRepository.findAllByTraineeIdForCalendar(trainer.getId(), year, month);
+		List<PtLesson> ptLessons = ptLessonSearchRepository.findAllByTraineeIdForTrainerCalendar(trainer.getId(), year,
+			month);
 
 		List<CalendarPtLessonCount> counts = ptLessons.stream()
 			.collect(Collectors.groupingBy(
@@ -206,6 +213,23 @@ public class PtService {
 			.build();
 
 		dietService.save(diet);
+	}
+
+	@Transactional(readOnly = true)
+	public GetTraineeCalendarPtLessonCountResponse getTraineeCalendarPtLessonCount(Long memberId, LocalDate startDate,
+		LocalDate endDate) {
+		Trainee trainee = traineeService.getTraineeWithMemberId(memberId);
+
+		List<PtLesson> ptLessons = ptLessonSearchRepository.findAllByTraineeIdForTraineeCalendar(trainee.getId(),
+			startDate, endDate);
+
+		List<LocalDate> dates = ptLessons.stream()
+			.map(PtLesson::getLessonStart)
+			.map(LocalDateTime::toLocalDate)
+			.distinct()
+			.toList();
+
+		return new GetTraineeCalendarPtLessonCountResponse(dates);
 	}
 
 	public boolean isPtTrainerTraineeExistWithTrainerId(Long trainerId) {
