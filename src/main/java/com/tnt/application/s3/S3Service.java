@@ -126,6 +126,7 @@ public class S3Service {
 			.size(MAX_WIDTH, MAX_HEIGHT)
 			.keepAspectRatio(true)
 			.outputQuality(IMAGE_QUALITY)
+			.useExifOrientation(true)
 			.outputFormat(extension)
 			.toOutputStream(outputStream);
 
