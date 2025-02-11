@@ -479,13 +479,13 @@ class TrainerControllerTest {
 			.andExpect(jsonPath("$.trainees[0].profileImageUrl").value(traineeMember1.getProfileImageUrl()))
 			.andExpect(jsonPath("$.trainees[0].finishedPtCount").value(ptTrainerTrainee1.getFinishedPtCount()))
 			.andExpect(jsonPath("$.trainees[0].totalPtCount").value(ptTrainerTrainee1.getTotalPtCount()))
-			.andExpect(jsonPath("$.trainees[0].cautionNote").value(trainee1.getCautionNote()))
+			.andExpect(jsonPath("$.trainees[0].memo").value(""))
 			.andExpect(jsonPath("$.trainees[1].id").value(trainee2.getId()))
 			.andExpect(jsonPath("$.trainees[1].name").value(traineeMember2.getName()))
 			.andExpect(jsonPath("$.trainees[1].profileImageUrl").value(traineeMember2.getProfileImageUrl()))
 			.andExpect(jsonPath("$.trainees[1].finishedPtCount").value(ptTrainerTrainee2.getFinishedPtCount()))
 			.andExpect(jsonPath("$.trainees[1].totalPtCount").value(ptTrainerTrainee2.getTotalPtCount()))
-			.andExpect(jsonPath("$.trainees[1].cautionNote").value(trainee2.getCautionNote()))
+			.andExpect(jsonPath("$.trainees[1].memo").value(""))
 			.andDo(print());
 	}
 
