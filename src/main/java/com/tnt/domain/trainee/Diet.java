@@ -5,9 +5,7 @@ import static com.tnt.common.error.model.ErrorMessage.DIET_INVALID_MEMO;
 import static io.micrometer.common.util.StringUtils.isBlank;
 import static java.util.Objects.requireNonNull;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 
 import com.tnt.infrastructure.mysql.BaseTimeEntity;
 
@@ -32,7 +30,7 @@ public class Diet extends BaseTimeEntity {
 
 	public static final int DIET_IMAGE_URL_LENGTH = 255;
 	public static final int MEMO_LENGTH = 100;
-	public static final int DIET_TYPE_LENGTH = 5;
+	public static final int DIET_TYPE_LENGTH = 20;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -43,10 +41,7 @@ public class Diet extends BaseTimeEntity {
 	private Long traineeId;
 
 	@Column(name = "date", nullable = false)
-	private LocalDate date;
-
-	@Column(name = "time", nullable = false)
-	private LocalTime time;
+	private LocalDateTime date;
 
 	@Column(name = "diet_image_url", nullable = false, length = DIET_IMAGE_URL_LENGTH)
 	private String dietImageUrl;
@@ -62,12 +57,10 @@ public class Diet extends BaseTimeEntity {
 	private DietType dietType;
 
 	@Builder
-	public Diet(Long id, Long traineeId, LocalDate date, LocalTime time, String dietImageUrl, String memo,
-		DietType dietType) {
+	public Diet(Long id, Long traineeId, LocalDateTime date, String dietImageUrl, String memo, DietType dietType) {
 		this.id = id;
 		this.traineeId = requireNonNull(traineeId);
 		this.date = requireNonNull(date);
-		this.time = requireNonNull(time);
 		this.dietImageUrl = validateDietImageUrl(dietImageUrl);
 		this.memo = validateMemo(memo);
 		this.dietType = requireNonNull(dietType);

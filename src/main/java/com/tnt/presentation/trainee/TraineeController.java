@@ -50,7 +50,7 @@ public class TraineeController {
 
 	@Operation(summary = "트레이니 식단 등록 API")
 	@ResponseStatus(CREATED)
-	@PostMapping(value = "/create-diet", consumes = MULTIPART_FORM_DATA_VALUE)
+	@PostMapping(value = "/diets", consumes = MULTIPART_FORM_DATA_VALUE)
 	public void createDiet(@AuthMember Long memberId, @RequestPart("request") @Valid CreateDietRequest request,
 		@RequestPart(value = "dietImage", required = false) MultipartFile dietImage) {
 		String dietImageUrl = s3Service.uploadImage("", DIET_S3_IMAGE_PATH, dietImage);

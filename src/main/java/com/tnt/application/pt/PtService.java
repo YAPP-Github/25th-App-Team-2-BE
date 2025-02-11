@@ -157,6 +157,7 @@ public class PtService {
 				.map(PtGoal::getContent)
 				.toList();
 
+			// Memo 추가 구현 필요
 			return new TraineeInfo(trainee.getId(), trainee.getMember().getName(),
 				trainee.getMember().getProfileImageUrl(), ptTrainerTrainee.getFinishedPtCount(),
 				ptTrainerTrainee.getTotalPtCount(), "", ptGoals);
@@ -199,7 +200,6 @@ public class PtService {
 		Diet diet = Diet.builder()
 			.traineeId(trainee.getId())
 			.date(request.date())
-			.time(request.time())
 			.dietImageUrl(dietImageUrl)
 			.memo(request.memo())
 			.dietType(request.dietType())

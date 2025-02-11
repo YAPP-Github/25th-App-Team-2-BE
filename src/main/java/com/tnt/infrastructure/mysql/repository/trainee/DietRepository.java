@@ -4,6 +4,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.tnt.domain.trainee.Diet;
 
-public interface DietRepository extends JpaRepository<Diet, Integer> {
+public interface DietRepository extends JpaRepository<Diet, Long> {
 
 }

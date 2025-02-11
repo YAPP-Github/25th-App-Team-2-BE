@@ -10,7 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
@@ -137,11 +137,10 @@ class TraineeControllerTest {
 		trainerRepository.save(trainer);
 		traineeRepository.save(trainee);
 
-		LocalDate date = LocalDate.now();
-		LocalTime time = LocalTime.now();
+		LocalDateTime date = LocalDateTime.now();
 		String memo = "배부르다";
 
-		CreateDietRequest request = new CreateDietRequest(date, time, DINNER, memo);
+		CreateDietRequest request = new CreateDietRequest(date, DINNER, memo);
 
 		MockMultipartFile dietImage = new MockMultipartFile("dietImage", "test.jpg", IMAGE_JPEG_VALUE,
 			"test image content".getBytes());
@@ -149,7 +148,7 @@ class TraineeControllerTest {
 		// when
 		var jsonRequest = new MockMultipartFile("request", "", APPLICATION_JSON_VALUE,
 			objectMapper.writeValueAsString(request).getBytes());
-		var result = mockMvc.perform(multipart("/trainees/create-diet")
+		var result = mockMvc.perform(multipart("/trainees/diets")
 			.file(jsonRequest)
 			.file(dietImage)
 			.contentType(MULTIPART_FORM_DATA_VALUE));
