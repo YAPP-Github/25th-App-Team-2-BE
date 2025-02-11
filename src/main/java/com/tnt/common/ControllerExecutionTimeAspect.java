@@ -58,7 +58,8 @@ public class ControllerExecutionTimeAspect {
 
 		@Override
 		public String toString() {
-			return String.format("count: %d, average: %dms, min: %dms, max: %dms", count, totalTime, minTime, maxTime);
+			return String.format("count: %d, average: %dms, min: %dms, max: %dms", count, totalTime / count, minTime,
+				maxTime);
 		}
 	}
 }
