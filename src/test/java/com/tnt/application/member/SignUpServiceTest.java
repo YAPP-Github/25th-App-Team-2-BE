@@ -1,6 +1,6 @@
 package com.tnt.application.member;
 
-import static com.tnt.common.constant.ProfileConstant.TRAINER_DEFAULT_IMAGE;
+import static com.tnt.common.constant.ImageConstant.TRAINER_DEFAULT_IMAGE;
 import static com.tnt.common.error.model.ErrorMessage.MEMBER_CONFLICT;
 import static com.tnt.domain.member.MemberType.TRAINER;
 import static org.assertj.core.api.Assertions.assertThat;

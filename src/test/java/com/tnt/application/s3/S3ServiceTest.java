@@ -1,6 +1,6 @@
 package com.tnt.application.s3;
 
-import static com.tnt.common.constant.ProfileConstant.TRAINEE_DEFAULT_IMAGE;
+import static com.tnt.common.constant.ImageConstant.TRAINEE_DEFAULT_IMAGE;
 import static com.tnt.domain.member.MemberType.TRAINEE;
 import static com.tnt.domain.member.MemberType.TRAINER;
 import static org.assertj.core.api.Assertions.assertThat;
