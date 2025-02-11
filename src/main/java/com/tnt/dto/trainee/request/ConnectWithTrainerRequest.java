@@ -1,4 +1,4 @@
-package com.tnt.dto.trainer.request;
+package com.tnt.dto.trainee.request;
 
 import java.time.LocalDate;
 

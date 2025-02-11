@@ -22,8 +22,9 @@ import com.tnt.domain.pt.PtTrainerTrainee;
 import com.tnt.domain.trainee.PtGoal;
 import com.tnt.domain.trainee.Trainee;
 import com.tnt.domain.trainer.Trainer;
+import com.tnt.dto.trainee.request.ConnectWithTrainerRequest;
+import com.tnt.dto.trainee.request.CreateDietRequest;
 import com.tnt.dto.trainer.ConnectWithTrainerDto;
-import com.tnt.dto.trainer.request.ConnectWithTrainerRequest;
 import com.tnt.dto.trainer.request.CreatePtLessonRequest;
 import com.tnt.dto.trainer.response.ConnectWithTraineeResponse;
 import com.tnt.dto.trainer.response.ConnectWithTraineeResponse.ConnectTraineeInfo;
@@ -39,6 +40,7 @@ import com.tnt.infrastructure.mysql.repository.pt.PtLessonSearchRepository;
 import com.tnt.infrastructure.mysql.repository.pt.PtTrainerTraineeRepository;
 import com.tnt.infrastructure.mysql.repository.pt.PtTrainerTraineeSearchRepository;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -185,6 +187,10 @@ public class PtService {
 
 		PtLesson ptLesson = getPtLessonWithId(ptLessonId);
 		ptLesson.completeLesson();
+	}
+
+	@Transactional
+	public void createDiet(Long memberId, @Valid CreateDietRequest request) {
 	}
 
 	public boolean isPtTrainerTraineeExistWithTrainerId(Long trainerId) {

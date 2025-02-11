@@ -25,7 +25,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tnt.domain.member.Member;
 import com.tnt.domain.trainee.Trainee;
 import com.tnt.domain.trainer.Trainer;
-import com.tnt.dto.trainer.request.ConnectWithTrainerRequest;
+import com.tnt.dto.trainee.request.ConnectWithTrainerRequest;
 import com.tnt.fixture.MemberFixture;
 import com.tnt.gateway.filter.CustomUserDetails;
 import com.tnt.infrastructure.mysql.repository.member.MemberRepository;
