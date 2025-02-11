@@ -29,8 +29,8 @@ public record GetActiveTraineesResponse(
 		@Schema(description = "총 PT 횟수", example = "100", nullable = false)
 		Integer totalPtCount,
 
-		@Schema(description = "주의사항", example = "가냘퍼요", nullable = true)
-		String cautionNote,
+		@Schema(description = "메모", example = "건강하지 않음", nullable = true)
+		String memo,
 
 		@Schema(description = "PT 목적들", example = "[\"체중 감량\", \"근력 향상\"]", nullable = false)
 		List<String> ptGoals
