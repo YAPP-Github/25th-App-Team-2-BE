@@ -348,6 +348,7 @@ class TrainerControllerTest {
 			.ptTrainerTrainee(ptTrainerTrainee)
 			.lessonStart(LocalDateTime.of(2025, 1, 1, 10, 0))
 			.lessonEnd(LocalDateTime.of(2025, 1, 1, 11, 0))
+			.session(1)
 			.memo("THIS IS MEMO")
 			.build();
 
@@ -393,21 +394,25 @@ class TrainerControllerTest {
 
 		List<PtLesson> ptLessons = List.of(PtLesson.builder()
 				.ptTrainerTrainee(ptTrainerTrainee)
+				.session(1)
 				.lessonStart(date)
 				.lessonEnd(date.plusHours(1))
 				.build(),
 			PtLesson.builder()
 				.ptTrainerTrainee(ptTrainerTrainee)
+				.session(2)
 				.lessonStart(date.plusHours(4))
 				.lessonEnd(date.plusHours(5))
 				.build(),
 			PtLesson.builder()
 				.ptTrainerTrainee(ptTrainerTrainee)
+				.session(3)
 				.lessonStart(date.plusDays(1))
 				.lessonEnd(date.plusDays(1).plusHours(1))
 				.build(),
 			PtLesson.builder()
 				.ptTrainerTrainee(ptTrainerTrainee)
+				.session(4)
 				.lessonStart(date.plusDays(4).plusHours(4))
 				.lessonEnd(date.plusDays(4).plusHours(5))
 				.build());
@@ -615,6 +620,7 @@ class TrainerControllerTest {
 
 		ptLessonRepository.save(PtLesson.builder()
 			.ptTrainerTrainee(ptTrainerTrainee)
+			.session(1)
 			.lessonStart(createdStart)
 			.lessonEnd(createdEnd)
 			.build());
@@ -678,6 +684,7 @@ class TrainerControllerTest {
 
 		PtLesson ptLesson = PtLesson.builder()
 			.ptTrainerTrainee(ptTrainerTrainee)
+			.session(1)
 			.lessonStart(LocalDateTime.of(2025, 1, 1, 10, 0))
 			.lessonEnd(LocalDateTime.of(2025, 1, 1, 11, 0))
 			.memo("THIS IS MEMO")

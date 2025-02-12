@@ -18,12 +18,14 @@ public class PtLessonsFixture {
 		return List.of(PtLesson.builder()
 				.id(1L)
 				.ptTrainerTrainee(ptTrainerTrainee)
+				.session(1)
 				.lessonStart(startDate1)
 				.lessonEnd(endDate1)
 				.build(),
 			PtLesson.builder()
 				.id(2L)
 				.ptTrainerTrainee(ptTrainerTrainee)
+				.session(2)
 				.lessonStart(startDate2)
 				.lessonEnd(endDate2)
 				.build()
@@ -39,11 +41,13 @@ public class PtLessonsFixture {
 
 		return List.of(PtLesson.builder()
 				.ptTrainerTrainee(ptTrainerTrainee)
+				.session(3)
 				.lessonStart(startDate1)
 				.lessonEnd(endDate1)
 				.build(),
 			PtLesson.builder()
 				.ptTrainerTrainee(ptTrainerTrainee)
+				.session(4)
 				.lessonStart(startDate2)
 				.lessonEnd(endDate2)
 				.build()

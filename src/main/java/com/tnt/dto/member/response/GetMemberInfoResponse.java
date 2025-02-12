@@ -43,11 +43,8 @@ public record GetMemberInfoResponse(
 	}
 
 	public record TraineeInfo(
-		@Schema(description = "트레이너 ID", example = "12352", nullable = true)
-		Long trainerId,
-
-		@Schema(description = "트레이너 초대 코드", example = "2H9DG4X3", nullable = true)
-		String invitationCode,
+		@Schema(description = "트레이너 연결 여부", example = "true", nullable = false)
+		Boolean isConnected,
 
 		@Schema(description = "생년월일", example = "2025-01-01", nullable = true)
 		LocalDate birthday,

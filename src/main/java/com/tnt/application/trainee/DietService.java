@@ -31,7 +31,7 @@ public class DietService {
 			.orElseThrow(() -> new NotFoundException(DIET_NOT_FOUND));
 	}
 
-	public List<Diet> getDietsWithTraineeIdForHome(Long traineeId, Integer year, Integer month) {
-		return dietSearchRepository.findAllByTraineeIdForHome(traineeId, year, month);
+	public List<Diet> getDietsWithTraineeIdForDaily(Long traineeId, Integer year, Integer month) {
+		return dietSearchRepository.findAllByTraineeIdForDaily(traineeId, year, month);
 	}
 }

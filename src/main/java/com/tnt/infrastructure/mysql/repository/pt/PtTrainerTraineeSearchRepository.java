@@ -29,7 +29,10 @@ public class PtTrainerTraineeSearchRepository {
 			.join(trainee.member, member)
 			.where(
 				ptTrainerTrainee.trainer.id.eq(trainerId),
-				ptTrainerTrainee.deletedAt.isNull()
+				ptTrainerTrainee.deletedAt.isNull(),
+				member.deletedAt.isNull(),
+				trainee.deletedAt.isNull(),
+				trainer.deletedAt.isNull()
 			)
 			.fetch();
 	}

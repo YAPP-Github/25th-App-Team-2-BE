@@ -18,7 +18,7 @@ public class DietSearchRepository {
 
 	private final JPAQueryFactory jpaQueryFactory;
 
-	public List<Diet> findAllByTraineeIdForHome(Long traineeId, Integer year, Integer month) {
+	public List<Diet> findAllByTraineeIdForDaily(Long traineeId, Integer year, Integer month) {
 		LocalDate startOfMonth = LocalDate.of(year, month, 1);
 		LocalDate endOfMonth = startOfMonth.withDayOfMonth(startOfMonth.lengthOfMonth());
 

@@ -181,6 +181,7 @@ class PtServiceTest {
 		PtLesson ptLesson = PtLesson.builder()
 			.id(1L)
 			.ptTrainerTrainee(ptTrainerTrainee)
+			.session(1)
 			.lessonStart(LocalDateTime.of(date, LocalTime.of(10, 0)))
 			.lessonEnd(LocalDateTime.of(date, LocalTime.of(11, 0)))
 			.build();
@@ -285,18 +286,21 @@ class PtServiceTest {
 		List<PtLesson> ptLessons = List.of(PtLesson.builder()
 				.id(1L)
 				.ptTrainerTrainee(ptTrainerTrainee)
+				.session(1)
 				.lessonStart(date)
 				.lessonEnd(date.plusHours(1))
 				.build(),
 			PtLesson.builder()
 				.id(2L)
 				.ptTrainerTrainee(ptTrainerTrainee)
+				.session(2)
 				.lessonStart(date.plusHours(4))
 				.lessonEnd(date.plusHours(5))
 				.build(),
 			PtLesson.builder()
 				.id(3L)
 				.ptTrainerTrainee(ptTrainerTrainee)
+				.session(3)
 				.lessonStart(date.plusDays(1))
 				.lessonEnd(date.plusDays(1).plusHours(1))
 				.build());

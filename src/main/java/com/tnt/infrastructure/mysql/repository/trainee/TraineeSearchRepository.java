@@ -24,6 +24,7 @@ public class TraineeSearchRepository {
 			.join(trainee.member, member).fetchJoin()
 			.where(
 				member.id.eq(memberId),
+				member.deletedAt.isNull(),
 				trainee.deletedAt.isNull()
 			)
 			.fetchOne());
@@ -35,6 +36,7 @@ public class TraineeSearchRepository {
 			.join(trainee.member, member).fetchJoin()
 			.where(
 				trainee.id.eq(id),
+				member.deletedAt.isNull(),
 				trainee.deletedAt.isNull()
 			)
 			.fetchOne());

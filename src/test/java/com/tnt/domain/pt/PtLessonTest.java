@@ -37,6 +37,7 @@ class PtLessonTest {
 		//when & then
 		assertThatThrownBy(() -> PtLesson.builder()
 			.ptTrainerTrainee(ptTrainerTrainee)
+			.session(1)
 			.lessonStart(LocalDateTime.of(2021, 1, 1, 10, 0))
 			.lessonEnd(LocalDateTime.of(2021, 1, 1, 11, 0))
 			.memo(failMemo)

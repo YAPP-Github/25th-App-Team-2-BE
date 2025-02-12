@@ -330,21 +330,25 @@ class TraineeControllerTest {
 
 		List<PtLesson> ptLessons = List.of(PtLesson.builder()
 				.ptTrainerTrainee(ptTrainerTrainee)
+				.session(1)
 				.lessonStart(date1)
 				.lessonEnd(date1.plusHours(1))
 				.build(),
 			PtLesson.builder()
 				.ptTrainerTrainee(ptTrainerTrainee)
+				.session(2)
 				.lessonStart(date2)
 				.lessonEnd(date2.plusHours(1))
 				.build(),
 			PtLesson.builder()
 				.ptTrainerTrainee(ptTrainerTrainee)
+				.session(3)
 				.lessonStart(date3)
 				.lessonEnd(date3.plusHours(1))
 				.build(),
 			PtLesson.builder()
 				.ptTrainerTrainee(ptTrainerTrainee)
+				.session(4)
 				.lessonStart(date4)
 				.lessonEnd(date4.plusHours(1))
 				.build());
@@ -415,18 +419,17 @@ class TraineeControllerTest {
 		DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
 		// when & then
-		mockMvc.perform(get("/trainees/home")
+		mockMvc.perform(get("/trainees/calendar")
 				.param("year", String.valueOf(2025))
 				.param("month", String.valueOf(2)))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.dailyRecords").isArray())
 			.andExpect(jsonPath("$.dailyRecords[0].date").value(diet1.getDate().toLocalDate().format(dateFormatter)))
-			.andExpect(jsonPath("$.dailyRecords[0].ptInfos").isArray())
-			.andExpect(jsonPath("$.dailyRecords[0].ptInfos[0].trainerName").value(trainer.getMember().getName()))
-			.andExpect(jsonPath("$.dailyRecords[0].ptInfos[0].ptCount").value(10))
-			.andExpect(jsonPath("$.dailyRecords[0].ptInfos[0].lessonStart").value(
+			.andExpect(jsonPath("$.dailyRecords[0].ptInfo.trainerName").value(trainer.getMember().getName()))
+			.andExpect(jsonPath("$.dailyRecords[0].ptInfo.session").value(ptLesson.getFirst().getSession()))
+			.andExpect(jsonPath("$.dailyRecords[0].ptInfo.lessonStart").value(
 				ptLesson.getFirst().getLessonStart().format(dateTimeFormatter)))
-			.andExpect(jsonPath("$.dailyRecords[0].ptInfos[0].lessonEnd").value(
+			.andExpect(jsonPath("$.dailyRecords[0].ptInfo.lessonEnd").value(
 				ptLesson.getFirst().getLessonEnd().format(dateTimeFormatter)))
 			.andExpect(jsonPath("$.dailyRecords[0].diets").isArray())
 			.andExpect(jsonPath("$.dailyRecords[0].diets[0].dietId").value(diet1.getId()))

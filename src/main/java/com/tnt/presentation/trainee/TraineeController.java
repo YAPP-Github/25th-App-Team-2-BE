@@ -27,7 +27,7 @@ import com.tnt.dto.trainee.response.ConnectWithTrainerResponse;
 import com.tnt.dto.trainee.response.CreateDietResponse;
 import com.tnt.dto.trainee.response.GetDietResponse;
 import com.tnt.dto.trainee.response.GetTraineeCalendarPtLessonCountResponse;
-import com.tnt.dto.trainee.response.GetTraineeHomeRecordsResponse;
+import com.tnt.dto.trainee.response.GetTraineeDailyRecordsResponse;
 import com.tnt.dto.trainer.ConnectWithTrainerDto;
 import com.tnt.gateway.config.AuthMember;
 
@@ -93,10 +93,10 @@ public class TraineeController {
 
 	@Operation(summary = "홈 기록 리스트 조회 API")
 	@ResponseStatus(OK)
-	@GetMapping("/home")
-	public GetTraineeHomeRecordsResponse getHomeRecords(@AuthMember Long memberId,
+	@GetMapping("/calendar")
+	public GetTraineeDailyRecordsResponse getDailyRecords(@AuthMember Long memberId,
 		@Parameter(description = "년도", example = "2025") @RequestParam("year") @Min(1900) @Max(2100) Integer year,
 		@Parameter(description = "월", example = "2") @RequestParam("month") @Min(1) @Max(12) Integer month) {
-		return ptService.getHomeRecords(memberId, year, month);
+		return ptService.getDailyRecords(memberId, year, month);
 	}
 }

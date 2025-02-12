@@ -9,7 +9,7 @@ import com.tnt.domain.trainee.DietType;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(description = "트레이니 홈 기록 리스트 조회 응답")
-public record GetTraineeHomeRecordsResponse(
+public record GetTraineeDailyRecordsResponse(
 
 	@Schema(description = "홈 기록 리스트", nullable = false)
 	List<DailyRecord> dailyRecords
@@ -19,7 +19,8 @@ public record GetTraineeHomeRecordsResponse(
 		@Schema(description = "날짜", example = "2025-02-01", nullable = false)
 		LocalDate date,
 
-		List<PtInfo> ptInfos,
+		@Schema(description = "PT 정보", nullable = true)
+		PtInfo ptInfo,
 
 		@Schema(description = "식단 목록", nullable = false)
 		List<DietRecord> diets
@@ -30,7 +31,7 @@ public record GetTraineeHomeRecordsResponse(
 			String trainerName,
 
 			@Schema(description = "PT 회차", example = "8", nullable = false)
-			Integer ptCount,
+			Integer session,
 
 			@Schema(description = "PT 시작 시간", example = "2025-02-01T17:00:00", nullable = false)
 			LocalDateTime lessonStart,

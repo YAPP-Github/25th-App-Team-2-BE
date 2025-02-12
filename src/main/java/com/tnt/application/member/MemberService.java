@@ -79,12 +79,10 @@ public class MemberService {
 			Trainee trainee = traineeService.getTraineeWithMemberId(memberId);
 			List<String> ptGoals = ptGoalService.getAllPtGoalsWithTraineeId(trainee.getId()).stream().map(
 				PtGoal::getContent).toList();
-			PtTrainerTrainee ptTrainerTrainee = ptService.getPtTrainerTraineeWithTraineeId(trainee.getId());
-			Trainer trainer = trainerService.getTrainerWithMemberId(ptTrainerTrainee.getTrainer().getMember().getId());
+			boolean isConnected = ptService.isPtTrainerTraineeExistWithTraineeId(trainee.getId());
 
-			TraineeInfo traineeInfo = new TraineeInfo(trainer.getId(), trainer.getInvitationCode(),
-				member.getBirthday(), member.getAge(), trainee.getHeight(), trainee.getWeight(),
-				trainee.getCautionNote(), ptGoals);
+			TraineeInfo traineeInfo = new TraineeInfo(isConnected, member.getBirthday(),
+				member.getAge(), trainee.getHeight(), trainee.getWeight(), trainee.getCautionNote(), ptGoals);
 
 			memberInfo = new GetMemberInfoResponse(member.getName(), member.getEmail(), member.getProfileImageUrl(),
 				member.getMemberType(), member.getSocialType(), null, traineeInfo);

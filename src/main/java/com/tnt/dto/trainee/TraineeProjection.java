@@ -13,16 +13,9 @@ public class TraineeProjection {
 	@QueryProjection
 	public record PtInfoDto(
 		String trainerName,
+		Integer session,
 		LocalDateTime lessonStart,
 		LocalDateTime lessonEnd
-	) {
-
-	}
-
-	@QueryProjection
-	public record PtCountInfoDto(
-		Integer finishedPtCount,
-		Integer totalPtCount
 	) {
 
 	}

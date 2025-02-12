@@ -2,21 +2,23 @@ package com.tnt.application.pt;
 
 import static com.tnt.common.error.model.ErrorMessage.PT_LESSON_DUPLICATE_TIME;
 import static com.tnt.common.error.model.ErrorMessage.PT_LESSON_NOT_FOUND;
+import static com.tnt.common.error.model.ErrorMessage.PT_LESSON_OVERFLOW;
 import static com.tnt.common.error.model.ErrorMessage.PT_TRAINEE_ALREADY_EXIST;
 import static com.tnt.common.error.model.ErrorMessage.PT_TRAINER_TRAINEE_ALREADY_EXIST;
 import static com.tnt.common.error.model.ErrorMessage.PT_TRAINER_TRAINEE_NOT_FOUND;
 import static com.tnt.common.error.model.ErrorMessage.TRAINEE_NOT_FOUND;
-import static java.util.Collections.emptyList;
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -28,6 +30,7 @@ import com.tnt.application.trainee.TraineeService;
 import com.tnt.application.trainer.TrainerService;
 import com.tnt.common.error.exception.ConflictException;
 import com.tnt.common.error.exception.NotFoundException;
+import com.tnt.common.error.exception.TnTException;
 import com.tnt.domain.member.Member;
 import com.tnt.domain.pt.PtLesson;
 import com.tnt.domain.pt.PtTrainerTrainee;
@@ -41,14 +44,14 @@ import com.tnt.dto.trainee.request.CreateDietRequest;
 import com.tnt.dto.trainee.response.CreateDietResponse;
 import com.tnt.dto.trainee.response.GetDietResponse;
 import com.tnt.dto.trainee.response.GetTraineeCalendarPtLessonCountResponse;
-import com.tnt.dto.trainee.response.GetTraineeHomeRecordsResponse;
+import com.tnt.dto.trainee.response.GetTraineeDailyRecordsResponse;
 import com.tnt.dto.trainer.ConnectWithTrainerDto;
 import com.tnt.dto.trainer.request.CreatePtLessonRequest;
 import com.tnt.dto.trainer.response.ConnectWithTraineeResponse;
 import com.tnt.dto.trainer.response.ConnectWithTraineeResponse.ConnectTraineeInfo;
 import com.tnt.dto.trainer.response.ConnectWithTraineeResponse.ConnectTrainerInfo;
 import com.tnt.dto.trainer.response.GetActiveTraineesResponse;
-import com.tnt.dto.trainer.response.GetActiveTraineesResponse.TraineeInfo;
+import com.tnt.dto.trainer.response.GetActiveTraineesResponse.ActiveTraineeInfo;
 import com.tnt.dto.trainer.response.GetCalendarPtLessonCountResponse;
 import com.tnt.dto.trainer.response.GetCalendarPtLessonCountResponse.CalendarPtLessonCount;
 import com.tnt.dto.trainer.response.GetPtLessonsOnDateResponse;
@@ -164,7 +167,7 @@ public class PtService {
 
 		List<Trainee> trainees = ptTrainerTraineeSearchRepository.findAllTrainees(trainer.getId());
 
-		List<TraineeInfo> traineeInfo = trainees.stream().map(trainee -> {
+		List<ActiveTraineeInfo> activeTraineeInfo = trainees.stream().map(trainee -> {
 			PtTrainerTrainee ptTrainerTrainee = ptTrainerTraineeRepository.findByTraineeIdAndDeletedAtIsNull(
 					trainee.getId())
 				.orElseThrow(() -> new NotFoundException(TRAINEE_NOT_FOUND));
@@ -175,12 +178,12 @@ public class PtService {
 				.toList();
 
 			// Memo 추가 구현 필요
-			return new TraineeInfo(trainee.getId(), trainee.getMember().getName(),
+			return new ActiveTraineeInfo(trainee.getId(), trainee.getMember().getName(),
 				trainee.getMember().getProfileImageUrl(), ptTrainerTrainee.getFinishedPtCount(),
 				ptTrainerTrainee.getTotalPtCount(), "", ptGoals);
 		}).toList();
 
-		return new GetActiveTraineesResponse(trainees.size(), traineeInfo);
+		return new GetActiveTraineesResponse(trainees.size(), activeTraineeInfo);
 	}
 
 	@Transactional
@@ -192,11 +195,14 @@ public class PtService {
 		// 트레이너의 기존 pt 수업중에 중복되는 시간대가 있는지 확인
 		validateLessonTime(ptTrainerTrainee, request.start(), request.end());
 
+		int nextSession = validateAndGetNextSession(ptTrainerTrainee, request.start());
+
 		PtLesson ptLesson = PtLesson.builder()
 			.ptTrainerTrainee(ptTrainerTrainee)
 			.lessonStart(request.start())
 			.lessonEnd(request.end())
 			.memo(request.memo())
+			.session(nextSession)
 			.build();
 
 		ptLessonRepository.save(ptLesson);
@@ -255,56 +261,47 @@ public class PtService {
 		return new GetTraineeCalendarPtLessonCountResponse(dates);
 	}
 
-	public GetTraineeHomeRecordsResponse getHomeRecords(Long memberId, Integer year, Integer month) {
-		Trainee trainee = traineeService.getTraineeWithMemberId(memberId);
+	@Transactional(readOnly = true)
+	public GetTraineeDailyRecordsResponse getDailyRecords(Long memberId, Integer year, Integer month) {
+		Trainee trainee = traineeService.getTraineeWithMemberIdNoFetch(memberId);
 
 		// PT 정보 조회
-		List<TraineeProjection.PtInfoDto> ptResults = ptLessonSearchRepository.findAllByTraineeIdForHome(
+		List<TraineeProjection.PtInfoDto> ptResults = ptLessonSearchRepository.findAllByTraineeIdForDaily(
 			trainee.getId(), year, month);
-		TraineeProjection.PtCountInfoDto ptCountInfo = ptLessonSearchRepository.getPtCountInfo(trainee.getId());
 
 		// PT 정보를 날짜 별로 그룹화
-		Map<LocalDate, List<GetTraineeHomeRecordsResponse.DailyRecord.PtInfo>> ptInfosByDate = ptResults.stream()
-			.map(lesson -> {
-				// ptResults 순서(인덱스)를 0부터 세어서 finishedPtCount에 더함
-				int ptOrder = ptResults.indexOf(lesson) + 1;
-				int ptCount = Math.min(ptCountInfo.finishedPtCount() + ptOrder, ptCountInfo.totalPtCount());
-
-				return new GetTraineeHomeRecordsResponse.DailyRecord.PtInfo(lesson.trainerName(), ptCount,
-					lesson.lessonStart(), lesson.lessonEnd());
-			})
-			.collect(groupingBy(
-				ptInfo -> ptInfo.lessonStart().toLocalDate(),
-				toList()
+		Map<LocalDate, GetTraineeDailyRecordsResponse.DailyRecord.PtInfo> ptInfosByDate = ptResults.stream()
+			.collect(toMap(
+				lesson -> lesson.lessonStart().toLocalDate(),
+				lesson -> new GetTraineeDailyRecordsResponse.DailyRecord.PtInfo(lesson.trainerName(), lesson.session(),
+					lesson.lessonStart(), lesson.lessonEnd())
 			));
 
 		// 식단 정보 조회
-		List<Diet> diets = dietService.getDietsWithTraineeIdForHome(trainee.getId(), year, month);
+		List<Diet> diets = dietService.getDietsWithTraineeIdForDaily(trainee.getId(), year, month);
 
 		// 식단 정보를 날짜 별로 그룹화
-		Map<LocalDate, List<GetTraineeHomeRecordsResponse.DailyRecord.DietRecord>> dietsByDate = diets.stream()
+		Map<LocalDate, List<GetTraineeDailyRecordsResponse.DailyRecord.DietRecord>> dietsByDate = diets.stream()
 			.collect(groupingBy(
 				diet -> diet.getDate().toLocalDate(),
 				mapping(
-					diet -> new GetTraineeHomeRecordsResponse.DailyRecord.DietRecord(diet.getId(), diet.getDate(),
+					diet -> new GetTraineeDailyRecordsResponse.DailyRecord.DietRecord(diet.getId(), diet.getDate(),
 						diet.getDietImageUrl(), diet.getDietType(), diet.getMemo()), toList()
 				)
 			));
 
-		// DailyRecord로 변환
-		List<GetTraineeHomeRecordsResponse.DailyRecord> dailyRecords = dietsByDate.entrySet().stream()
+		// DailyRecord 로 변환
+		List<GetTraineeDailyRecordsResponse.DailyRecord> dailyRecords = dietsByDate.entrySet().stream()
 			.map(entry -> {
 				LocalDate date = entry.getKey();
-				List<GetTraineeHomeRecordsResponse.DailyRecord.DietRecord> dietRecords = entry.getValue();
-				List<GetTraineeHomeRecordsResponse.DailyRecord.PtInfo> ptInfos = ptInfosByDate.getOrDefault(date,
-					emptyList());
+				List<GetTraineeDailyRecordsResponse.DailyRecord.DietRecord> dietRecords = entry.getValue();
 
-				return new GetTraineeHomeRecordsResponse.DailyRecord(date, ptInfos, dietRecords);
+				return new GetTraineeDailyRecordsResponse.DailyRecord(date, ptInfosByDate.get(date), dietRecords);
 			})
-			.sorted(comparing(GetTraineeHomeRecordsResponse.DailyRecord::date))
+			.sorted(comparing(GetTraineeDailyRecordsResponse.DailyRecord::date))
 			.toList();
 
-		return new GetTraineeHomeRecordsResponse(dailyRecords);
+		return new GetTraineeDailyRecordsResponse(dailyRecords);
 	}
 
 	public boolean isPtTrainerTraineeExistWithTrainerId(Long trainerId) {
@@ -362,5 +359,34 @@ public class PtService {
 		if (ptLessonSearchRepository.existsByStartAndEnd(ptTrainerTrainee, start, end)) {
 			throw new ConflictException(PT_LESSON_DUPLICATE_TIME);
 		}
+	}
+
+	private int validateAndGetNextSession(PtTrainerTrainee ptTrainerTrainee, LocalDateTime start) {
+		List<PtLesson> notCompletedLessons =
+			ptLessonRepository.findAllByPtTrainerTraineeAndIsCompletedIsFalseAndDeletedAtIsNull(ptTrainerTrainee);
+
+		int temp = 0;
+
+		if (!notCompletedLessons.isEmpty()) {
+			if (Objects.equals(notCompletedLessons.getLast().getSession(), ptTrainerTrainee.getTotalPtCount())) {
+				throw new TnTException(PT_LESSON_OVERFLOW);
+			}
+
+			for (PtLesson toCompare : notCompletedLessons) {
+				if (toCompare.getLessonStart().isBefore(start)) {
+					temp += 1;
+				} else {
+					break;
+				}
+			}
+
+			// 뒤에 있는 수업 회차 다시 +1 update
+			for (int i = temp; i < notCompletedLessons.size(); i++) {
+				PtLesson lesson = notCompletedLessons.get(i);
+				lesson.increaseSession();
+			}
+		}
+
+		return ptTrainerTrainee.getFinishedPtCount() + 1 + temp;
 	}
 }
