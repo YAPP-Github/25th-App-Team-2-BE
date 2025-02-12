@@ -315,7 +315,8 @@ class MemberControllerTest extends AbstractContainerBaseTest {
 			.andExpect(jsonPath("$.trainee.birthday").value(traineeMember.getBirthday().toString()))
 			.andExpect(jsonPath("$.trainee.height").value(trainee.getHeight()))
 			.andExpect(jsonPath("$.trainee.weight").value(trainee.getWeight()))
-			.andExpect(jsonPath("$.trainee.cautionNote").value(trainee.getCautionNote()));
+			.andExpect(jsonPath("$.trainee.cautionNote").value(trainee.getCautionNote()))
+			.andDo(print());
 	}
 
 	@TestConfiguration
