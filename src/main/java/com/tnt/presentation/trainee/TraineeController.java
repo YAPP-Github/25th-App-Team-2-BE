@@ -2,11 +2,16 @@ package com.tnt.presentation.trainee;
 
 import static com.tnt.common.constant.ImageConstant.DIET_S3_IMAGE_PATH;
 import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 
+import java.time.LocalDate;
+
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -17,11 +22,13 @@ import com.tnt.application.pt.PtService;
 import com.tnt.application.s3.S3Service;
 import com.tnt.dto.trainee.request.ConnectWithTrainerRequest;
 import com.tnt.dto.trainee.request.CreateDietRequest;
+import com.tnt.dto.trainee.response.ConnectWithTrainerResponse;
+import com.tnt.dto.trainee.response.GetTraineeCalendarPtLessonCountResponse;
 import com.tnt.dto.trainer.ConnectWithTrainerDto;
-import com.tnt.dto.trainer.response.ConnectWithTrainerResponse;
 import com.tnt.gateway.config.AuthMember;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -56,5 +63,16 @@ public class TraineeController {
 		String dietImageUrl = s3Service.uploadImage(null, DIET_S3_IMAGE_PATH, dietImage);
 
 		ptService.createDiet(memberId, request, dietImageUrl);
+	}
+
+	@Operation(summary = "달력 PT 수업 있는 날 표시 데이터 조회 API")
+	@ResponseStatus(OK)
+	@GetMapping("/lessons/calendar")
+	public GetTraineeCalendarPtLessonCountResponse getTraineeCalendarPtLessonCount(@AuthMember Long memberId,
+		@Parameter(description = "조회 시작 날짜", example = "2025-01-10")
+		@RequestParam("startDate") LocalDate startDate,
+		@Parameter(description = "조회 종료 날짜", example = "2025-02-15")
+		@RequestParam("endDate") LocalDate endDate) {
+		return ptService.getTraineeCalendarPtLessonCount(memberId, startDate, endDate);
 	}
 }

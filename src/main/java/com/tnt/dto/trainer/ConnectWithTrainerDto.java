@@ -1,6 +1,6 @@
 package com.tnt.dto.trainer;
 
-import com.tnt.dto.trainer.response.ConnectWithTrainerResponse;
+import com.tnt.dto.trainee.response.ConnectWithTrainerResponse;
 
 public record ConnectWithTrainerDto(
 	String trainerFcmToken,

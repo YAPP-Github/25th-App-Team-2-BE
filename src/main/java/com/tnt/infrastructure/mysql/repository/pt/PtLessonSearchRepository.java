@@ -41,7 +41,7 @@ public class PtLessonSearchRepository {
 			.fetch();
 	}
 
-	public List<PtLesson> findAllByTraineeIdForCalendar(Long traineeId, Integer year, Integer month) {
+	public List<PtLesson> findAllByTraineeIdForTrainerCalendar(Long traineeId, Integer year, Integer month) {
 		LocalDateTime startDate = LocalDateTime.of(year, month, 1, 0, 0);
 		LocalDateTime endDate = startDate.plusMonths(1).minusNanos(1);
 
@@ -52,6 +52,20 @@ public class PtLessonSearchRepository {
 			.where(
 				trainer.id.eq(traineeId),
 				ptLesson.lessonStart.between(startDate, endDate),
+				ptLesson.deletedAt.isNull()
+			)
+			.orderBy(ptLesson.lessonStart.asc())
+			.fetch();
+	}
+
+	public List<PtLesson> findAllByTraineeIdForTraineeCalendar(Long traineeId, LocalDate startDate, LocalDate endDate) {
+		return jpaQueryFactory
+			.selectFrom(ptLesson)
+			.join(ptLesson.ptTrainerTrainee, ptTrainerTrainee).fetchJoin()
+			.join(ptTrainerTrainee.trainee, trainee).fetchJoin()
+			.where(
+				trainee.id.eq(traineeId),
+				ptLesson.lessonStart.between(startDate.atStartOfDay(), endDate.atTime(LocalTime.MAX)),
 				ptLesson.deletedAt.isNull()
 			)
 			.orderBy(ptLesson.lessonStart.asc())

@@ -8,7 +8,7 @@ import com.tnt.domain.pt.PtTrainerTrainee;
 
 public class PtLessonsFixture {
 
-	public static List<PtLesson> getPtLessons(PtTrainerTrainee ptTrainerTrainee) {
+	public static List<PtLesson> getPtLessons1WithId(PtTrainerTrainee ptTrainerTrainee) {
 		return List.of(PtLesson.builder()
 			.id(1L)
 			.ptTrainerTrainee(ptTrainerTrainee)

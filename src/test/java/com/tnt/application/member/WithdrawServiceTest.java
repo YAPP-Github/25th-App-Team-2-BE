@@ -107,7 +107,7 @@ class WithdrawServiceTest {
 
 		PtTrainerTrainee ptTrainerTrainee = PtTrainerTraineeFixture.getPtTrainerTrainee1(trainer, trainee);
 
-		List<PtLesson> ptLessons = PtLessonsFixture.getPtLessons(ptTrainerTrainee);
+		List<PtLesson> ptLessons = PtLessonsFixture.getPtLessons1WithId(ptTrainerTrainee);
 
 		given(memberService.getMemberWithMemberId(trainerMember.getId())).willReturn(trainerMember);
 		given(trainerService.getTrainerWithMemberId(trainerMember.getId())).willReturn(trainer);
@@ -136,7 +136,7 @@ class WithdrawServiceTest {
 
 		List<PtGoal> ptGoals = List.of(PtGoal.builder().id(1L).traineeId(trainee.getId()).content("test").build());
 
-		List<PtLesson> ptLessons = PtLessonsFixture.getPtLessons(ptTrainerTrainee);
+		List<PtLesson> ptLessons = PtLessonsFixture.getPtLessons1WithId(ptTrainerTrainee);
 
 		given(memberService.getMemberWithMemberId(traineeMember.getId())).willReturn(traineeMember);
 		given(traineeService.getTraineeWithMemberId(traineeMember.getId())).willReturn(trainee);
