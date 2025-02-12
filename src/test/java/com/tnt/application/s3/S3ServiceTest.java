@@ -57,7 +57,7 @@ class S3ServiceTest {
 		return image;
 	}
 
-	private byte[] createDummyImageData() throws IOException {
+	private byte[] createDummyImageData(int orientation) throws IOException {
 		BufferedImage image = createTestImage();
 
 		// 생성된 이미지를 JPG 형식의 바이트 배열로 변환
@@ -71,7 +71,7 @@ class S3ServiceTest {
 		TiffOutputDirectory rootDirectory = outputSet.getOrCreateRootDirectory();
 
 		// 3 = 180도 회전
-		rootDirectory.add(TIFF_TAG_ORIENTATION, (short)3);
+		rootDirectory.add(TIFF_TAG_ORIENTATION, (short)orientation);
 
 		// 기존 이미지에 EXIF 메타데이터를 추가하여 새로운 이미지 생성
 		new ExifRewriter().updateExifMetadataLossless(imageBytes, finalBaos, outputSet);
@@ -83,7 +83,7 @@ class S3ServiceTest {
 	@DisplayName("트레이너 프로필 이미지 업로드 성공")
 	void upload_trainer_profile_image_success() throws Exception {
 		// given
-		MockMultipartFile image = new MockMultipartFile("image", "test.jpg", IMAGE_JPEG_VALUE, createDummyImageData());
+		MockMultipartFile image = new MockMultipartFile("image", "test.jpg", IMAGE_JPEG_VALUE, createDummyImageData(1));
 		String expectedUrl = "https://bucket.s3.amazonaws.com/trainer/profile/123.jpg";
 
 		given(s3Adapter.uploadFile(any(byte[].class), anyString(), anyString())).willReturn(expectedUrl);
@@ -109,7 +109,7 @@ class S3ServiceTest {
 	@DisplayName("지원하지 않는 이미지 형식으로 업로드 실패")
 	void upload_profile_image_unsupported_format_error() throws IOException {
 		// given
-		MockMultipartFile image = new MockMultipartFile("image", "test.gif", "image/gif", createDummyImageData());
+		MockMultipartFile image = new MockMultipartFile("image", "test.gif", "image/gif", createDummyImageData(1));
 
 		// when & then
 		assertThrows(ImageException.class, () -> s3Service.uploadProfileImage(image, TRAINER));
@@ -120,15 +120,30 @@ class S3ServiceTest {
 	void rotate_image_orientation_3_success() throws IOException {
 		// given
 		BufferedImage originalImage = createTestImage();
-		MockMultipartFile image = new MockMultipartFile("image", "test.jpg", IMAGE_JPEG_VALUE, createDummyImageData());
+		MockMultipartFile image = new MockMultipartFile("image", "test.jpg", IMAGE_JPEG_VALUE, createDummyImageData(3));
 
 		// when
 		BufferedImage rotatedImage = ReflectionTestUtils.invokeMethod(s3Service, "rotateImageIfRequired", originalImage,
 			image);
 
 		// then
-		// 회전 후에는 위쪽이 검은색, 아래쪽이 흰색이어야 함
-		assertThat(requireNonNull(rotatedImage).getRGB(50, 25)).isEqualTo(Color.BLACK.getRGB()); // 원래 아래쪽 색
-		assertThat(requireNonNull(rotatedImage).getRGB(50, 75)).isEqualTo(Color.WHITE.getRGB()); // 원래 위쪽 색
+		assertThat(requireNonNull(rotatedImage).getRGB(50, 25)).isEqualTo(Color.BLACK.getRGB());
+		assertThat(requireNonNull(rotatedImage).getRGB(50, 75)).isEqualTo(Color.WHITE.getRGB());
+	}
+
+	@Test
+	@DisplayName("orientation이 6일 때 이미지 90도 회전 성공")
+	void rotate_image_orientation_6_success() throws IOException {
+		// given
+		BufferedImage originalImage = createTestImage();
+		MockMultipartFile image = new MockMultipartFile("image", "test.jpg", IMAGE_JPEG_VALUE, createDummyImageData(6));
+
+		// when
+		BufferedImage rotatedImage = ReflectionTestUtils.invokeMethod(s3Service, "rotateImageIfRequired", originalImage,
+			image);
+
+		// then
+		assertThat(requireNonNull(rotatedImage).getRGB(25, 50)).isEqualTo(Color.BLACK.getRGB());
+		assertThat(requireNonNull(rotatedImage).getRGB(75, 50)).isEqualTo(Color.WHITE.getRGB());
 	}
 }
