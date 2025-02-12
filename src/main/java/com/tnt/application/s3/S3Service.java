@@ -13,9 +13,15 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import javax.imageio.metadata.IIOMetadata;
+import javax.imageio.plugins.tiff.TIFFDirectory;
+import javax.imageio.plugins.tiff.TIFFField;
+import javax.imageio.stream.ImageInputStream;
 
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
@@ -78,7 +84,7 @@ public class S3Service {
 	}
 
 	public void deleteProfileImage(String imageUrl) {
-		if (isDefaultImage(imageUrl)) {
+		if (imageUrl.equals(TRAINER_DEFAULT_IMAGE) || imageUrl.equals(TRAINEE_DEFAULT_IMAGE)) {
 			return;
 		}
 
@@ -123,21 +129,48 @@ public class S3Service {
 			return image.getBytes();
 		}
 
-		BufferedImage originalImage = ImageIO.read(image.getInputStream());
+		// EXIF 정보를 포함하여 이미지 읽기
+		Iterator<ImageReader> readers = ImageIO.getImageReadersByFormatName(extension);
+		ImageReader reader = readers.next();
+
+		ImageInputStream iis = ImageIO.createImageInputStream(image.getInputStream());
+		reader.setInput(iis, true);
+
+		// 이미지 메타데이터 읽기
+		IIOMetadata metadata = reader.getImageMetadata(0);
+		TIFFDirectory dir = TIFFDirectory.createFromMetadata(metadata);
+		TIFFField orientation = dir.getTIFFField(274); // EXIF Orientation 태그
+
+		// 원본 이미지 읽기
+		BufferedImage originalImage = reader.read(0);
+
+		// 방향에 따라 이미지 회전
+		if (orientation != null) {
+			int orientationValue = orientation.getAsInt(0);
+			originalImage = rotateImageByOrientation(originalImage, orientationValue);
+		}
+
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
 		Thumbnails.of(originalImage)
 			.size(MAX_WIDTH, MAX_HEIGHT)
 			.keepAspectRatio(true)
 			.outputQuality(IMAGE_QUALITY)
-			.useExifOrientation(true)
 			.outputFormat(extension)
 			.toOutputStream(outputStream);
 
 		return outputStream.toByteArray();
 	}
 
-	private boolean isDefaultImage(String imageUrl) {
-		return imageUrl.equals(TRAINER_DEFAULT_IMAGE) || imageUrl.equals(TRAINEE_DEFAULT_IMAGE);
+	private BufferedImage rotateImageByOrientation(BufferedImage image, int orientation) throws IOException {
+		return switch (orientation) {
+			case 3 -> // 180도 회전
+				Thumbnails.of(image).scale(1.0).rotate(180).asBufferedImage();
+			case 6 -> // 90도 시계방향
+				Thumbnails.of(image).scale(1.0).rotate(90).asBufferedImage();
+			case 8 -> // 270도 시계방향
+				Thumbnails.of(image).scale(1.0).rotate(270).asBufferedImage();
+			default -> image;
+		};
 	}
 }
