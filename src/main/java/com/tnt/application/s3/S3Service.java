@@ -133,14 +133,18 @@ public class S3Service {
 		// 원본 이미지 읽기
 		BufferedImage originalImage = ImageIO.read(image.getInputStream());
 
-		// 이미지 방향 보정
-		originalImage = rotateImageIfRequired(originalImage, image);
-
-		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-
-		Thumbnails.of(originalImage)
+		// 리사이징
+		BufferedImage resizedImage = Thumbnails.of(originalImage)
 			.size(MAX_WIDTH, MAX_HEIGHT)
 			.keepAspectRatio(true)
+			.asBufferedImage();
+
+		// 리사이즈된 이미지를 회전
+		resizedImage = rotateImageIfRequired(resizedImage, image);
+
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+		Thumbnails.of(resizedImage)
+			.scale(1.0)  // 크기는 그대로
 			.outputQuality(IMAGE_QUALITY)
 			.outputFormat(extension)
 			.toOutputStream(outputStream);
