@@ -205,4 +205,8 @@ dependencies {
 
     // Thumbnailator - 이미지 리사이징과 포맷 변환
     implementation 'net.coobird:thumbnailator:0.4.20'
+
+    // 이미지 메타데이터 관련 라이브러리
+    implementation 'com.drewnoakes:metadata-extractor:2.19.0'
+    implementation 'org.apache.commons:commons-imaging:1.0.0-alpha5'
 }

@@ -1,5 +1,6 @@
 package com.tnt.application.s3;
 
+import static com.drew.metadata.exif.ExifDirectoryBase.TAG_ORIENTATION;
 import static com.tnt.common.constant.ImageConstant.TRAINEE_DEFAULT_IMAGE;
 import static com.tnt.common.constant.ImageConstant.TRAINEE_S3_PROFILE_IMAGE_PATH;
 import static com.tnt.common.constant.ImageConstant.TRAINER_DEFAULT_IMAGE;
@@ -13,16 +14,9 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.imageio.ImageIO;
-import javax.imageio.ImageReader;
-import javax.imageio.metadata.IIOMetadata;
-import javax.imageio.plugins.tiff.TIFFDirectory;
-import javax.imageio.plugins.tiff.TIFFField;
-import javax.imageio.plugins.tiff.TIFFTag;
-import javax.imageio.stream.ImageInputStream;
 
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
@@ -30,6 +24,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 import net.coobird.thumbnailator.Thumbnails;
 
+import com.drew.imaging.ImageMetadataReader;
+import com.drew.imaging.ImageProcessingException;
+import com.drew.metadata.Directory;
+import com.drew.metadata.Metadata;
+import com.drew.metadata.MetadataException;
+import com.drew.metadata.exif.ExifIFD0Directory;
 import com.tnt.common.error.exception.ImageException;
 import com.tnt.domain.member.MemberType;
 import com.tnt.infrastructure.s3.S3Adapter;
@@ -130,27 +130,11 @@ public class S3Service {
 			return image.getBytes();
 		}
 
-		// EXIF 정보를 포함하여 이미지 읽기
-		Iterator<ImageReader> readers = ImageIO.getImageReadersByFormatName(extension);
-		ImageReader reader = readers.next();
-
-		ImageInputStream iis = ImageIO.createImageInputStream(image.getInputStream());
-		reader.setInput(iis, true);
-
-		// 이미지 메타데이터 읽기
-		IIOMetadata metadata = reader.getImageMetadata(0);
-		TIFFDirectory dir = TIFFDirectory.createFromMetadata(metadata);
-		TIFFField orientation = dir.getTIFFField(274); // EXIF Orientation 태그
-
 		// 원본 이미지 읽기
-		BufferedImage originalImage = reader.read(0);
+		BufferedImage originalImage = ImageIO.read(image.getInputStream());
 
-		// 방향에 따라 이미지 회전
-		if (orientation != null) {
-			dir.removeTIFFField(274);
-			dir.addTIFFField(new TIFFField(new TIFFTag("Orientation", 274, TIFFTag.TIFF_SHORT), TIFFTag.TIFF_SHORT, 1,
-				new int[] {1}));
-		}
+		// 이미지 방향 보정
+		originalImage = rotateImageIfRequired(originalImage, image);
 
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
@@ -162,5 +146,27 @@ public class S3Service {
 			.toOutputStream(outputStream);
 
 		return outputStream.toByteArray();
+	}
+
+	private BufferedImage rotateImageIfRequired(BufferedImage image, MultipartFile multipartFile) throws IOException {
+		try {
+			Metadata metadata = ImageMetadataReader.readMetadata(multipartFile.getInputStream());
+			Directory directory = metadata.getFirstDirectoryOfType(ExifIFD0Directory.class);
+
+			if (directory != null && directory.containsTag(TAG_ORIENTATION)) {
+				int orientation = directory.getInt(TAG_ORIENTATION);
+
+				return switch (orientation) {
+					case 3 -> Thumbnails.of(image).scale(1.0).rotate(180).asBufferedImage();
+					case 6 -> Thumbnails.of(image).scale(1.0).rotate(90).asBufferedImage();
+					case 8 -> Thumbnails.of(image).scale(1.0).rotate(270).asBufferedImage();
+					default -> image;
+				};
+			}
+		} catch (ImageProcessingException | MetadataException e) {
+			log.warn("이미지 방향 정보 읽기 실패", e);
+		}
+
+		return image;
 	}
 }
