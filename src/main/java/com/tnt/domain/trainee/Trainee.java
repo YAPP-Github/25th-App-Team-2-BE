@@ -1,9 +1,7 @@
 package com.tnt.domain.trainee;
 
 import static com.tnt.common.error.model.ErrorMessage.TRAINEE_INVALID_CAUTION_NOTE;
-import static com.tnt.common.error.model.ErrorMessage.TRAINEE_NULL_HEIGHT;
 import static com.tnt.common.error.model.ErrorMessage.TRAINEE_NULL_MEMBER;
-import static com.tnt.common.error.model.ErrorMessage.TRAINEE_NULL_WEIGHT;
 import static jakarta.persistence.ConstraintMode.NO_CONSTRAINT;
 import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
@@ -46,10 +44,10 @@ public class Trainee extends BaseTimeEntity {
 	@JoinColumn(name = "member_id", nullable = false, foreignKey = @ForeignKey(NO_CONSTRAINT))
 	private Member member;
 
-	@Column(name = "height", nullable = false)
+	@Column(name = "height", nullable = true)
 	private Double height;
 
-	@Column(name = "weight", nullable = false)
+	@Column(name = "weight", nullable = true)
 	private Double weight;
 
 	@Column(name = "caution_note", nullable = true, length = CAUTION_NOTE_LENGTH)
@@ -62,8 +60,8 @@ public class Trainee extends BaseTimeEntity {
 	public Trainee(Long id, Member member, Double height, Double weight, @Nullable String cautionNote) {
 		this.id = id;
 		this.member = requireNonNull(member, TRAINEE_NULL_MEMBER.getMessage());
-		this.height = requireNonNull(height, TRAINEE_NULL_HEIGHT.getMessage());
-		this.weight = requireNonNull(weight, TRAINEE_NULL_WEIGHT.getMessage());
+		this.height = height;
+		this.weight = weight;
 		validateAndSetCautionNote(cautionNote);
 	}
 
