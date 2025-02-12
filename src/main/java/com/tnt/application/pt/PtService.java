@@ -31,6 +31,8 @@ import com.tnt.domain.trainee.Trainee;
 import com.tnt.domain.trainer.Trainer;
 import com.tnt.dto.trainee.request.ConnectWithTrainerRequest;
 import com.tnt.dto.trainee.request.CreateDietRequest;
+import com.tnt.dto.trainee.response.CreateDietResponse;
+import com.tnt.dto.trainee.response.GetDietResponse;
 import com.tnt.dto.trainee.response.GetTraineeCalendarPtLessonCountResponse;
 import com.tnt.dto.trainer.ConnectWithTrainerDto;
 import com.tnt.dto.trainer.request.CreatePtLessonRequest;
@@ -201,7 +203,7 @@ public class PtService {
 	}
 
 	@Transactional
-	public void createDiet(Long memberId, CreateDietRequest request, String dietImageUrl) {
+	public CreateDietResponse createDiet(Long memberId, CreateDietRequest request, String dietImageUrl) {
 		Trainee trainee = traineeService.getTraineeWithMemberId(memberId);
 
 		Diet diet = Diet.builder()
@@ -212,7 +214,20 @@ public class PtService {
 			.dietType(request.dietType())
 			.build();
 
-		dietService.save(diet);
+		Diet saveDiet = dietService.save(diet);
+
+		return new CreateDietResponse(saveDiet.getId(), saveDiet.getDate(), saveDiet.getDietImageUrl(),
+			saveDiet.getDietType(), saveDiet.getMemo());
+	}
+
+	@Transactional(readOnly = true)
+	public GetDietResponse getDiet(Long memberId, Long dietId) {
+		Trainee trainee = traineeService.getTraineeWithMemberId(memberId);
+
+		Diet diet = dietService.getDietWithTraineeIdAndDietId(dietId, trainee.getId());
+
+		return new GetDietResponse(diet.getId(), diet.getDate(), diet.getDietImageUrl(), diet.getDietType(),
+			diet.getMemo());
 	}
 
 	@Transactional(readOnly = true)

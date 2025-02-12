@@ -13,6 +13,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
@@ -35,10 +36,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tnt.domain.member.Member;
 import com.tnt.domain.pt.PtLesson;
 import com.tnt.domain.pt.PtTrainerTrainee;
+import com.tnt.domain.trainee.Diet;
 import com.tnt.domain.trainee.Trainee;
 import com.tnt.domain.trainer.Trainer;
 import com.tnt.dto.trainee.request.ConnectWithTrainerRequest;
 import com.tnt.dto.trainee.request.CreateDietRequest;
+import com.tnt.fixture.DietFixture;
 import com.tnt.fixture.MemberFixture;
 import com.tnt.fixture.PtTrainerTraineeFixture;
 import com.tnt.fixture.TraineeFixture;
@@ -47,6 +50,7 @@ import com.tnt.gateway.filter.CustomUserDetails;
 import com.tnt.infrastructure.mysql.repository.member.MemberRepository;
 import com.tnt.infrastructure.mysql.repository.pt.PtLessonRepository;
 import com.tnt.infrastructure.mysql.repository.pt.PtTrainerTraineeRepository;
+import com.tnt.infrastructure.mysql.repository.trainee.DietRepository;
 import com.tnt.infrastructure.mysql.repository.trainee.TraineeRepository;
 import com.tnt.infrastructure.mysql.repository.trainer.TrainerRepository;
 
@@ -71,8 +75,13 @@ class TraineeControllerTest {
 
 	@Autowired
 	private TraineeRepository traineeRepository;
+
+	@Autowired
+	private DietRepository dietRepository;
+
 	@Autowired
 	private PtTrainerTraineeRepository ptTrainerTraineeRepository;
+
 	@Autowired
 	private PtLessonRepository ptLessonRepository;
 
@@ -127,10 +136,8 @@ class TraineeControllerTest {
 	@DisplayName("통합 테스트 - 식단 등록 성공")
 	void create_diet_success() throws Exception {
 		// given
-		Member trainerMember = MemberFixture.getTrainerMember1();
 		Member traineeMember = MemberFixture.getTraineeMember2();
 
-		trainerMember = memberRepository.save(trainerMember);
 		traineeMember = memberRepository.save(traineeMember);
 
 		CustomUserDetails traineeUserDetails = new CustomUserDetails(traineeMember.getId(),
@@ -142,13 +149,13 @@ class TraineeControllerTest {
 
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
-		Trainer trainer = TrainerFixture.getTrainer2(trainerMember);
 		Trainee trainee = TraineeFixture.getTrainee1(traineeMember);
 
-		trainerRepository.save(trainer);
 		traineeRepository.save(trainee);
 
-		LocalDateTime date = LocalDateTime.now();
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+		LocalDateTime date = LocalDateTime.parse("2025-02-11T15:38");
+		String formattedDate = date.format(formatter);
 		String memo = "배부르다";
 
 		CreateDietRequest request = new CreateDietRequest(date, DINNER, memo);
@@ -166,6 +173,11 @@ class TraineeControllerTest {
 
 		// then
 		result.andExpect(status().isCreated())
+			.andExpect(jsonPath("$.dietId").value(3))
+			.andExpect(jsonPath("$.date").value(formattedDate))
+			.andExpect(jsonPath("$.dietImageUrl").doesNotExist())
+			.andExpect(jsonPath("$.memo").value(memo))
+			.andExpect(jsonPath("$.dietType").value(DINNER.toString()))
 			.andDo(print());
 	}
 
@@ -173,10 +185,8 @@ class TraineeControllerTest {
 	@DisplayName("통합 테스트 - 사진 없이 식단 등록 성공")
 	void create_diet_without_image_success() throws Exception {
 		// given
-		Member trainerMember = MemberFixture.getTrainerMember1();
 		Member traineeMember = MemberFixture.getTraineeMember2();
 
-		trainerMember = memberRepository.save(trainerMember);
 		traineeMember = memberRepository.save(traineeMember);
 
 		CustomUserDetails traineeUserDetails = new CustomUserDetails(traineeMember.getId(),
@@ -188,13 +198,13 @@ class TraineeControllerTest {
 
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
-		Trainer trainer = TrainerFixture.getTrainer2(trainerMember);
 		Trainee trainee = TraineeFixture.getTrainee1(traineeMember);
 
-		trainerRepository.save(trainer);
 		traineeRepository.save(trainee);
 
-		LocalDateTime date = LocalDateTime.now();
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+		LocalDateTime date = LocalDateTime.parse("2025-02-11T15:38");
+		String formattedDate = date.format(formatter);
 		String memo = "배부르다";
 
 		CreateDietRequest request = new CreateDietRequest(date, DINNER, memo);
@@ -208,6 +218,79 @@ class TraineeControllerTest {
 
 		// then
 		result.andExpect(status().isCreated())
+			.andExpect(jsonPath("$.dietId").value(2))
+			.andExpect(jsonPath("$.date").value(formattedDate))
+			.andExpect(jsonPath("$.dietImageUrl").doesNotExist())
+			.andExpect(jsonPath("$.memo").value(memo))
+			.andExpect(jsonPath("$.dietType").value(DINNER.toString()))
+			.andDo(print());
+	}
+
+	@Test
+	@DisplayName("통합 테스트 - 특정 식단 조회 성공")
+	void get_diet_with_diet_id_success() throws Exception {
+		// given
+		Member traineeMember = MemberFixture.getTraineeMember2();
+
+		traineeMember = memberRepository.save(traineeMember);
+
+		CustomUserDetails traineeUserDetails = new CustomUserDetails(traineeMember.getId(),
+			traineeMember.getId().toString(),
+			authoritiesMapper.mapAuthorities(List.of(new SimpleGrantedAuthority("ROLE_USER"))));
+
+		Authentication authentication = new UsernamePasswordAuthenticationToken(traineeUserDetails, null,
+			authoritiesMapper.mapAuthorities(traineeUserDetails.getAuthorities()));
+
+		SecurityContextHolder.getContext().setAuthentication(authentication);
+
+		Trainee trainee = TraineeFixture.getTrainee1(traineeMember);
+
+		traineeRepository.save(trainee);
+
+		Diet diet = DietFixture.getDiet1(trainee.getId());
+
+		dietRepository.save(diet);
+
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+		String formattedDate = diet.getDate().format(formatter);
+
+		// when
+		mockMvc.perform(get("/trainees/diets/{dietId}", diet.getId())
+				.contentType("application/json"))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.dietId").value(diet.getId()))
+			.andExpect(jsonPath("$.date").value(formattedDate))
+			.andExpect(jsonPath("$.dietImageUrl").value(diet.getDietImageUrl()))
+			.andExpect(jsonPath("$.memo").value(diet.getMemo()))
+			.andExpect(jsonPath("$.dietType").value(DINNER.toString()))
+			.andDo(print());
+	}
+
+	@Test
+	@DisplayName("통합 테스트 - 특정 식단 조회 실패")
+	void get_diet_with_diet_id_failure() throws Exception {
+		// given
+		Member traineeMember = MemberFixture.getTraineeMember2();
+
+		traineeMember = memberRepository.save(traineeMember);
+
+		CustomUserDetails traineeUserDetails = new CustomUserDetails(traineeMember.getId(),
+			traineeMember.getId().toString(),
+			authoritiesMapper.mapAuthorities(List.of(new SimpleGrantedAuthority("ROLE_USER"))));
+
+		Authentication authentication = new UsernamePasswordAuthenticationToken(traineeUserDetails, null,
+			authoritiesMapper.mapAuthorities(traineeUserDetails.getAuthorities()));
+
+		SecurityContextHolder.getContext().setAuthentication(authentication);
+
+		Trainee trainee = TraineeFixture.getTrainee1(traineeMember);
+
+		traineeRepository.save(trainee);
+
+		// when
+		mockMvc.perform(get("/trainees/diets/{dietId}", 123)
+				.contentType("application/json"))
+			.andExpect(status().is4xxClientError())
 			.andDo(print());
 	}
 

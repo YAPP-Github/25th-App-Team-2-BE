@@ -82,7 +82,8 @@ public enum ErrorMessage {
 	DIET_NULL_TRAINEE_ID("식단 트레이니 id가 null 입니다."),
 	DIET_INVALID_IMAGE_URL("유효하지 않는 식단 사진입니다."),
 	DIET_INVALID_MEMO("식단 메모가 올바르지 않습니다."),
-	UNSUPPORTED_DIET_TYPE("지원하지 않는 식단 타입입니다.");
+	UNSUPPORTED_DIET_TYPE("지원하지 않는 식단 타입입니다."),
+	DIET_NOT_FOUND("존재하지 않는 식단입니다.");
 
 	private final String message;
 }
