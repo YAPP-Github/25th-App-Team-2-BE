@@ -24,6 +24,7 @@ public class TrainerSearchRepository {
 			.join(trainer.member, member).fetchJoin()
 			.where(
 				member.id.eq(memberId),
+				member.deletedAt.isNull(),
 				trainer.deletedAt.isNull()
 			)
 			.fetchOne());
@@ -35,6 +36,7 @@ public class TrainerSearchRepository {
 			.join(trainer.member, member).fetchJoin()
 			.where(
 				trainer.invitationCode.eq(invitationCode),
+				member.deletedAt.isNull(),
 				trainer.deletedAt.isNull()
 			)
 			.fetchOne());

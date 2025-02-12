@@ -54,22 +54,34 @@ public class PtLesson extends BaseTimeEntity {
 	@Column(name = "memo", nullable = true, length = MEMO_LENGTH)
 	private String memo;
 
+	@Column(name = "session", nullable = false)
+	private Integer session;
+
 	@Column(name = "deleted_at", nullable = true)
 	private LocalDateTime deletedAt;
 
 	@Builder
 	public PtLesson(Long id, PtTrainerTrainee ptTrainerTrainee, LocalDateTime lessonStart, LocalDateTime lessonEnd,
-		@Nullable String memo) {
+		@Nullable String memo, Integer session) {
 		this.id = id;
 		this.ptTrainerTrainee = requireNonNull(ptTrainerTrainee, PT_TRAINER_TRAINEE_NULL.getMessage());
 		this.lessonStart = requireNonNull(lessonStart);
 		this.lessonEnd = requireNonNull(lessonEnd);
 		this.isCompleted = false;
+		this.session = requireNonNull(session);
 		validateAndSetMemo(memo);
 	}
 
 	public void completeLesson() {
 		this.isCompleted = true;
+	}
+
+	public void softDelete() {
+		this.deletedAt = LocalDateTime.now();
+	}
+
+	public void increaseSession() {
+		this.session++;
 	}
 
 	private void validateAndSetMemo(String memo) {
@@ -82,9 +94,5 @@ public class PtLesson extends BaseTimeEntity {
 		}
 
 		this.memo = memo;
-	}
-
-	public void softDelete() {
-		this.deletedAt = LocalDateTime.now();
 	}
 }

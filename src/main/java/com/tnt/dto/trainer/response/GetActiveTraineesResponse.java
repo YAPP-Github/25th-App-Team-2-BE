@@ -10,10 +10,10 @@ public record GetActiveTraineesResponse(
 	Integer traineeCount,
 
 	@Schema(description = "트레이니 목록", nullable = false)
-	List<TraineeInfo> trainees
+	List<ActiveTraineeInfo> trainees
 ) {
 
-	public record TraineeInfo(
+	public record ActiveTraineeInfo(
 		@Schema(description = "트레이니 ID", example = "123523564", nullable = false)
 		Long id,
 

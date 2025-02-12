@@ -79,8 +79,9 @@ public class MemberService {
 			Trainee trainee = traineeService.getTraineeWithMemberId(memberId);
 			List<String> ptGoals = ptGoalService.getAllPtGoalsWithTraineeId(trainee.getId()).stream().map(
 				PtGoal::getContent).toList();
+			boolean isConnected = ptService.isPtTrainerTraineeExistWithTraineeId(trainee.getId());
 
-			TraineeInfo traineeInfo = new TraineeInfo(member.getBirthday(),
+			TraineeInfo traineeInfo = new TraineeInfo(isConnected, member.getBirthday(),
 				member.getAge(), trainee.getHeight(), trainee.getWeight(), trainee.getCautionNote(), ptGoals);
 
 			memberInfo = new GetMemberInfoResponse(member.getName(), member.getEmail(), member.getProfileImageUrl(),

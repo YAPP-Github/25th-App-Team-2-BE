@@ -9,12 +9,11 @@ import java.time.LocalDateTime;
 
 import com.tnt.infrastructure.mysql.BaseTimeEntity;
 
+import io.hypersistence.utils.hibernate.id.Tsid;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
@@ -33,7 +32,7 @@ public class Diet extends BaseTimeEntity {
 	public static final int DIET_TYPE_LENGTH = 20;
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Tsid
 	@Column(name = "id", nullable = false, unique = true)
 	private Long id;
 

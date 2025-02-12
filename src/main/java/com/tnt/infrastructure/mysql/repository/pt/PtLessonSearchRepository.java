@@ -16,6 +16,8 @@ import org.springframework.stereotype.Repository;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.tnt.domain.pt.PtLesson;
 import com.tnt.domain.pt.PtTrainerTrainee;
+import com.tnt.dto.trainee.QTraineeProjection_PtInfoDto;
+import com.tnt.dto.trainee.TraineeProjection;
 
 import lombok.RequiredArgsConstructor;
 
@@ -35,7 +37,10 @@ public class PtLessonSearchRepository {
 			.where(
 				trainer.id.eq(trainerId),
 				ptLesson.lessonStart.between(date.atStartOfDay(), date.atTime(LocalTime.MAX)),
-				ptLesson.deletedAt.isNull()
+				ptTrainerTrainee.deletedAt.isNull(),
+				trainer.deletedAt.isNull(),
+				ptLesson.deletedAt.isNull(),
+				member.deletedAt.isNull()
 			)
 			.orderBy(ptLesson.lessonStart.asc())
 			.fetch();
@@ -52,6 +57,8 @@ public class PtLessonSearchRepository {
 			.where(
 				trainer.id.eq(traineeId),
 				ptLesson.lessonStart.between(startDate, endDate),
+				ptTrainerTrainee.deletedAt.isNull(),
+				trainer.deletedAt.isNull(),
 				ptLesson.deletedAt.isNull()
 			)
 			.orderBy(ptLesson.lessonStart.asc())
@@ -66,7 +73,9 @@ public class PtLessonSearchRepository {
 			.where(
 				trainee.id.eq(traineeId),
 				ptLesson.lessonStart.between(startDate.atStartOfDay(), endDate.atTime(LocalTime.MAX)),
-				ptLesson.deletedAt.isNull()
+				trainee.deletedAt.isNull(),
+				ptLesson.deletedAt.isNull(),
+				ptTrainerTrainee.deletedAt.isNull()
 			)
 			.orderBy(ptLesson.lessonStart.asc())
 			.fetch();
@@ -81,8 +90,31 @@ public class PtLessonSearchRepository {
 				ptTrainerTrainee.eq(pt),
 				ptLesson.lessonStart.lt(end),
 				ptLesson.lessonEnd.gt(start),
-				ptLesson.deletedAt.isNull()
+				ptLesson.deletedAt.isNull(),
+				ptTrainerTrainee.deletedAt.isNull()
 			)
 			.fetchFirst() != null;
+	}
+
+	public List<TraineeProjection.PtInfoDto> findAllByTraineeIdForDaily(Long traineeId, Integer year, Integer month) {
+		LocalDate startOfMonth = LocalDate.of(year, month, 1);
+		LocalDate endOfMonth = startOfMonth.withDayOfMonth(startOfMonth.lengthOfMonth());
+
+		return jpaQueryFactory
+			.select(new QTraineeProjection_PtInfoDto(trainer.member.name, ptLesson.session, ptLesson.lessonStart,
+				ptLesson.lessonEnd))
+			.from(ptLesson)
+			.join(ptLesson.ptTrainerTrainee, ptTrainerTrainee)
+			.join(ptTrainerTrainee.trainer, trainer)
+			.where(
+				ptLesson.lessonStart.goe(startOfMonth.atStartOfDay()),
+				ptLesson.lessonStart.lt(endOfMonth.plusDays(1).atStartOfDay()),
+				ptTrainerTrainee.trainee.id.eq(traineeId),
+				ptLesson.deletedAt.isNull(),
+				ptTrainerTrainee.deletedAt.isNull(),
+				trainer.deletedAt.isNull()
+			)
+			.orderBy(ptLesson.lessonStart.asc())
+			.fetch();
 	}
 }

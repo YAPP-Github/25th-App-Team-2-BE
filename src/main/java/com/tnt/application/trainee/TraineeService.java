@@ -29,9 +29,13 @@ public class TraineeService {
 			.orElseThrow(() -> new NotFoundException(TRAINEE_NOT_FOUND));
 	}
 
+	public Trainee getTraineeWithMemberIdNoFetch(Long memberId) {
+		return traineeRepository.findByMemberIdAndDeletedAtIsNull(memberId)
+			.orElseThrow(() -> new NotFoundException(TRAINEE_NOT_FOUND));
+	}
+
 	public Trainee getTraineeWithId(Long traineeId) {
 		return traineeSearchRepository.findById(traineeId)
 			.orElseThrow(() -> new NotFoundException(TRAINEE_NOT_FOUND));
 	}
-
 }

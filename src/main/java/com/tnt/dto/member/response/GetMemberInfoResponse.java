@@ -43,6 +43,9 @@ public record GetMemberInfoResponse(
 	}
 
 	public record TraineeInfo(
+		@Schema(description = "트레이너 연결 여부", example = "true", nullable = false)
+		Boolean isConnected,
+
 		@Schema(description = "생년월일", example = "2025-01-01", nullable = true)
 		LocalDate birthday,
 
