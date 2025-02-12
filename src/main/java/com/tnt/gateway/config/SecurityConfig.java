@@ -19,6 +19,7 @@ import org.springframework.security.web.authentication.logout.LogoutFilter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tnt.common.error.model.ErrorResponse;
 import com.tnt.gateway.filter.SessionAuthenticationFilter;
+import com.tnt.gateway.service.CustomOAuth2UserService;
 import com.tnt.gateway.service.SessionService;
 
 import lombok.RequiredArgsConstructor;
@@ -42,6 +43,7 @@ public class SecurityConfig {
 	};
 
 	private final ObjectMapper objectMapper;
+	private final CustomOAuth2UserService customOAuth2UserService;
 	private final SessionService sessionService;
 
 	@Bean
@@ -55,6 +57,7 @@ public class SecurityConfig {
 			.headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
 			.sessionManagement(sessionManagement ->
 				sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+			.oauth2Login(oauth2 -> oauth2.userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService)))
 			.authorizeHttpRequests(request -> request
 				.requestMatchers(ALLOWED_URIS).permitAll().anyRequest().authenticated())
 			.addFilterAfter(sessionAuthenticationFilter(), LogoutFilter.class)

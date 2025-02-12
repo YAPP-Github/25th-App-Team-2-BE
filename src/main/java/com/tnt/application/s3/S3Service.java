@@ -21,6 +21,7 @@ import javax.imageio.ImageReader;
 import javax.imageio.metadata.IIOMetadata;
 import javax.imageio.plugins.tiff.TIFFDirectory;
 import javax.imageio.plugins.tiff.TIFFField;
+import javax.imageio.plugins.tiff.TIFFTag;
 import javax.imageio.stream.ImageInputStream;
 
 import org.springframework.lang.Nullable;
@@ -146,8 +147,9 @@ public class S3Service {
 
 		// 방향에 따라 이미지 회전
 		if (orientation != null) {
-			int orientationValue = orientation.getAsInt(0);
-			originalImage = rotateImageByOrientation(originalImage, orientationValue);
+			dir.removeTIFFField(274);
+			dir.addTIFFField(new TIFFField(new TIFFTag("Orientation", 274, TIFFTag.TIFF_SHORT), TIFFTag.TIFF_SHORT, 1,
+				new int[] {1}));
 		}
 
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -160,17 +162,5 @@ public class S3Service {
 			.toOutputStream(outputStream);
 
 		return outputStream.toByteArray();
-	}
-
-	private BufferedImage rotateImageByOrientation(BufferedImage image, int orientation) throws IOException {
-		return switch (orientation) {
-			case 3 -> // 180도 회전
-				Thumbnails.of(image).scale(1.0).rotate(180).asBufferedImage();
-			case 6 -> // 90도 시계방향
-				Thumbnails.of(image).scale(1.0).rotate(90).asBufferedImage();
-			case 8 -> // 270도 시계방향
-				Thumbnails.of(image).scale(1.0).rotate(270).asBufferedImage();
-			default -> image;
-		};
 	}
 }
