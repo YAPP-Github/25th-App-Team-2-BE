@@ -12,16 +12,34 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public record GetTraineeHomeRecordsResponse(
 
 	@Schema(description = "홈 기록 리스트", nullable = false)
-	List<DailyRecord> homeRecords
+	List<DailyRecord> dailyRecords
 ) {
 
 	public record DailyRecord(
 		@Schema(description = "날짜", example = "2025-02-01", nullable = false)
 		LocalDate date,
 
+		List<PtInfo> ptInfos,
+
 		@Schema(description = "식단 목록", nullable = false)
 		List<DietRecord> diets
 	) {
+
+		public record PtInfo(
+			@Schema(description = "트레이너 이름", example = "홍길동", nullable = false)
+			String trainerName,
+
+			@Schema(description = "PT 회차", example = "8", nullable = false)
+			Integer ptCount,
+
+			@Schema(description = "PT 시작 시간", example = "2025-02-01T17:00:00", nullable = false)
+			LocalDateTime lessonStart,
+
+			@Schema(description = "PT 종료 시간", example = "2025-02-01T18:30:00", nullable = false)
+			LocalDateTime lessonEnd
+		) {
+
+		}
 
 		public record DietRecord(
 			@Schema(description = "식단 ID", example = "54924", nullable = false)

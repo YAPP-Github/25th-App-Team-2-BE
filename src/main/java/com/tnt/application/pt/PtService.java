@@ -6,8 +6,8 @@ import static com.tnt.common.error.model.ErrorMessage.PT_TRAINEE_ALREADY_EXIST;
 import static com.tnt.common.error.model.ErrorMessage.PT_TRAINER_TRAINEE_ALREADY_EXIST;
 import static com.tnt.common.error.model.ErrorMessage.PT_TRAINER_TRAINEE_NOT_FOUND;
 import static com.tnt.common.error.model.ErrorMessage.TRAINEE_NOT_FOUND;
+import static java.util.Collections.emptyList;
 import static java.util.Comparator.comparing;
-import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.toList;
@@ -16,6 +16,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -34,6 +35,7 @@ import com.tnt.domain.trainee.Diet;
 import com.tnt.domain.trainee.PtGoal;
 import com.tnt.domain.trainee.Trainee;
 import com.tnt.domain.trainer.Trainer;
+import com.tnt.dto.trainee.TraineeProjection;
 import com.tnt.dto.trainee.request.ConnectWithTrainerRequest;
 import com.tnt.dto.trainee.request.CreateDietRequest;
 import com.tnt.dto.trainee.response.CreateDietResponse;
@@ -256,23 +258,49 @@ public class PtService {
 	public GetTraineeHomeRecordsResponse getHomeRecords(Long memberId, Integer year, Integer month) {
 		Trainee trainee = traineeService.getTraineeWithMemberId(memberId);
 
+		// PT 정보 조회
+		List<TraineeProjection.PtInfoDto> ptResults = ptLessonSearchRepository.findAllByTraineeIdForHome(
+			trainee.getId(), year, month);
+		TraineeProjection.PtCountInfoDto ptCountInfo = ptLessonSearchRepository.getPtCountInfo(trainee.getId());
+
+		// PT 정보를 날짜 별로 그룹화
+		Map<LocalDate, List<GetTraineeHomeRecordsResponse.DailyRecord.PtInfo>> ptInfosByDate = ptResults.stream()
+			.map(lesson -> {
+				// ptResults 순서(인덱스)를 0부터 세어서 finishedPtCount에 더함
+				int ptOrder = ptResults.indexOf(lesson) + 1;
+				int ptCount = Math.min(ptCountInfo.finishedPtCount() + ptOrder, ptCountInfo.totalPtCount());
+
+				return new GetTraineeHomeRecordsResponse.DailyRecord.PtInfo(lesson.trainerName(), ptCount,
+					lesson.lessonStart(), lesson.lessonEnd());
+			})
+			.collect(groupingBy(
+				ptInfo -> ptInfo.lessonStart().toLocalDate(),
+				toList()
+			));
+
+		// 식단 정보 조회
 		List<Diet> diets = dietService.getDietsWithTraineeIdForHome(trainee.getId(), year, month);
 
-		List<GetTraineeHomeRecordsResponse.DailyRecord> dailyRecords = diets.stream()
+		// 식단 정보를 날짜 별로 그룹화
+		Map<LocalDate, List<GetTraineeHomeRecordsResponse.DailyRecord.DietRecord>> dietsByDate = diets.stream()
 			.collect(groupingBy(
 				diet -> diet.getDate().toLocalDate(),
 				mapping(
 					diet -> new GetTraineeHomeRecordsResponse.DailyRecord.DietRecord(diet.getId(), diet.getDate(),
-						diet.getDietImageUrl(), diet.getDietType(), diet.getMemo()),
-					collectingAndThen(
-						toList(),
-						dietRecords -> new GetTraineeHomeRecordsResponse.DailyRecord(
-							dietRecords.getFirst().date().toLocalDate(), dietRecords)
-					)
+						diet.getDietImageUrl(), diet.getDietType(), diet.getMemo()), toList()
 				)
-			))
-			.values()
-			.stream()
+			));
+
+		// DailyRecord로 변환
+		List<GetTraineeHomeRecordsResponse.DailyRecord> dailyRecords = dietsByDate.entrySet().stream()
+			.map(entry -> {
+				LocalDate date = entry.getKey();
+				List<GetTraineeHomeRecordsResponse.DailyRecord.DietRecord> dietRecords = entry.getValue();
+				List<GetTraineeHomeRecordsResponse.DailyRecord.PtInfo> ptInfos = ptInfosByDate.getOrDefault(date,
+					emptyList());
+
+				return new GetTraineeHomeRecordsResponse.DailyRecord(date, ptInfos, dietRecords);
+			})
 			.sorted(comparing(GetTraineeHomeRecordsResponse.DailyRecord::date))
 			.toList();
 

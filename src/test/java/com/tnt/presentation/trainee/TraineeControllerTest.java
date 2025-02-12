@@ -44,6 +44,7 @@ import com.tnt.dto.trainee.request.ConnectWithTrainerRequest;
 import com.tnt.dto.trainee.request.CreateDietRequest;
 import com.tnt.fixture.DietFixture;
 import com.tnt.fixture.MemberFixture;
+import com.tnt.fixture.PtLessonsFixture;
 import com.tnt.fixture.PtTrainerTraineeFixture;
 import com.tnt.fixture.TraineeFixture;
 import com.tnt.fixture.TrainerFixture;
@@ -372,8 +373,10 @@ class TraineeControllerTest {
 	@DisplayName("통합 테스트 - 트레이니 홈 기록 조회 성공")
 	void get_home_records_success() throws Exception {
 		// given
+		Member trainerMember = MemberFixture.getTrainerMember1();
 		Member traineeMember = MemberFixture.getTraineeMember2();
 
+		trainerMember = memberRepository.save(trainerMember);
 		traineeMember = memberRepository.save(traineeMember);
 
 		CustomUserDetails traineeUserDetails = new CustomUserDetails(traineeMember.getId(),
@@ -385,9 +388,19 @@ class TraineeControllerTest {
 
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
+		Trainer trainer = TrainerFixture.getTrainer2(trainerMember);
 		Trainee trainee = TraineeFixture.getTrainee1(traineeMember);
 
+		trainerRepository.save(trainer);
 		traineeRepository.save(trainee);
+
+		PtTrainerTrainee ptTrainerTrainee = PtTrainerTraineeFixture.getPtTrainerTrainee1(trainer, trainee);
+
+		ptTrainerTraineeRepository.save(ptTrainerTrainee);
+
+		List<PtLesson> ptLesson = PtLessonsFixture.getPtLessons1(ptTrainerTrainee);
+
+		ptLessonRepository.saveAll(ptLesson);
 
 		Diet diet1 = DietFixture.getDiet1(trainee.getId());
 		Diet diet2 = DietFixture.getDiet2(trainee.getId());
@@ -406,31 +419,38 @@ class TraineeControllerTest {
 				.param("year", String.valueOf(2025))
 				.param("month", String.valueOf(2)))
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.homeRecords").isArray())
-			.andExpect(jsonPath("$.homeRecords[0].date").value(diet1.getDate().toLocalDate().format(dateFormatter)))
-			.andExpect(jsonPath("$.homeRecords[0].diets").isArray())
-			.andExpect(jsonPath("$.homeRecords[0].diets[0].dietId").value(diet1.getId()))
-			.andExpect(jsonPath("$.homeRecords[0].diets[0].date").value(diet1.getDate().format(dateTimeFormatter)))
-			.andExpect(jsonPath("$.homeRecords[0].diets[0].dietImageUrl").value(diet1.getDietImageUrl()))
-			.andExpect(jsonPath("$.homeRecords[0].diets[0].memo").value(diet1.getMemo()))
-			.andExpect(jsonPath("$.homeRecords[0].diets[0].dietType").value(diet1.getDietType().toString()))
-			.andExpect(jsonPath("$.homeRecords[0].diets[1].dietId").value(diet2.getId()))
-			.andExpect(jsonPath("$.homeRecords[0].diets[1].date").value(diet2.getDate().format(dateTimeFormatter)))
-			.andExpect(jsonPath("$.homeRecords[0].diets[1].dietImageUrl").value(diet2.getDietImageUrl()))
-			.andExpect(jsonPath("$.homeRecords[0].diets[1].memo").value(diet2.getMemo()))
-			.andExpect(jsonPath("$.homeRecords[0].diets[1].dietType").value(diet2.getDietType().toString()))
-			.andExpect(jsonPath("$.homeRecords[1].date").value(diet3.getDate().toLocalDate().format(dateFormatter)))
-			.andExpect(jsonPath("$.homeRecords[1].diets").isArray())
-			.andExpect(jsonPath("$.homeRecords[1].diets[0].dietId").value(diet3.getId()))
-			.andExpect(jsonPath("$.homeRecords[1].diets[0].date").value(diet3.getDate().format(dateTimeFormatter)))
-			.andExpect(jsonPath("$.homeRecords[1].diets[0].dietImageUrl").value(diet3.getDietImageUrl()))
-			.andExpect(jsonPath("$.homeRecords[1].diets[0].memo").value(diet3.getMemo()))
-			.andExpect(jsonPath("$.homeRecords[1].diets[0].dietType").value(diet3.getDietType().toString()))
-			.andExpect(jsonPath("$.homeRecords[1].diets[1].dietId").value(diet4.getId()))
-			.andExpect(jsonPath("$.homeRecords[1].diets[1].date").value(diet4.getDate().format(dateTimeFormatter)))
-			.andExpect(jsonPath("$.homeRecords[1].diets[1].dietImageUrl").value(diet4.getDietImageUrl()))
-			.andExpect(jsonPath("$.homeRecords[1].diets[1].memo").value(diet4.getMemo()))
-			.andExpect(jsonPath("$.homeRecords[1].diets[1].dietType").value(diet4.getDietType().toString()))
+			.andExpect(jsonPath("$.dailyRecords").isArray())
+			.andExpect(jsonPath("$.dailyRecords[0].date").value(diet1.getDate().toLocalDate().format(dateFormatter)))
+			.andExpect(jsonPath("$.dailyRecords[0].ptInfos").isArray())
+			.andExpect(jsonPath("$.dailyRecords[0].ptInfos[0].trainerName").value(trainer.getMember().getName()))
+			.andExpect(jsonPath("$.dailyRecords[0].ptInfos[0].ptCount").value(10))
+			.andExpect(jsonPath("$.dailyRecords[0].ptInfos[0].lessonStart").value(
+				ptLesson.getFirst().getLessonStart().format(dateTimeFormatter)))
+			.andExpect(jsonPath("$.dailyRecords[0].ptInfos[0].lessonEnd").value(
+				ptLesson.getFirst().getLessonEnd().format(dateTimeFormatter)))
+			.andExpect(jsonPath("$.dailyRecords[0].diets").isArray())
+			.andExpect(jsonPath("$.dailyRecords[0].diets[0].dietId").value(diet1.getId()))
+			.andExpect(jsonPath("$.dailyRecords[0].diets[0].date").value(diet1.getDate().format(dateTimeFormatter)))
+			.andExpect(jsonPath("$.dailyRecords[0].diets[0].dietImageUrl").value(diet1.getDietImageUrl()))
+			.andExpect(jsonPath("$.dailyRecords[0].diets[0].memo").value(diet1.getMemo()))
+			.andExpect(jsonPath("$.dailyRecords[0].diets[0].dietType").value(diet1.getDietType().toString()))
+			.andExpect(jsonPath("$.dailyRecords[0].diets[1].dietId").value(diet2.getId()))
+			.andExpect(jsonPath("$.dailyRecords[0].diets[1].date").value(diet2.getDate().format(dateTimeFormatter)))
+			.andExpect(jsonPath("$.dailyRecords[0].diets[1].dietImageUrl").value(diet2.getDietImageUrl()))
+			.andExpect(jsonPath("$.dailyRecords[0].diets[1].memo").value(diet2.getMemo()))
+			.andExpect(jsonPath("$.dailyRecords[0].diets[1].dietType").value(diet2.getDietType().toString()))
+			.andExpect(jsonPath("$.dailyRecords[1].date").value(diet3.getDate().toLocalDate().format(dateFormatter)))
+			.andExpect(jsonPath("$.dailyRecords[1].diets").isArray())
+			.andExpect(jsonPath("$.dailyRecords[1].diets[0].dietId").value(diet3.getId()))
+			.andExpect(jsonPath("$.dailyRecords[1].diets[0].date").value(diet3.getDate().format(dateTimeFormatter)))
+			.andExpect(jsonPath("$.dailyRecords[1].diets[0].dietImageUrl").value(diet3.getDietImageUrl()))
+			.andExpect(jsonPath("$.dailyRecords[1].diets[0].memo").value(diet3.getMemo()))
+			.andExpect(jsonPath("$.dailyRecords[1].diets[0].dietType").value(diet3.getDietType().toString()))
+			.andExpect(jsonPath("$.dailyRecords[1].diets[1].dietId").value(diet4.getId()))
+			.andExpect(jsonPath("$.dailyRecords[1].diets[1].date").value(diet4.getDate().format(dateTimeFormatter)))
+			.andExpect(jsonPath("$.dailyRecords[1].diets[1].dietImageUrl").value(diet4.getDietImageUrl()))
+			.andExpect(jsonPath("$.dailyRecords[1].diets[1].memo").value(diet4.getMemo()))
+			.andExpect(jsonPath("$.dailyRecords[1].diets[1].dietType").value(diet4.getDietType().toString()))
 			.andDo(print());
 	}
 }

@@ -11,7 +11,7 @@ public class PtTrainerTraineeFixture {
 	public static PtTrainerTrainee getPtTrainerTrainee1(Trainer trainer, Trainee trainee) {
 		LocalDate startDate = LocalDate.of(2025, 1, 1);
 		Integer totalPtCount = 10;
-		Integer finishedPtCount = 3;
+		Integer finishedPtCount = 9;
 
 		return PtTrainerTrainee.builder()
 			.trainer(trainer)
