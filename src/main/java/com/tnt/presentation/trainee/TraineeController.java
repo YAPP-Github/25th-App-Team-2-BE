@@ -27,6 +27,7 @@ import com.tnt.dto.trainee.response.ConnectWithTrainerResponse;
 import com.tnt.dto.trainee.response.CreateDietResponse;
 import com.tnt.dto.trainee.response.GetDietResponse;
 import com.tnt.dto.trainee.response.GetTraineeCalendarPtLessonCountResponse;
+import com.tnt.dto.trainee.response.GetTraineeHomeRecordsResponse;
 import com.tnt.dto.trainer.ConnectWithTrainerDto;
 import com.tnt.gateway.config.AuthMember;
 
@@ -34,6 +35,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 
 @Tag(name = "트레이니", description = "트레이니 관련 API")
@@ -86,5 +89,14 @@ public class TraineeController {
 		@Parameter(description = "조회 종료 날짜", example = "2025-02-15")
 		@RequestParam("endDate") LocalDate endDate) {
 		return ptService.getTraineeCalendarPtLessonCount(memberId, startDate, endDate);
+	}
+
+	@Operation(summary = "홈 기록 리스트 조회 API")
+	@ResponseStatus(OK)
+	@GetMapping("/home")
+	public GetTraineeHomeRecordsResponse getHomeRecords(@AuthMember Long memberId,
+		@Parameter(description = "년도", example = "2025") @RequestParam("year") @Min(1900) @Max(2100) Integer year,
+		@Parameter(description = "월", example = "2") @RequestParam("month") @Min(1) @Max(12) Integer month) {
+		return ptService.getHomeRecords(memberId, year, month);
 	}
 }

@@ -6,7 +6,7 @@ import com.tnt.domain.trainee.DietType;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
-@Schema
+@Schema(description = "트레이니 특정 식단 조회 응답")
 public record GetDietResponse(
 	@Schema(description = "식단 ID", example = "54924", nullable = false)
 	Long dietId,

@@ -6,6 +6,11 @@ import static com.tnt.common.error.model.ErrorMessage.PT_TRAINEE_ALREADY_EXIST;
 import static com.tnt.common.error.model.ErrorMessage.PT_TRAINER_TRAINEE_ALREADY_EXIST;
 import static com.tnt.common.error.model.ErrorMessage.PT_TRAINER_TRAINEE_NOT_FOUND;
 import static com.tnt.common.error.model.ErrorMessage.TRAINEE_NOT_FOUND;
+import static java.util.Comparator.comparing;
+import static java.util.stream.Collectors.collectingAndThen;
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.mapping;
+import static java.util.stream.Collectors.toList;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -34,6 +39,7 @@ import com.tnt.dto.trainee.request.CreateDietRequest;
 import com.tnt.dto.trainee.response.CreateDietResponse;
 import com.tnt.dto.trainee.response.GetDietResponse;
 import com.tnt.dto.trainee.response.GetTraineeCalendarPtLessonCountResponse;
+import com.tnt.dto.trainee.response.GetTraineeHomeRecordsResponse;
 import com.tnt.dto.trainer.ConnectWithTrainerDto;
 import com.tnt.dto.trainer.request.CreatePtLessonRequest;
 import com.tnt.dto.trainer.response.ConnectWithTraineeResponse;
@@ -138,7 +144,7 @@ public class PtService {
 			month);
 
 		List<CalendarPtLessonCount> counts = ptLessons.stream()
-			.collect(Collectors.groupingBy(
+			.collect(groupingBy(
 				lesson -> lesson.getLessonStart().toLocalDate(),
 				LinkedHashMap::new,
 				Collectors.counting()
@@ -245,6 +251,32 @@ public class PtService {
 			.toList();
 
 		return new GetTraineeCalendarPtLessonCountResponse(dates);
+	}
+
+	public GetTraineeHomeRecordsResponse getHomeRecords(Long memberId, Integer year, Integer month) {
+		Trainee trainee = traineeService.getTraineeWithMemberId(memberId);
+
+		List<Diet> diets = dietService.getDietsWithTraineeIdForHome(trainee.getId(), year, month);
+
+		List<GetTraineeHomeRecordsResponse.DailyRecord> dailyRecords = diets.stream()
+			.collect(groupingBy(
+				diet -> diet.getDate().toLocalDate(),
+				mapping(
+					diet -> new GetTraineeHomeRecordsResponse.DailyRecord.DietRecord(diet.getId(), diet.getDate(),
+						diet.getDietImageUrl(), diet.getDietType(), diet.getMemo()),
+					collectingAndThen(
+						toList(),
+						dietRecords -> new GetTraineeHomeRecordsResponse.DailyRecord(
+							dietRecords.getFirst().date().toLocalDate(), dietRecords)
+					)
+				)
+			))
+			.values()
+			.stream()
+			.sorted(comparing(GetTraineeHomeRecordsResponse.DailyRecord::date))
+			.toList();
+
+		return new GetTraineeHomeRecordsResponse(dailyRecords);
 	}
 
 	public boolean isPtTrainerTraineeExistWithTrainerId(Long trainerId) {
