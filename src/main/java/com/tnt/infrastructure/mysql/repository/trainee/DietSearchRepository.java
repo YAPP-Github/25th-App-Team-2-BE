@@ -3,6 +3,7 @@ package com.tnt.infrastructure.mysql.repository.trainee;
 import static com.tnt.domain.trainee.QDiet.diet;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 import org.springframework.stereotype.Repository;
@@ -23,7 +24,7 @@ public class DietSearchRepository {
 			.selectFrom(diet)
 			.where(
 				diet.traineeId.eq(traineeId),
-				diet.date.between(date.atStartOfDay(), date.plusDays(1).atStartOfDay()),
+				diet.date.between(date.atStartOfDay(), date.atTime(LocalTime.MAX)),
 				diet.deletedAt.isNull()
 			)
 			.orderBy(diet.date.asc())
@@ -35,7 +36,7 @@ public class DietSearchRepository {
 			.selectFrom(diet)
 			.where(
 				diet.traineeId.eq(traineeId),
-				diet.date.between(startDate.atStartOfDay(), endDate.plusDays(1).atStartOfDay()),
+				diet.date.between(startDate.atStartOfDay(), endDate.atTime(LocalTime.MAX)),
 				diet.deletedAt.isNull()
 			)
 			.orderBy(diet.date.asc())
