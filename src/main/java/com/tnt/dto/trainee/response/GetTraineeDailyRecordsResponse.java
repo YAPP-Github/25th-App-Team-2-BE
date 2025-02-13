@@ -8,7 +8,7 @@ import com.tnt.domain.trainee.DietType;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
-@Schema(description = "트레이니 홈 기록 리스트 조회 응답")
+@Schema(description = "트레이니 특정 날짜 기록 조회 응답")
 public record GetTraineeDailyRecordsResponse(
 
 	@Schema(description = "날짜", example = "2025-02-01", nullable = false)

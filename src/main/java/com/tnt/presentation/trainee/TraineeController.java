@@ -89,7 +89,7 @@ public class TraineeController {
 		return ptService.getTraineeCalendarPtLessonCount(memberId, startDate, endDate);
 	}
 
-	@Operation(summary = "특정 날짜 캘린더 기록 조회 API")
+	@Operation(summary = "특정 날짜 기록 조회 API")
 	@ResponseStatus(OK)
 	@GetMapping("/calendar/{date}")
 	public GetTraineeDailyRecordsResponse getDailyRecord(@AuthMember Long memberId,
