@@ -31,10 +31,10 @@ public record ConnectWithTraineeResponse(
 		@Schema(description = "트레이니 나이", example = "25", nullable = true)
 		Integer traineeAge,
 
-		@Schema(description = "트레이니 키", example = "178.6cm", nullable = false)
+		@Schema(description = "트레이니 키", example = "178.6cm", nullable = true)
 		Double height,
 
-		@Schema(description = "트레이니 몸무게", example = "70.2kg", nullable = false)
+		@Schema(description = "트레이니 몸무게", example = "70.2kg", nullable = true)
 		Double weight,
 
 		@Schema(description = "PT 목표", example = "체중 감량, 근력 향상, 건강 관리", nullable = false)
