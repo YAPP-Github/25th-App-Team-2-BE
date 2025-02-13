@@ -6,28 +6,7 @@ services:
     restart: unless-stopped
     ports:
       - "80:8080"
-    depends_on:
-      - mysql
     environment:
       SPRING_ACTIVE_PROFILE: ${SPRING_ACTIVE_PROFILE}
     volumes:
       - ../logs/spring:/logs
-
-  mysql:
-    image: mysql:8.0.40
-    container_name: mysql
-    #    platform: linux/arm64/v8
-    platform: linux/amd64
-    restart: always
-    ports:
-      - "3306:3306"
-    environment:
-      TZ: Asia/Seoul
-      MYSQL_DATABASE: ${DEV_MYSQL_DATABASE}
-      MYSQL_ROOT_PASSWORD: ${DEV_MYSQL_PASSWORD}
-      MYSQL_USER: ${DEV_MYSQL_USER}
-      MYSQL_PASSWORD: ${DEV_MYSQL_PASSWORD}
-    command:
-      - --skip-character-set-client-handshake
-      - --character-set-server=utf8mb4
-      - --collation-server=utf8mb4_unicode_ci
