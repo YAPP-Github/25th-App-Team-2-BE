@@ -13,6 +13,7 @@ public class TraineeProjection {
 	@QueryProjection
 	public record PtInfoDto(
 		String trainerName,
+		String trainerProfileImage,
 		Integer session,
 		LocalDateTime lessonStart,
 		LocalDateTime lessonEnd

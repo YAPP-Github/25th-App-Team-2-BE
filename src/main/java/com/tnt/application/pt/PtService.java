@@ -274,11 +274,11 @@ public class PtService {
 
 		// PT 정보 조회
 		TraineeProjection.PtInfoDto ptResult = ptLessonSearchRepository.findAllByTraineeIdForDaily(trainee.getId(),
-			date).orElse(new TraineeProjection.PtInfoDto(null, null, null, null));
+			date).orElse(new TraineeProjection.PtInfoDto(null, null, null, null, null));
 
 		// PT 정보 Mapping to PtInfo
 		GetTraineeDailyRecordsResponse.PtInfo ptInfo = new GetTraineeDailyRecordsResponse.PtInfo(ptResult.trainerName(),
-			ptResult.session(), ptResult.lessonStart(), ptResult.lessonEnd());
+			ptResult.trainerProfileImage(), ptResult.session(), ptResult.lessonStart(), ptResult.lessonEnd());
 
 		// 식단 정보 조회
 		List<Diet> diets = dietService.getDietsWithTraineeIdForDaily(trainee.getId(), date);

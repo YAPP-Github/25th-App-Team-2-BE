@@ -25,6 +25,9 @@ public record GetTraineeDailyRecordsResponse(
 		@Schema(description = "트레이너 이름", example = "홍길동", nullable = false)
 		String trainerName,
 
+		@Schema(description = "트레이너 프로필 사진", nullable = false)
+		String trainerProfileImage,
+
 		@Schema(description = "PT 회차", example = "8", nullable = false)
 		Integer session,
 
