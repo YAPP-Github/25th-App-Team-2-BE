@@ -15,6 +15,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -244,13 +245,24 @@ public class PtService {
 		LocalDate endDate) {
 		Trainee trainee = traineeService.getTraineeWithMemberId(memberId);
 
+		// 기간 내 PT 수업 조회
 		List<PtLesson> ptLessons = ptLessonSearchRepository.findAllByTraineeIdForTraineeCalendar(trainee.getId(),
 			startDate, endDate);
 
-		List<LocalDate> dates = ptLessons.stream()
-			.map(PtLesson::getLessonStart)
-			.map(LocalDateTime::toLocalDate)
+		// 기간 내 식단 조회
+		List<Diet> diets = dietService.getDietsWithTraineeIdForTraineeCalendar(trainee.getId(), startDate, endDate);
+
+		// Mapping
+		List<LocalDate> dates = Stream.concat(
+				ptLessons.stream()
+					.map(PtLesson::getLessonStart)
+					.map(LocalDateTime::toLocalDate),
+				diets.stream()
+					.map(Diet::getDate)
+					.map(LocalDateTime::toLocalDate)
+			)
 			.distinct()
+			.sorted()
 			.toList();
 
 		return new GetTraineeCalendarPtLessonCountResponse(dates);

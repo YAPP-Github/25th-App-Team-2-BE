@@ -78,7 +78,7 @@ public class TraineeController {
 		return ptService.getDiet(memberId, dietId);
 	}
 
-	@Operation(summary = "달력 PT 수업 있는 날 표시 데이터 조회 API")
+	@Operation(summary = "캘린더 PT 수업, 기록 있는 날짜 조회 API")
 	@ResponseStatus(OK)
 	@GetMapping("/lessons/calendar")
 	public GetTraineeCalendarPtLessonCountResponse getTraineeCalendarPtLessonCount(@AuthMember Long memberId,

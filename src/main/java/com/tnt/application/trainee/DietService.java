@@ -35,4 +35,8 @@ public class DietService {
 	public List<Diet> getDietsWithTraineeIdForDaily(Long traineeId, LocalDate date) {
 		return dietSearchRepository.findAllByTraineeIdForDaily(traineeId, date);
 	}
+
+	public List<Diet> getDietsWithTraineeIdForTraineeCalendar(Long traineeId, LocalDate startDate, LocalDate endDate) {
+		return dietSearchRepository.findAllByTraineeIdForTraineeCalendar(traineeId, startDate, endDate);
+	}
 }

@@ -295,7 +295,7 @@ class TraineeControllerTest {
 	}
 
 	@Test
-	@DisplayName("통합 테스트 - 트레이니 홈 달력 PT 수업 있는 날 표시 데이터 조회 성공")
+	@DisplayName("통합 테스트 - 트레이니 캘린더 PT 수업, 기록 있는 날짜 조회 성공")
 	void get_trainee_calendar_pt_lesson_count_success() throws Exception {
 		// given
 		Member trainerMember = MemberFixture.getTrainerMember1();
@@ -355,6 +355,11 @@ class TraineeControllerTest {
 
 		ptLessonRepository.saveAll(ptLessons);
 
+		Diet diet1 = DietFixture.getDiet1(trainee.getId());
+		Diet diet2 = DietFixture.getDiet2(trainee.getId());
+
+		dietRepository.saveAll(List.of(diet1, diet2));
+
 		LocalDate startDate = LocalDate.of(2024, 12, 1);
 		LocalDate endDate = LocalDate.of(2025, 2, 28);
 
@@ -365,16 +370,17 @@ class TraineeControllerTest {
 				.contentType("application/json"))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.ptLessonDates").isArray())
-			.andExpect(jsonPath("$.ptLessonDates.size()").value(4))
+			.andExpect(jsonPath("$.ptLessonDates.size()").value(5))
 			.andExpect(jsonPath("$.ptLessonDates[0]").value("2025-01-03"))
 			.andExpect(jsonPath("$.ptLessonDates[1]").value("2025-01-05"))
 			.andExpect(jsonPath("$.ptLessonDates[2]").value("2025-01-07"))
 			.andExpect(jsonPath("$.ptLessonDates[3]").value("2025-01-10"))
+			.andExpect(jsonPath("$.ptLessonDates[4]").value(diet1.getDate().toLocalDate().toString()))
 			.andDo(print());
 	}
 
 	@Test
-	@DisplayName("통합 테스트 - 트레이니 특정 날짜 캘린더 기록 조회 성공")
+	@DisplayName("통합 테스트 - 트레이니 특정 날짜 기록 조회 성공")
 	void get_calendar_daily_records_success() throws Exception {
 		// given
 		Member trainerMember = MemberFixture.getTrainerMember1();

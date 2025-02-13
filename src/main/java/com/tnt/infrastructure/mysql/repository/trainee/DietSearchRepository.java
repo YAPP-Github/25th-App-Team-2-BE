@@ -29,4 +29,16 @@ public class DietSearchRepository {
 			.orderBy(diet.date.asc())
 			.fetch();
 	}
+
+	public List<Diet> findAllByTraineeIdForTraineeCalendar(Long traineeId, LocalDate startDate, LocalDate endDate) {
+		return jpaQueryFactory
+			.selectFrom(diet)
+			.where(
+				diet.traineeId.eq(traineeId),
+				diet.date.between(startDate.atStartOfDay(), endDate.plusDays(1).atStartOfDay()),
+				diet.deletedAt.isNull()
+			)
+			.orderBy(diet.date.asc())
+			.fetch();
+	}
 }
