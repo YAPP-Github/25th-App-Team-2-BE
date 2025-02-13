@@ -295,7 +295,7 @@ class TraineeControllerTest {
 	}
 
 	@Test
-	@DisplayName("통합 테스트 - 트레이니 홈 달력 PT 수업 있는 날 표시 데이터 조회 성공")
+	@DisplayName("통합 테스트 - 트레이니 캘린더 PT 수업, 기록 있는 날짜 조회 성공")
 	void get_trainee_calendar_pt_lesson_count_success() throws Exception {
 		// given
 		Member trainerMember = MemberFixture.getTrainerMember1();
@@ -355,6 +355,11 @@ class TraineeControllerTest {
 
 		ptLessonRepository.saveAll(ptLessons);
 
+		Diet diet1 = DietFixture.getDiet1(trainee.getId());
+		Diet diet2 = DietFixture.getDiet2(trainee.getId());
+
+		dietRepository.saveAll(List.of(diet1, diet2));
+
 		LocalDate startDate = LocalDate.of(2024, 12, 1);
 		LocalDate endDate = LocalDate.of(2025, 2, 28);
 
@@ -365,17 +370,18 @@ class TraineeControllerTest {
 				.contentType("application/json"))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.ptLessonDates").isArray())
-			.andExpect(jsonPath("$.ptLessonDates.size()").value(4))
+			.andExpect(jsonPath("$.ptLessonDates.size()").value(5))
 			.andExpect(jsonPath("$.ptLessonDates[0]").value("2025-01-03"))
 			.andExpect(jsonPath("$.ptLessonDates[1]").value("2025-01-05"))
 			.andExpect(jsonPath("$.ptLessonDates[2]").value("2025-01-07"))
 			.andExpect(jsonPath("$.ptLessonDates[3]").value("2025-01-10"))
+			.andExpect(jsonPath("$.ptLessonDates[4]").value(diet1.getDate().toLocalDate().toString()))
 			.andDo(print());
 	}
 
 	@Test
-	@DisplayName("통합 테스트 - 트레이니 홈 기록 조회 성공")
-	void get_home_records_success() throws Exception {
+	@DisplayName("통합 테스트 - 트레이니 특정 날짜 기록 조회 성공")
+	void get_calendar_daily_records_success() throws Exception {
 		// given
 		Member trainerMember = MemberFixture.getTrainerMember1();
 		Member traineeMember = MemberFixture.getTraineeMember2();
@@ -402,58 +408,40 @@ class TraineeControllerTest {
 
 		ptTrainerTraineeRepository.save(ptTrainerTrainee);
 
-		List<PtLesson> ptLesson = PtLessonsFixture.getPtLessons1(ptTrainerTrainee);
+		PtLesson ptLesson = PtLessonsFixture.getPtLessons1(ptTrainerTrainee).getFirst();
 
-		ptLessonRepository.saveAll(ptLesson);
+		ptLessonRepository.save(ptLesson);
 
 		Diet diet1 = DietFixture.getDiet1(trainee.getId());
 		Diet diet2 = DietFixture.getDiet2(trainee.getId());
-		Diet diet3 = DietFixture.getDiet3(trainee.getId());
-		Diet diet4 = DietFixture.getDiet4(trainee.getId());
 
-		List<Diet> diets = List.of(diet1, diet2, diet3, diet4);
+		List<Diet> diets = List.of(diet1, diet2);
 
 		dietRepository.saveAll(diets);
 
 		DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 		DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+		LocalDate targetDate = diet1.getDate().toLocalDate();
 
 		// when & then
-		mockMvc.perform(get("/trainees/calendar")
-				.param("year", String.valueOf(2025))
-				.param("month", String.valueOf(2)))
+		mockMvc.perform(get("/trainees/calendar/{date}", targetDate))
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.dailyRecords").isArray())
-			.andExpect(jsonPath("$.dailyRecords[0].date").value(diet1.getDate().toLocalDate().format(dateFormatter)))
-			.andExpect(jsonPath("$.dailyRecords[0].ptInfo.trainerName").value(trainer.getMember().getName()))
-			.andExpect(jsonPath("$.dailyRecords[0].ptInfo.session").value(ptLesson.getFirst().getSession()))
-			.andExpect(jsonPath("$.dailyRecords[0].ptInfo.lessonStart").value(
-				ptLesson.getFirst().getLessonStart().format(dateTimeFormatter)))
-			.andExpect(jsonPath("$.dailyRecords[0].ptInfo.lessonEnd").value(
-				ptLesson.getFirst().getLessonEnd().format(dateTimeFormatter)))
-			.andExpect(jsonPath("$.dailyRecords[0].diets").isArray())
-			.andExpect(jsonPath("$.dailyRecords[0].diets[0].dietId").value(diet1.getId()))
-			.andExpect(jsonPath("$.dailyRecords[0].diets[0].date").value(diet1.getDate().format(dateTimeFormatter)))
-			.andExpect(jsonPath("$.dailyRecords[0].diets[0].dietImageUrl").value(diet1.getDietImageUrl()))
-			.andExpect(jsonPath("$.dailyRecords[0].diets[0].memo").value(diet1.getMemo()))
-			.andExpect(jsonPath("$.dailyRecords[0].diets[0].dietType").value(diet1.getDietType().toString()))
-			.andExpect(jsonPath("$.dailyRecords[0].diets[1].dietId").value(diet2.getId()))
-			.andExpect(jsonPath("$.dailyRecords[0].diets[1].date").value(diet2.getDate().format(dateTimeFormatter)))
-			.andExpect(jsonPath("$.dailyRecords[0].diets[1].dietImageUrl").value(diet2.getDietImageUrl()))
-			.andExpect(jsonPath("$.dailyRecords[0].diets[1].memo").value(diet2.getMemo()))
-			.andExpect(jsonPath("$.dailyRecords[0].diets[1].dietType").value(diet2.getDietType().toString()))
-			.andExpect(jsonPath("$.dailyRecords[1].date").value(diet3.getDate().toLocalDate().format(dateFormatter)))
-			.andExpect(jsonPath("$.dailyRecords[1].diets").isArray())
-			.andExpect(jsonPath("$.dailyRecords[1].diets[0].dietId").value(diet3.getId()))
-			.andExpect(jsonPath("$.dailyRecords[1].diets[0].date").value(diet3.getDate().format(dateTimeFormatter)))
-			.andExpect(jsonPath("$.dailyRecords[1].diets[0].dietImageUrl").value(diet3.getDietImageUrl()))
-			.andExpect(jsonPath("$.dailyRecords[1].diets[0].memo").value(diet3.getMemo()))
-			.andExpect(jsonPath("$.dailyRecords[1].diets[0].dietType").value(diet3.getDietType().toString()))
-			.andExpect(jsonPath("$.dailyRecords[1].diets[1].dietId").value(diet4.getId()))
-			.andExpect(jsonPath("$.dailyRecords[1].diets[1].date").value(diet4.getDate().format(dateTimeFormatter)))
-			.andExpect(jsonPath("$.dailyRecords[1].diets[1].dietImageUrl").value(diet4.getDietImageUrl()))
-			.andExpect(jsonPath("$.dailyRecords[1].diets[1].memo").value(diet4.getMemo()))
-			.andExpect(jsonPath("$.dailyRecords[1].diets[1].dietType").value(diet4.getDietType().toString()))
+			.andExpect(jsonPath("$.date").value(targetDate.format(dateFormatter)))
+			.andExpect(jsonPath("$.ptInfo.trainerName").value(trainer.getMember().getName()))
+			.andExpect(jsonPath("$.ptInfo.session").value(ptLesson.getSession()))
+			.andExpect(jsonPath("$.ptInfo.lessonStart").value(ptLesson.getLessonStart().format(dateTimeFormatter)))
+			.andExpect(jsonPath("$.ptInfo.lessonEnd").value(ptLesson.getLessonEnd().format(dateTimeFormatter)))
+			.andExpect(jsonPath("$.diets").isArray())
+			.andExpect(jsonPath("$.diets[0].dietId").value(diet1.getId()))
+			.andExpect(jsonPath("$.diets[0].date").value(diet1.getDate().format(dateTimeFormatter)))
+			.andExpect(jsonPath("$.diets[0].dietImageUrl").value(diet1.getDietImageUrl()))
+			.andExpect(jsonPath("$.diets[0].memo").value(diet1.getMemo()))
+			.andExpect(jsonPath("$.diets[0].dietType").value(diet1.getDietType().toString()))
+			.andExpect(jsonPath("$.diets[1].dietId").value(diet2.getId()))
+			.andExpect(jsonPath("$.diets[1].date").value(diet2.getDate().format(dateTimeFormatter)))
+			.andExpect(jsonPath("$.diets[1].dietImageUrl").value(diet2.getDietImageUrl()))
+			.andExpect(jsonPath("$.diets[1].memo").value(diet2.getMemo()))
+			.andExpect(jsonPath("$.diets[1].dietType").value(diet2.getDietType().toString()))
 			.andDo(print());
 	}
 }

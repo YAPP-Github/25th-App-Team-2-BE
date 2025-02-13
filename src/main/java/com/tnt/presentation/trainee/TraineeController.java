@@ -35,8 +35,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 
 @Tag(name = "트레이니", description = "트레이니 관련 API")
@@ -80,7 +78,7 @@ public class TraineeController {
 		return ptService.getDiet(memberId, dietId);
 	}
 
-	@Operation(summary = "달력 PT 수업 있는 날 표시 데이터 조회 API")
+	@Operation(summary = "캘린더 PT 수업, 기록 있는 날짜 조회 API")
 	@ResponseStatus(OK)
 	@GetMapping("/lessons/calendar")
 	public GetTraineeCalendarPtLessonCountResponse getTraineeCalendarPtLessonCount(@AuthMember Long memberId,
@@ -91,12 +89,11 @@ public class TraineeController {
 		return ptService.getTraineeCalendarPtLessonCount(memberId, startDate, endDate);
 	}
 
-	@Operation(summary = "홈 기록 리스트 조회 API")
+	@Operation(summary = "특정 날짜 기록 조회 API")
 	@ResponseStatus(OK)
-	@GetMapping("/calendar")
-	public GetTraineeDailyRecordsResponse getDailyRecords(@AuthMember Long memberId,
-		@Parameter(description = "년도", example = "2025") @RequestParam("year") @Min(1900) @Max(2100) Integer year,
-		@Parameter(description = "월", example = "2") @RequestParam("month") @Min(1) @Max(12) Integer month) {
-		return ptService.getDailyRecords(memberId, year, month);
+	@GetMapping("/calendar/{date}")
+	public GetTraineeDailyRecordsResponse getDailyRecord(@AuthMember Long memberId,
+		@Parameter(description = "날짜", example = "2025-02-01") @PathVariable("date") LocalDate date) {
+		return ptService.getDailyRecords(memberId, date);
 	}
 }

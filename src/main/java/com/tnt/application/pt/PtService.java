@@ -7,19 +7,15 @@ import static com.tnt.common.error.model.ErrorMessage.PT_TRAINEE_ALREADY_EXIST;
 import static com.tnt.common.error.model.ErrorMessage.PT_TRAINER_TRAINEE_ALREADY_EXIST;
 import static com.tnt.common.error.model.ErrorMessage.PT_TRAINER_TRAINEE_NOT_FOUND;
 import static com.tnt.common.error.model.ErrorMessage.TRAINEE_NOT_FOUND;
-import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.mapping;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -249,59 +245,51 @@ public class PtService {
 		LocalDate endDate) {
 		Trainee trainee = traineeService.getTraineeWithMemberId(memberId);
 
+		// 기간 내 PT 수업 조회
 		List<PtLesson> ptLessons = ptLessonSearchRepository.findAllByTraineeIdForTraineeCalendar(trainee.getId(),
 			startDate, endDate);
 
-		List<LocalDate> dates = ptLessons.stream()
-			.map(PtLesson::getLessonStart)
-			.map(LocalDateTime::toLocalDate)
+		// 기간 내 식단 조회
+		List<Diet> diets = dietService.getDietsWithTraineeIdForTraineeCalendar(trainee.getId(), startDate, endDate);
+
+		// Mapping
+		List<LocalDate> dates = Stream.concat(
+				ptLessons.stream()
+					.map(PtLesson::getLessonStart)
+					.map(LocalDateTime::toLocalDate),
+				diets.stream()
+					.map(Diet::getDate)
+					.map(LocalDateTime::toLocalDate)
+			)
 			.distinct()
+			.sorted()
 			.toList();
 
 		return new GetTraineeCalendarPtLessonCountResponse(dates);
 	}
 
 	@Transactional(readOnly = true)
-	public GetTraineeDailyRecordsResponse getDailyRecords(Long memberId, Integer year, Integer month) {
+	public GetTraineeDailyRecordsResponse getDailyRecords(Long memberId, LocalDate date) {
 		Trainee trainee = traineeService.getTraineeWithMemberIdNoFetch(memberId);
 
 		// PT 정보 조회
-		List<TraineeProjection.PtInfoDto> ptResults = ptLessonSearchRepository.findAllByTraineeIdForDaily(
-			trainee.getId(), year, month);
+		TraineeProjection.PtInfoDto ptResult = ptLessonSearchRepository.findAllByTraineeIdForDaily(trainee.getId(),
+			date).orElse(new TraineeProjection.PtInfoDto(null, null, null, null));
 
-		// PT 정보를 날짜 별로 그룹화
-		Map<LocalDate, GetTraineeDailyRecordsResponse.DailyRecord.PtInfo> ptInfosByDate = ptResults.stream()
-			.collect(toMap(
-				lesson -> lesson.lessonStart().toLocalDate(),
-				lesson -> new GetTraineeDailyRecordsResponse.DailyRecord.PtInfo(lesson.trainerName(), lesson.session(),
-					lesson.lessonStart(), lesson.lessonEnd())
-			));
+		// PT 정보 Mapping to PtInfo
+		GetTraineeDailyRecordsResponse.PtInfo ptInfo = new GetTraineeDailyRecordsResponse.PtInfo(ptResult.trainerName(),
+			ptResult.session(), ptResult.lessonStart(), ptResult.lessonEnd());
 
 		// 식단 정보 조회
-		List<Diet> diets = dietService.getDietsWithTraineeIdForDaily(trainee.getId(), year, month);
+		List<Diet> diets = dietService.getDietsWithTraineeIdForDaily(trainee.getId(), date);
 
-		// 식단 정보를 날짜 별로 그룹화
-		Map<LocalDate, List<GetTraineeDailyRecordsResponse.DailyRecord.DietRecord>> dietsByDate = diets.stream()
-			.collect(groupingBy(
-				diet -> diet.getDate().toLocalDate(),
-				mapping(
-					diet -> new GetTraineeDailyRecordsResponse.DailyRecord.DietRecord(diet.getId(), diet.getDate(),
-						diet.getDietImageUrl(), diet.getDietType(), diet.getMemo()), toList()
-				)
-			));
-
-		// DailyRecord 로 변환
-		List<GetTraineeDailyRecordsResponse.DailyRecord> dailyRecords = dietsByDate.entrySet().stream()
-			.map(entry -> {
-				LocalDate date = entry.getKey();
-				List<GetTraineeDailyRecordsResponse.DailyRecord.DietRecord> dietRecords = entry.getValue();
-
-				return new GetTraineeDailyRecordsResponse.DailyRecord(date, ptInfosByDate.get(date), dietRecords);
-			})
-			.sorted(comparing(GetTraineeDailyRecordsResponse.DailyRecord::date))
+		// 식단 정보 Mapping to DietRecord
+		List<GetTraineeDailyRecordsResponse.DietRecord> dietRecords = diets.stream()
+			.map(diet -> new GetTraineeDailyRecordsResponse.DietRecord(diet.getId(), diet.getDate(),
+				diet.getDietImageUrl(), diet.getDietType(), diet.getMemo()))
 			.toList();
 
-		return new GetTraineeDailyRecordsResponse(dailyRecords);
+		return new GetTraineeDailyRecordsResponse(date, ptInfo, dietRecords);
 	}
 
 	public boolean isPtTrainerTraineeExistWithTrainerId(Long trainerId) {
