@@ -1,19 +1,23 @@
 package com.tnt.application.member;
 
+import static com.tnt.domain.member.MemberType.TRAINEE;
+import static com.tnt.domain.member.MemberType.TRAINER;
+
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.tnt.application.pt.PtService;
+import com.tnt.application.trainee.DietService;
 import com.tnt.application.trainee.PtGoalService;
 import com.tnt.application.trainee.TraineeService;
 import com.tnt.application.trainer.TrainerService;
 import com.tnt.common.error.exception.NotFoundException;
 import com.tnt.domain.member.Member;
-import com.tnt.domain.member.MemberType;
 import com.tnt.domain.pt.PtLesson;
 import com.tnt.domain.pt.PtTrainerTrainee;
+import com.tnt.domain.trainee.Diet;
 import com.tnt.domain.trainee.PtGoal;
 import com.tnt.domain.trainee.Trainee;
 import com.tnt.domain.trainer.Trainer;
@@ -31,6 +35,7 @@ public class WithdrawService {
 	private final TrainerService trainerService;
 	private final TraineeService traineeService;
 	private final PtGoalService ptGoalService;
+	private final DietService dietService;
 	private final PtService ptService;
 
 	@Transactional
@@ -45,7 +50,7 @@ public class WithdrawService {
 	}
 
 	private void deleteMemberData(Member member) {
-		if (member.getMemberType() == MemberType.TRAINER) {
+		if (member.getMemberType() == TRAINER) {
 			Trainer trainer = trainerService.getTrainerWithMemberId(member.getId());
 
 			if (ptService.isPtTrainerTraineeExistWithTrainerId(trainer.getId())) {
@@ -65,9 +70,10 @@ public class WithdrawService {
 			}
 
 			trainer.softDelete();
-		} else if (member.getMemberType() == MemberType.TRAINEE) {
+		} else if (member.getMemberType() == TRAINEE) {
 			Trainee trainee = traineeService.getTraineeWithMemberId(member.getId());
 			List<PtGoal> ptGoals = ptGoalService.getAllPtGoalsWithTraineeId(trainee.getId());
+			List<Diet> diets = dietService.getAllDietsWithTraineeId(trainee.getId());
 
 			if (ptService.isPtTrainerTraineeExistWithTraineeId(trainee.getId())) {
 				try {
@@ -82,6 +88,8 @@ public class WithdrawService {
 			}
 
 			ptGoals.forEach(PtGoal::softDelete);
+
+			diets.forEach(Diet::softDelete);
 
 			trainee.softDelete();
 		}

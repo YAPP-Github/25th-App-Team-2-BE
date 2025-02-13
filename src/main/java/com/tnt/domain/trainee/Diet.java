@@ -80,4 +80,8 @@ public class Diet extends BaseTimeEntity {
 
 		return memo;
 	}
+
+	public void softDelete() {
+		this.deletedAt = LocalDateTime.now();
+	}
 }

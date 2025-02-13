@@ -32,6 +32,10 @@ public class DietService {
 			.orElseThrow(() -> new NotFoundException(DIET_NOT_FOUND));
 	}
 
+	public List<Diet> getAllDietsWithTraineeId(Long traineeId) {
+		return dietRepository.findAllByTraineeIdAndDeletedAtIsNull(traineeId);
+	}
+
 	public List<Diet> getDietsWithTraineeIdForDaily(Long traineeId, LocalDate date) {
 		return dietSearchRepository.findAllByTraineeIdForDaily(traineeId, date);
 	}

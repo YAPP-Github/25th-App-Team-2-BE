@@ -13,6 +13,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.tnt.application.pt.PtService;
+import com.tnt.application.trainee.DietService;
 import com.tnt.application.trainee.PtGoalService;
 import com.tnt.application.trainee.TraineeService;
 import com.tnt.application.trainer.TrainerService;
@@ -20,9 +21,11 @@ import com.tnt.common.error.exception.NotFoundException;
 import com.tnt.domain.member.Member;
 import com.tnt.domain.pt.PtLesson;
 import com.tnt.domain.pt.PtTrainerTrainee;
+import com.tnt.domain.trainee.Diet;
 import com.tnt.domain.trainee.PtGoal;
 import com.tnt.domain.trainee.Trainee;
 import com.tnt.domain.trainer.Trainer;
+import com.tnt.fixture.DietFixture;
 import com.tnt.fixture.MemberFixture;
 import com.tnt.fixture.PtLessonsFixture;
 import com.tnt.fixture.PtTrainerTraineeFixture;
@@ -47,6 +50,9 @@ class WithdrawServiceTest {
 
 	@Mock
 	private PtGoalService ptGoalService;
+
+	@Mock
+	private DietService dietService;
 
 	@Mock
 	private PtService ptService;
@@ -79,10 +85,12 @@ class WithdrawServiceTest {
 		Trainee trainee = TraineeFixture.getTrainee1WithId(1L, traineeMember);
 
 		List<PtGoal> ptGoals = List.of(PtGoal.builder().id(1L).traineeId(trainee.getId()).content("test").build());
+		List<Diet> diets = List.of(DietFixture.getDiet1(trainee.getId()), DietFixture.getDiet2(trainee.getId()));
 
 		given(memberService.getMemberWithMemberId(traineeMember.getId())).willReturn(traineeMember);
 		given(traineeService.getTraineeWithMemberId(traineeMember.getId())).willReturn(trainee);
 		given(ptGoalService.getAllPtGoalsWithTraineeId(trainee.getId())).willReturn(ptGoals);
+		given(dietService.getAllDietsWithTraineeId(trainee.getId())).willReturn(diets);
 
 		// when
 		withdrawService.withdraw(traineeMember.getId());
@@ -131,6 +139,7 @@ class WithdrawServiceTest {
 		PtTrainerTrainee ptTrainerTrainee = PtTrainerTraineeFixture.getPtTrainerTrainee1(trainer, trainee);
 
 		List<PtGoal> ptGoals = List.of(PtGoal.builder().id(1L).traineeId(trainee.getId()).content("test").build());
+		List<Diet> diets = List.of(DietFixture.getDiet1(trainee.getId()), DietFixture.getDiet2(trainee.getId()));
 
 		List<PtLesson> ptLessons = PtLessonsFixture.getPtLessons1WithId(ptTrainerTrainee);
 
@@ -138,6 +147,7 @@ class WithdrawServiceTest {
 		given(traineeService.getTraineeWithMemberId(traineeMember.getId())).willReturn(trainee);
 		given(ptService.isPtTrainerTraineeExistWithTraineeId(trainee.getId())).willReturn(true);
 		given(ptGoalService.getAllPtGoalsWithTraineeId(trainee.getId())).willReturn(ptGoals);
+		given(dietService.getAllDietsWithTraineeId(trainee.getId())).willReturn(diets);
 		given(ptService.getPtTrainerTraineeWithTraineeId(trainee.getId())).willReturn(ptTrainerTrainee);
 		given(ptService.getPtLessonWithPtTrainerTrainee(ptTrainerTrainee)).willReturn(ptLessons);
 
@@ -176,11 +186,13 @@ class WithdrawServiceTest {
 		Trainee trainee = TraineeFixture.getTrainee1WithId(1L, traineeMember);
 
 		List<PtGoal> ptGoals = List.of(PtGoal.builder().id(1L).traineeId(trainee.getId()).content("test").build());
+		List<Diet> diets = List.of(DietFixture.getDiet1(trainee.getId()), DietFixture.getDiet2(trainee.getId()));
 
 		given(memberService.getMemberWithMemberId(traineeMember.getId())).willReturn(traineeMember);
 		given(traineeService.getTraineeWithMemberId(traineeMember.getId())).willReturn(trainee);
 		given(ptService.isPtTrainerTraineeExistWithTraineeId(trainee.getId())).willReturn(true);
 		given(ptGoalService.getAllPtGoalsWithTraineeId(trainee.getId())).willReturn(ptGoals);
+		given(dietService.getAllDietsWithTraineeId(trainee.getId())).willReturn(diets);
 		given(ptService.getPtTrainerTraineeWithTraineeId(trainee.getId())).willThrow(NotFoundException.class);
 
 		// when
