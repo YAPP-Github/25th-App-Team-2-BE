@@ -2,6 +2,7 @@ package com.tnt.application.trainee;
 
 import static com.tnt.common.error.model.ErrorMessage.DIET_NOT_FOUND;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -31,7 +32,7 @@ public class DietService {
 			.orElseThrow(() -> new NotFoundException(DIET_NOT_FOUND));
 	}
 
-	public List<Diet> getDietsWithTraineeIdForDaily(Long traineeId, Integer year, Integer month) {
-		return dietSearchRepository.findAllByTraineeIdForDaily(traineeId, year, month);
+	public List<Diet> getDietsWithTraineeIdForDaily(Long traineeId, LocalDate date) {
+		return dietSearchRepository.findAllByTraineeIdForDaily(traineeId, date);
 	}
 }
