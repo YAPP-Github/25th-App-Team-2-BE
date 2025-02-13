@@ -274,7 +274,7 @@ public class PtService {
 
 		// PT 정보 조회
 		TraineeProjection.PtInfoDto ptResult = ptLessonSearchRepository.findAllByTraineeIdForDaily(trainee.getId(),
-			date);
+			date).orElse(new TraineeProjection.PtInfoDto(null, null, null, null));
 
 		// PT 정보 Mapping to PtInfo
 		GetTraineeDailyRecordsResponse.PtInfo ptInfo = new GetTraineeDailyRecordsResponse.PtInfo(ptResult.trainerName(),
