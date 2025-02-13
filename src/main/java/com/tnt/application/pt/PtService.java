@@ -264,13 +264,14 @@ public class PtService {
 		TraineeProjection.PtInfoDto ptResult = ptLessonSearchRepository.findAllByTraineeIdForDaily(trainee.getId(),
 			date);
 
+		// PT 정보 Mapping to PtInfo
 		GetTraineeDailyRecordsResponse.PtInfo ptInfo = new GetTraineeDailyRecordsResponse.PtInfo(ptResult.trainerName(),
 			ptResult.session(), ptResult.lessonStart(), ptResult.lessonEnd());
 
 		// 식단 정보 조회
 		List<Diet> diets = dietService.getDietsWithTraineeIdForDaily(trainee.getId(), date);
 
-		// 식단 정보를 날짜 별로 그룹화
+		// 식단 정보 Mapping to DietRecord
 		List<GetTraineeDailyRecordsResponse.DietRecord> dietRecords = diets.stream()
 			.map(diet -> new GetTraineeDailyRecordsResponse.DietRecord(diet.getId(), diet.getDate(),
 				diet.getDietImageUrl(), diet.getDietType(), diet.getMemo()))
