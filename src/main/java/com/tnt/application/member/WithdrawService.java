@@ -54,19 +54,15 @@ public class WithdrawService {
 			Trainer trainer = trainerService.getTrainerWithMemberId(member.getId());
 
 			if (ptService.isPtTrainerTraineeExistWithTrainerId(trainer.getId())) {
-				try {
-					List<PtTrainerTrainee> ptTrainerTrainee = ptService.getAllPtTrainerTraineeWithTrainerId(
-						trainer.getId());
+				List<PtTrainerTrainee> ptTrainerTrainee = ptService.getAllPtTrainerTraineeWithTrainerId(
+					trainer.getId());
 
-					List<PtLesson> ptLessons = ptTrainerTrainee.stream().map(ptService::getPtLessonWithPtTrainerTrainee)
-						.flatMap(List::stream)
-						.toList();
+				List<PtLesson> ptLessons = ptTrainerTrainee.stream().map(ptService::getPtLessonWithPtTrainerTrainee)
+					.flatMap(List::stream)
+					.toList();
 
-					ptLessons.forEach(PtLesson::softDelete);
-					ptTrainerTrainee.forEach(PtTrainerTrainee::softDelete);
-				} catch (NotFoundException e) {
-					// Do nothing
-				}
+				ptLessons.forEach(PtLesson::softDelete);
+				ptTrainerTrainee.forEach(PtTrainerTrainee::softDelete);
 			}
 
 			trainer.softDelete();
