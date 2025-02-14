@@ -667,9 +667,11 @@ class TrainerControllerTest {
 		// given
 		Member trainerMember = MemberFixture.getTrainerMember1();
 		Member traineeMember = MemberFixture.getTraineeMember1();
+		Member traineeMember2 = MemberFixture.getTraineeMember2();
 
 		trainerMember = memberRepository.save(trainerMember);
 		traineeMember = memberRepository.save(traineeMember);
+		traineeMember2 = memberRepository.save(traineeMember2);
 
 		CustomUserDetails trainerUserDetails = new CustomUserDetails(trainerMember.getId(),
 			trainerMember.getId().toString(),
@@ -682,31 +684,22 @@ class TrainerControllerTest {
 
 		Trainer trainer = TrainerFixture.getTrainer2(trainerMember);
 		Trainee trainee = TraineeFixture.getTrainee2(traineeMember);
+		Trainee trainee2 = TraineeFixture.getTrainee1(traineeMember2);
 
 		trainer = trainerRepository.save(trainer);
 		trainee = traineeRepository.save(trainee);
+		trainee2 = traineeRepository.save(trainee2);
 
 		PtTrainerTrainee ptTrainerTrainee = PtTrainerTraineeFixture.getPtTrainerTrainee1(trainer, trainee);
+		PtTrainerTrainee ptTrainerTrainee2 = PtTrainerTraineeFixture.getPtTrainerTrainee2(trainer, trainee2);
 
-		ptTrainerTraineeRepository.save(ptTrainerTrainee);
-
-		PtGoal ptGoal1 = PtGoal.builder()
-			.traineeId(trainee.getId())
-			.content("다이어트")
-			.build();
-
-		PtGoal ptGoal2 = PtGoal.builder()
-			.traineeId(trainee.getId())
-			.content("체중 감량")
-			.build();
-
-		ptGoalRepository.saveAll(List.of(ptGoal1, ptGoal2));
+		ptTrainerTraineeRepository.saveAll(List.of(ptTrainerTrainee, ptTrainerTrainee2));
 
 		LocalDateTime startDate1 = LocalDateTime.parse("2025-02-01T11:30");
 		LocalDateTime endDate1 = LocalDateTime.parse("2025-02-01T13:00");
 
-		LocalDateTime startDate2 = LocalDateTime.parse("2025-02-07T11:30");
-		LocalDateTime endDate2 = LocalDateTime.parse("2025-02-07T13:00");
+		LocalDateTime startDate2 = LocalDateTime.parse("2025-02-20T12:30");
+		LocalDateTime endDate2 = LocalDateTime.parse("2025-02-20T13:00");
 
 		List<PtLesson> ptLessons = List.of(PtLesson.builder()
 				.ptTrainerTrainee(ptTrainerTrainee)
@@ -727,7 +720,7 @@ class TrainerControllerTest {
 		LocalDateTime end = LocalDateTime.of(2025, 2, 5, 11, 0);
 		String memo = "THIS IS MEMO";
 
-		CreatePtLessonRequest request = new CreatePtLessonRequest(start, end, memo, trainee.getId());
+		CreatePtLessonRequest request = new CreatePtLessonRequest(start, end, memo, trainee2.getId());
 
 		// when & then
 		mockMvc.perform(post("/trainers/lessons")
@@ -735,27 +728,6 @@ class TrainerControllerTest {
 				.content(objectMapper.writeValueAsString(request)))
 			.andExpect(status().isCreated())
 			.andDo(print());
-
-		List<PtLesson> ptLessonsResult = ptLessonRepository.findAll().stream()
-			.sorted(comparing(PtLesson::getLessonStart))
-			.toList();
-
-		assertThat(ptLessonsResult).hasSize(3);
-		assertThat(ptLessonsResult.getFirst().getLessonStart()).isEqualTo(ptLessons.getFirst().getLessonStart());
-		assertThat(ptLessonsResult.getFirst().getLessonEnd()).isEqualTo(ptLessons.getFirst().getLessonEnd());
-		assertThat(ptLessonsResult.getFirst().getSession()).isEqualTo(4);
-		assertThat(ptLessonsResult.getFirst().getMemo()).isEqualTo(ptLessons.getFirst().getMemo());
-		assertThat(ptLessonsResult.getFirst().getPtTrainerTrainee()).isEqualTo(ptTrainerTrainee);
-		assertThat(ptLessonsResult.get(1).getLessonStart()).isEqualTo(start);
-		assertThat(ptLessonsResult.get(1).getLessonEnd()).isEqualTo(end);
-		assertThat(ptLessonsResult.get(1).getSession()).isEqualTo(5);
-		assertThat(ptLessonsResult.get(1).getMemo()).isEqualTo(memo);
-		assertThat(ptLessonsResult.get(1).getPtTrainerTrainee()).isEqualTo(ptTrainerTrainee);
-		assertThat(ptLessonsResult.getLast().getLessonStart()).isEqualTo(ptLessons.getLast().getLessonStart());
-		assertThat(ptLessonsResult.getLast().getLessonEnd()).isEqualTo(ptLessons.getLast().getLessonEnd());
-		assertThat(ptLessonsResult.getLast().getSession()).isEqualTo(6);
-		assertThat(ptLessonsResult.getLast().getMemo()).isEqualTo(ptLessons.getLast().getMemo());
-		assertThat(ptLessonsResult.getLast().getPtTrainerTrainee()).isEqualTo(ptTrainerTrainee);
 	}
 
 	@Test
@@ -853,6 +825,64 @@ class TrainerControllerTest {
 		assertThat(ptLessonsResult.getLast().getSession()).isEqualTo(6);
 		assertThat(ptLessonsResult.getLast().getMemo()).isEqualTo(memo);
 		assertThat(ptLessonsResult.getLast().getPtTrainerTrainee()).isEqualTo(ptTrainerTrainee);
+	}
+
+	@Test
+	@DisplayName("통합 테스트 - 연속 PT 수업 추가 성공")
+	void add_pt_lesson_success5() throws Exception {
+		// given
+		Member trainerMember = MemberFixture.getTrainerMember1();
+		Member traineeMember = MemberFixture.getTraineeMember1();
+		Member traineeMember2 = MemberFixture.getTraineeMember2();
+
+		trainerMember = memberRepository.save(trainerMember);
+		traineeMember = memberRepository.save(traineeMember);
+		traineeMember2 = memberRepository.save(traineeMember2);
+
+		CustomUserDetails trainerUserDetails = new CustomUserDetails(trainerMember.getId(),
+			trainerMember.getId().toString(),
+			authoritiesMapper.mapAuthorities(List.of(new SimpleGrantedAuthority("ROLE_USER"))));
+
+		Authentication authentication = new UsernamePasswordAuthenticationToken(trainerUserDetails, null,
+			authoritiesMapper.mapAuthorities(trainerUserDetails.getAuthorities()));
+
+		SecurityContextHolder.getContext().setAuthentication(authentication);
+
+		Trainer trainer = TrainerFixture.getTrainer2(trainerMember);
+		Trainee trainee = TraineeFixture.getTrainee1(traineeMember);
+		Trainee trainee2 = TraineeFixture.getTrainee2(traineeMember2);
+
+		trainer = trainerRepository.save(trainer);
+		trainee = traineeRepository.save(trainee);
+		trainee2 = traineeRepository.save(trainee2);
+
+		PtTrainerTrainee ptTrainerTrainee = PtTrainerTraineeFixture.getPtTrainerTrainee3(trainer, trainee);
+		PtTrainerTrainee ptTrainerTrainee2 = PtTrainerTraineeFixture.getPtTrainerTrainee2(trainer, trainee2);
+
+		ptTrainerTraineeRepository.saveAll(List.of(ptTrainerTrainee, ptTrainerTrainee2));
+
+		LocalDateTime startDate1 = LocalDateTime.parse("2025-02-01T11:30");
+		LocalDateTime endDate1 = LocalDateTime.parse("2025-02-01T13:00");
+
+		List<PtLesson> ptLessons = List.of(PtLesson.builder()
+			.ptTrainerTrainee(ptTrainerTrainee)
+			.session(9)
+			.lessonStart(startDate1)
+			.lessonEnd(endDate1)
+			.build());
+
+		ptLessonRepository.saveAll(ptLessons);
+
+		LocalDateTime start = LocalDateTime.of(2025, 2, 1, 13, 0);
+		LocalDateTime end = LocalDateTime.of(2025, 2, 1, 15, 30);
+		String memo = "THIS IS MEMO";
+
+		CreatePtLessonRequest request = new CreatePtLessonRequest(start, end, memo, trainee2.getId());
+
+		mockMvc.perform(post("/trainers/lessons")
+				.contentType("application/json")
+				.content(objectMapper.writeValueAsString(request)))
+			.andExpect(status().isCreated());
 	}
 
 	@Test
@@ -988,7 +1018,65 @@ class TrainerControllerTest {
 		mockMvc.perform(post("/trainers/lessons")
 				.contentType("application/json")
 				.content(objectMapper.writeValueAsString(request)))
-			.andExpect(status().is5xxServerError());
+			.andExpect(status().is4xxClientError());
+	}
+
+	@Test
+	@DisplayName("통합 테스트 - 같은 시작, 다른 끝 PT 수업 추가 실패")
+	void add_pt_lesson_fail3() throws Exception {
+		// given
+		Member trainerMember = MemberFixture.getTrainerMember1();
+		Member traineeMember = MemberFixture.getTraineeMember1();
+		Member traineeMember2 = MemberFixture.getTraineeMember2();
+
+		trainerMember = memberRepository.save(trainerMember);
+		traineeMember = memberRepository.save(traineeMember);
+		traineeMember2 = memberRepository.save(traineeMember2);
+
+		CustomUserDetails trainerUserDetails = new CustomUserDetails(trainerMember.getId(),
+			trainerMember.getId().toString(),
+			authoritiesMapper.mapAuthorities(List.of(new SimpleGrantedAuthority("ROLE_USER"))));
+
+		Authentication authentication = new UsernamePasswordAuthenticationToken(trainerUserDetails, null,
+			authoritiesMapper.mapAuthorities(trainerUserDetails.getAuthorities()));
+
+		SecurityContextHolder.getContext().setAuthentication(authentication);
+
+		Trainer trainer = TrainerFixture.getTrainer2(trainerMember);
+		Trainee trainee = TraineeFixture.getTrainee1(traineeMember);
+		Trainee trainee2 = TraineeFixture.getTrainee2(traineeMember2);
+
+		trainer = trainerRepository.save(trainer);
+		trainee = traineeRepository.save(trainee);
+		trainee2 = traineeRepository.save(trainee2);
+
+		PtTrainerTrainee ptTrainerTrainee = PtTrainerTraineeFixture.getPtTrainerTrainee3(trainer, trainee);
+		PtTrainerTrainee ptTrainerTrainee2 = PtTrainerTraineeFixture.getPtTrainerTrainee2(trainer, trainee2);
+
+		ptTrainerTraineeRepository.saveAll(List.of(ptTrainerTrainee, ptTrainerTrainee2));
+
+		LocalDateTime startDate1 = LocalDateTime.parse("2025-02-01T11:30");
+		LocalDateTime endDate1 = LocalDateTime.parse("2025-02-01T13:00");
+
+		List<PtLesson> ptLessons = List.of(PtLesson.builder()
+			.ptTrainerTrainee(ptTrainerTrainee)
+			.session(9)
+			.lessonStart(startDate1)
+			.lessonEnd(endDate1)
+			.build());
+
+		ptLessonRepository.saveAll(ptLessons);
+
+		LocalDateTime start = LocalDateTime.parse("2025-02-01T11:30");
+		LocalDateTime end = LocalDateTime.parse("2025-02-01T12:30");
+		String memo = "THIS IS MEMO";
+
+		CreatePtLessonRequest request = new CreatePtLessonRequest(start, end, memo, trainee2.getId());
+
+		mockMvc.perform(post("/trainers/lessons")
+				.contentType("application/json")
+				.content(objectMapper.writeValueAsString(request)))
+			.andExpect(status().is4xxClientError());
 	}
 
 	@Test

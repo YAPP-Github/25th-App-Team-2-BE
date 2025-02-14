@@ -1,6 +1,7 @@
 package com.tnt.application.pt;
 
 import static com.tnt.common.error.model.ErrorMessage.PT_LESSON_DUPLICATE_TIME;
+import static com.tnt.common.error.model.ErrorMessage.PT_LESSON_MORE_THAN_ONE_A_DAY;
 import static com.tnt.common.error.model.ErrorMessage.PT_LESSON_NOT_FOUND;
 import static com.tnt.common.error.model.ErrorMessage.PT_LESSON_OVERFLOW;
 import static com.tnt.common.error.model.ErrorMessage.PT_TRAINEE_ALREADY_EXIST;
@@ -26,7 +27,6 @@ import com.tnt.application.trainee.TraineeService;
 import com.tnt.application.trainer.TrainerService;
 import com.tnt.common.error.exception.ConflictException;
 import com.tnt.common.error.exception.NotFoundException;
-import com.tnt.common.error.exception.TnTException;
 import com.tnt.domain.member.Member;
 import com.tnt.domain.pt.PtLesson;
 import com.tnt.domain.pt.PtTrainerTrainee;
@@ -210,6 +210,7 @@ public class PtService {
 
 		PtLesson ptLesson = getPtLessonWithId(ptLessonId);
 		ptLesson.completeLesson();
+		ptLesson.getPtTrainerTrainee().completeLesson();
 	}
 
 	@Transactional
@@ -326,7 +327,7 @@ public class PtService {
 	}
 
 	public PtLesson getPtLessonWithId(Long ptLessonId) {
-		return ptLessonRepository.findByIdAndDeletedAtIsNull(ptLessonId)
+		return ptLessonSearchRepository.findById(ptLessonId)
 			.orElseThrow(() -> new NotFoundException(PT_LESSON_NOT_FOUND));
 	}
 
@@ -347,8 +348,12 @@ public class PtService {
 	}
 
 	private void validateLessonTime(PtTrainerTrainee ptTrainerTrainee, LocalDateTime start, LocalDateTime end) {
-		if (ptLessonSearchRepository.existsByStartAndEnd(ptTrainerTrainee, start, end)) {
+		if (ptLessonSearchRepository.existsByStartAndEnd(start, end)) {
 			throw new ConflictException(PT_LESSON_DUPLICATE_TIME);
+		}
+
+		if (ptLessonSearchRepository.existsByStart(ptTrainerTrainee, start)) {
+			throw new ConflictException(PT_LESSON_MORE_THAN_ONE_A_DAY);
 		}
 	}
 
@@ -360,7 +365,7 @@ public class PtService {
 
 		if (!notCompletedLessons.isEmpty()) {
 			if (Objects.equals(notCompletedLessons.getLast().getSession(), ptTrainerTrainee.getTotalPtCount())) {
-				throw new TnTException(PT_LESSON_OVERFLOW);
+				throw new ConflictException(PT_LESSON_OVERFLOW);
 			}
 
 			for (PtLesson toCompare : notCompletedLessons) {

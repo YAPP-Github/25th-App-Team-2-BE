@@ -78,7 +78,8 @@ public enum ErrorMessage {
 	PT_LESSON_INVALID_MEMO("수업 메모의 길이는 공백 포함 30자 이하이어야 합니다."),
 	PT_LESSON_DUPLICATE_TIME("이미 예약된 시간대입니다."),
 	PT_LESSON_NOT_FOUND("존재하지 않는 수업입니다."),
-	PT_LESSON_OVERFLOW("총 수업 수 보다 수업을 더 추가 할 수 없습니다."),
+	PT_LESSON_OVERFLOW("총 수업 수 보다 수업을 더 추가할 수 없습니다."),
+	PT_LESSON_MORE_THAN_ONE_A_DAY("한명의 수업은 하루에 하나만 추가할 수 있습니다."),
 
 	DIET_NULL_TRAINEE_ID("식단 트레이니 id가 null 입니다."),
 	DIET_INVALID_IMAGE_URL("유효하지 않는 식단 사진입니다."),

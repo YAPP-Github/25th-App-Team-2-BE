@@ -82,15 +82,29 @@ public class PtLessonSearchRepository {
 			.fetch();
 	}
 
-	public boolean existsByStartAndEnd(PtTrainerTrainee pt, LocalDateTime start, LocalDateTime end) {
+	public boolean existsByStartAndEnd(LocalDateTime start, LocalDateTime end) {
+		return jpaQueryFactory
+			.selectOne()
+			.from(ptLesson)
+			.where(
+				ptLesson.lessonStart.lt(end),
+				ptLesson.lessonEnd.gt(start),
+				ptLesson.deletedAt.isNull(),
+				ptTrainerTrainee.deletedAt.isNull()
+			)
+			.fetchFirst() != null;
+	}
+
+	public boolean existsByStart(PtTrainerTrainee pt, LocalDateTime start) {
 		return jpaQueryFactory
 			.selectOne()
 			.from(ptLesson)
 			.join(ptLesson.ptTrainerTrainee, ptTrainerTrainee)
 			.where(
 				ptTrainerTrainee.eq(pt),
-				ptLesson.lessonStart.lt(end),
-				ptLesson.lessonEnd.gt(start),
+				ptLesson.lessonStart.year().eq(start.getYear())
+					.and(ptLesson.lessonStart.month().eq(start.getMonthValue()))
+					.and(ptLesson.lessonStart.dayOfMonth().eq(start.getDayOfMonth())),
 				ptLesson.deletedAt.isNull(),
 				ptTrainerTrainee.deletedAt.isNull()
 			)
@@ -113,6 +127,19 @@ public class PtLessonSearchRepository {
 					trainer.deletedAt.isNull(),
 					member.deletedAt.isNull())
 				.fetchOne()
+		);
+	}
+
+	public Optional<PtLesson> findById(Long id) {
+		return Optional.ofNullable(jpaQueryFactory
+			.selectFrom(ptLesson)
+			.join(ptLesson.ptTrainerTrainee, ptTrainerTrainee).fetchJoin()
+			.where(
+				ptLesson.id.eq(id),
+				ptLesson.deletedAt.isNull(),
+				ptTrainerTrainee.deletedAt.isNull()
+			)
+			.fetchOne()
 		);
 	}
 }

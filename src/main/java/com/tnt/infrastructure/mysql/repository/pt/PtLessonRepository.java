@@ -14,7 +14,5 @@ public interface PtLessonRepository extends JpaRepository<PtLesson, Long> {
 
 	Optional<PtLesson> findByIdAndDeletedAtIsNull(Long id);
 
-	Long countByPtTrainerTraineeAndIsCompletedIsFalseAndDeletedAtIsNull(PtTrainerTrainee ptTrainerTrainee);
-
 	List<PtLesson> findAllByPtTrainerTraineeAndIsCompletedIsFalseAndDeletedAtIsNull(PtTrainerTrainee ptTrainerTrainee);
 }

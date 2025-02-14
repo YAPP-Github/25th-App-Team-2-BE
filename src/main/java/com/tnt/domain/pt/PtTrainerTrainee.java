@@ -73,6 +73,10 @@ public class PtTrainerTrainee extends BaseTimeEntity {
 		return this.finishedPtCount + 1;
 	}
 
+	public void completeLesson() {
+		this.finishedPtCount++;
+	}
+
 	public void softDelete() {
 		this.deletedAt = LocalDateTime.now();
 	}

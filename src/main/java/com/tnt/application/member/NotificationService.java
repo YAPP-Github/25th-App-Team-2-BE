@@ -16,7 +16,7 @@ public class NotificationService {
 	private final FcmAdapter fcmAdapter;
 
 	public void sendConnectNotificationToTrainer(String fcmToken, String traineeName, Long trainerId, Long traineeId) {
-		String title = "트레이니와 연결 완료";
+		String title = "트레이니 연결 완료";
 		String body = traineeName + " 트레이니와 연결되었어요!";
 
 		Map<String, String> data = new HashMap<>();
