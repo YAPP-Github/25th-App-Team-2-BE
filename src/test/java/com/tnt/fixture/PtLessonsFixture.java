@@ -36,8 +36,8 @@ public class PtLessonsFixture {
 		LocalDateTime startDate1 = LocalDateTime.parse("2025-02-01T11:30");
 		LocalDateTime endDate1 = LocalDateTime.parse("2025-02-01T13:00");
 
-		LocalDateTime startDate2 = LocalDateTime.parse("2025-02-02T11:30");
-		LocalDateTime endDate2 = LocalDateTime.parse("2025-02-02T13:00");
+		LocalDateTime startDate2 = LocalDateTime.parse("2025-02-05T11:30");
+		LocalDateTime endDate2 = LocalDateTime.parse("2025-02-05T13:00");
 
 		return List.of(PtLesson.builder()
 				.ptTrainerTrainee(ptTrainerTrainee)

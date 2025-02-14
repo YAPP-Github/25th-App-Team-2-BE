@@ -277,8 +277,7 @@ public class PtService {
 			date).orElse(new TraineeProjection.PtInfoDto(null, null, null, null, null));
 
 		// PT 정보 Mapping to PtInfo
-		GetTraineeDailyRecordsResponse.PtInfo ptInfo = new GetTraineeDailyRecordsResponse.PtInfo(ptResult.trainerName(),
-			ptResult.trainerProfileImage(), ptResult.session(), ptResult.lessonStart(), ptResult.lessonEnd());
+		GetTraineeDailyRecordsResponse.PtInfo ptInfo = toPtInfo(ptResult);
 
 		// 식단 정보 조회
 		List<Diet> diets = dietService.getDietsWithTraineeIdForDaily(trainee.getId(), date);
@@ -376,5 +375,19 @@ public class PtService {
 		}
 
 		return ptTrainerTrainee.getFinishedPtCount() + 1 + temp;
+	}
+
+	private GetTraineeDailyRecordsResponse.PtInfo toPtInfo(TraineeProjection.PtInfoDto dto) {
+		if (isAllFieldsNull(dto)) {
+			return null;
+		}
+
+		return new GetTraineeDailyRecordsResponse.PtInfo(dto.trainerName(), dto.trainerProfileImage(), dto.session(),
+			dto.lessonStart(), dto.lessonEnd());
+	}
+
+	private boolean isAllFieldsNull(TraineeProjection.PtInfoDto dto) {
+		return dto.trainerName() == null && dto.trainerProfileImage() == null && dto.session() == null
+			&& dto.lessonStart() == null && dto.lessonEnd() == null;
 	}
 }
