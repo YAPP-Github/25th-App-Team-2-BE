@@ -279,8 +279,7 @@ public class PtService {
 
 		// PT 정보 Mapping to PtInfo
 		GetTraineeDailyRecordsResponse.PtInfo ptInfo =
-			(ptResult.trainerName() == null && ptResult.trainerProfileImage() == null && ptResult.session() == null
-				&& ptResult.lessonStart() == null && ptResult.lessonEnd() == null) ? null :
+			ptResult.trainerName() == null ? null :
 				new GetTraineeDailyRecordsResponse.PtInfo(ptResult.trainerName(), ptResult.trainerProfileImage(),
 					ptResult.session(), ptResult.lessonStart(), ptResult.lessonEnd());
 
