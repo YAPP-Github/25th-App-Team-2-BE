@@ -428,6 +428,7 @@ class TraineeControllerTest {
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.date").value(targetDate.format(dateFormatter)))
 			.andExpect(jsonPath("$.ptInfo.trainerName").value(trainer.getMember().getName()))
+			.andExpect(jsonPath("$.ptInfo.trainerProfileImage").value(trainer.getMember().getProfileImageUrl()))
 			.andExpect(jsonPath("$.ptInfo.session").value(ptLesson.getSession()))
 			.andExpect(jsonPath("$.ptInfo.lessonStart").value(ptLesson.getLessonStart().format(dateTimeFormatter)))
 			.andExpect(jsonPath("$.ptInfo.lessonEnd").value(ptLesson.getLessonEnd().format(dateTimeFormatter)))
@@ -442,6 +443,69 @@ class TraineeControllerTest {
 			.andExpect(jsonPath("$.diets[1].dietImageUrl").value(diet2.getDietImageUrl()))
 			.andExpect(jsonPath("$.diets[1].memo").value(diet2.getMemo()))
 			.andExpect(jsonPath("$.diets[1].dietType").value(diet2.getDietType().toString()))
+			.andDo(print());
+	}
+
+	@Test
+	@DisplayName("통합 테스트 - 트레이니 PT 수업 없는 날 특정 날짜 기록 조회 성공")
+	void get_calendar_daily_records_without_pt_info_success() throws Exception {
+		// given
+		Member trainerMember = MemberFixture.getTrainerMember1();
+		Member traineeMember = MemberFixture.getTraineeMember2();
+
+		trainerMember = memberRepository.save(trainerMember);
+		traineeMember = memberRepository.save(traineeMember);
+
+		CustomUserDetails traineeUserDetails = new CustomUserDetails(traineeMember.getId(),
+			traineeMember.getId().toString(),
+			authoritiesMapper.mapAuthorities(List.of(new SimpleGrantedAuthority("ROLE_USER"))));
+
+		Authentication authentication = new UsernamePasswordAuthenticationToken(traineeUserDetails, null,
+			authoritiesMapper.mapAuthorities(traineeUserDetails.getAuthorities()));
+
+		SecurityContextHolder.getContext().setAuthentication(authentication);
+
+		Trainer trainer = TrainerFixture.getTrainer2(trainerMember);
+		Trainee trainee = TraineeFixture.getTrainee1(traineeMember);
+
+		trainerRepository.save(trainer);
+		traineeRepository.save(trainee);
+
+		PtTrainerTrainee ptTrainerTrainee = PtTrainerTraineeFixture.getPtTrainerTrainee1(trainer, trainee);
+
+		ptTrainerTraineeRepository.save(ptTrainerTrainee);
+
+		PtLesson ptLesson = PtLessonsFixture.getPtLessons1(ptTrainerTrainee).getFirst();
+
+		ptLessonRepository.save(ptLesson);
+
+		Diet diet3 = DietFixture.getDiet3(trainee.getId());
+		Diet diet4 = DietFixture.getDiet4(trainee.getId());
+
+		List<Diet> diets = List.of(diet3, diet4);
+
+		dietRepository.saveAll(diets);
+
+		DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+		DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+		LocalDate targetDate = diet3.getDate().toLocalDate();
+
+		// when & then
+		mockMvc.perform(get("/trainees/calendar/{date}", targetDate))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.date").value(targetDate.format(dateFormatter)))
+			.andExpect(jsonPath("$.ptInfo").doesNotExist())
+			.andExpect(jsonPath("$.diets").isArray())
+			.andExpect(jsonPath("$.diets[0].dietId").value(diet3.getId()))
+			.andExpect(jsonPath("$.diets[0].date").value(diet3.getDate().format(dateTimeFormatter)))
+			.andExpect(jsonPath("$.diets[0].dietImageUrl").value(diet3.getDietImageUrl()))
+			.andExpect(jsonPath("$.diets[0].memo").value(diet3.getMemo()))
+			.andExpect(jsonPath("$.diets[0].dietType").value(diet3.getDietType().toString()))
+			.andExpect(jsonPath("$.diets[1].dietId").value(diet4.getId()))
+			.andExpect(jsonPath("$.diets[1].date").value(diet4.getDate().format(dateTimeFormatter)))
+			.andExpect(jsonPath("$.diets[1].dietImageUrl").value(diet4.getDietImageUrl()))
+			.andExpect(jsonPath("$.diets[1].memo").value(diet4.getMemo()))
+			.andExpect(jsonPath("$.diets[1].dietType").value(diet4.getDietType().toString()))
 			.andDo(print());
 	}
 }
