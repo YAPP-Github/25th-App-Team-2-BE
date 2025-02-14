@@ -66,7 +66,9 @@ public class WithdrawService {
 			}
 
 			trainer.softDelete();
-		} else if (member.getMemberType() == TRAINEE) {
+		}
+
+		if (member.getMemberType() == TRAINEE) {
 			Trainee trainee = traineeService.getTraineeWithMemberId(member.getId());
 			List<PtGoal> ptGoals = ptGoalService.getAllPtGoalsWithTraineeId(trainee.getId());
 			List<Diet> diets = dietService.getAllDietsWithTraineeId(trainee.getId());
