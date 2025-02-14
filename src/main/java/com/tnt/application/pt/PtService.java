@@ -378,16 +378,11 @@ public class PtService {
 	}
 
 	private GetTraineeDailyRecordsResponse.PtInfo toPtInfo(TraineeProjection.PtInfoDto dto) {
-		if (isAllFieldsNull(dto)) {
+		if (dto.session() == null) {
 			return null;
 		}
 
 		return new GetTraineeDailyRecordsResponse.PtInfo(dto.trainerName(), dto.trainerProfileImage(), dto.session(),
 			dto.lessonStart(), dto.lessonEnd());
-	}
-
-	private boolean isAllFieldsNull(TraineeProjection.PtInfoDto dto) {
-		return dto.trainerName() == null && dto.trainerProfileImage() == null && dto.session() == null
-			&& dto.lessonStart() == null && dto.lessonEnd() == null;
 	}
 }

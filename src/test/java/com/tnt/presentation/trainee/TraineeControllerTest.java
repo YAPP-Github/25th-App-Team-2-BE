@@ -428,6 +428,7 @@ class TraineeControllerTest {
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.date").value(targetDate.format(dateFormatter)))
 			.andExpect(jsonPath("$.ptInfo.trainerName").value(trainer.getMember().getName()))
+			.andExpect(jsonPath("$.ptInfo.trainerProfileImage").value(trainer.getMember().getProfileImageUrl()))
 			.andExpect(jsonPath("$.ptInfo.session").value(ptLesson.getSession()))
 			.andExpect(jsonPath("$.ptInfo.lessonStart").value(ptLesson.getLessonStart().format(dateTimeFormatter)))
 			.andExpect(jsonPath("$.ptInfo.lessonEnd").value(ptLesson.getLessonEnd().format(dateTimeFormatter)))
