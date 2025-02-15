@@ -1,5 +1,6 @@
 package com.tnt.application.pt;
 
+import static com.tnt.common.error.model.ErrorMessage.DIET_DUPLICATE_TIME;
 import static com.tnt.common.error.model.ErrorMessage.PT_LESSON_DUPLICATE_TIME;
 import static com.tnt.common.error.model.ErrorMessage.PT_LESSON_MORE_THAN_ONE_A_DAY;
 import static com.tnt.common.error.model.ErrorMessage.PT_LESSON_NOT_FOUND;
@@ -291,6 +292,16 @@ public class PtService {
 			.toList();
 
 		return new GetTraineeDailyRecordsResponse(date, ptInfo, dietRecords);
+	}
+
+	public Long validateDuplicationDiet(Long memberId, LocalDateTime date) {
+		Trainee trainee = traineeService.getTraineeWithMemberId(memberId);
+
+		if (dietService.isDietExistWithTraineeIdAndDate(trainee.getId(), date)) {
+			throw new ConflictException(DIET_DUPLICATE_TIME);
+		}
+
+		return trainee.getId();
 	}
 
 	public boolean isPtTrainerTraineeExistWithTrainerId(Long trainerId) {
