@@ -209,8 +209,8 @@ public class PtService {
 		trainerService.validateTrainerRegistration(memberId);
 
 		PtLesson ptLesson = getPtLessonWithId(ptLessonId);
+		ptLesson.getPtTrainerTrainee().completeLesson(ptLesson.getSession());
 		ptLesson.completeLesson();
-		ptLesson.getPtTrainerTrainee().completeLesson();
 	}
 
 	@Transactional

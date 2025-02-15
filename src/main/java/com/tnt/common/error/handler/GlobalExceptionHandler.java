@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
+import com.tnt.common.error.exception.BadRequestException;
 import com.tnt.common.error.exception.ConflictException;
 import com.tnt.common.error.exception.ImageException;
 import com.tnt.common.error.exception.NotFoundException;
@@ -131,6 +132,14 @@ public class GlobalExceptionHandler {
 	@ResponseStatus(NOT_FOUND)
 	@ExceptionHandler(NotFoundException.class)
 	protected ErrorResponse handleNotFoundException(NotFoundException exception) {
+		log.error(exception.getMessage(), exception);
+
+		return new ErrorResponse(exception.getMessage());
+	}
+
+	@ResponseStatus(BAD_REQUEST)
+	@ExceptionHandler(BadRequestException.class)
+	protected ErrorResponse handleBadRequestException(BadRequestException exception) {
 		log.error(exception.getMessage(), exception);
 
 		return new ErrorResponse(exception.getMessage());

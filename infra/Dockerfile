@@ -1,4 +1,4 @@
-FROM eclipse-temurin:21-jre-alpine
+FROM eclipse-temurin:21-jre
 
 ARG SPRING_ACTIVE_PROFILE
 ENV SPRING_ACTIVE_PROFILE=${SPRING_ACTIVE_PROFILE}

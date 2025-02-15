@@ -716,8 +716,8 @@ class TrainerControllerTest {
 
 		ptLessonRepository.saveAll(ptLessons);
 
-		LocalDateTime start = LocalDateTime.of(2025, 2, 5, 10, 0);
-		LocalDateTime end = LocalDateTime.of(2025, 2, 5, 11, 0);
+		LocalDateTime start = LocalDateTime.of(2025, 2, 5, 12, 30);
+		LocalDateTime end = LocalDateTime.of(2025, 2, 5, 13, 30);
 		String memo = "THIS IS MEMO";
 
 		CreatePtLessonRequest request = new CreatePtLessonRequest(start, end, memo, trainee2.getId());
@@ -1130,7 +1130,7 @@ class TrainerControllerTest {
 
 		PtLesson ptLesson = PtLesson.builder()
 			.ptTrainerTrainee(ptTrainerTrainee)
-			.session(1)
+			.session(4)
 			.lessonStart(LocalDateTime.of(2025, 1, 1, 10, 0))
 			.lessonEnd(LocalDateTime.of(2025, 1, 1, 11, 0))
 			.memo("THIS IS MEMO")

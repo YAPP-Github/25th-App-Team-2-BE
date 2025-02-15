@@ -20,6 +20,8 @@ public class NotificationService {
 		String body = traineeName + " 트레이니와 연결되었어요!";
 
 		Map<String, String> data = new HashMap<>();
+		data.put("title", title);  // For Android
+		data.put("content", body); // For Android
 		data.put("trainerId", String.valueOf(trainerId));
 		data.put("traineeId", String.valueOf(traineeId));
 
