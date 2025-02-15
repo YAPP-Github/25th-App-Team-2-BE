@@ -1,6 +1,6 @@
 package com.tnt.gateway.filter;
 
-import static jakarta.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
+import static jakarta.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
 
 import java.io.IOException;
 import java.util.List;
@@ -56,7 +56,7 @@ public class SessionAuthenticationFilter extends OncePerRequestFilter {
 			saveAuthentication(sessionService.authenticate(request.getHeader(AUTHORIZATION_HEADER)));
 		} catch (UnauthorizedException e) {
 			response.setContentType("application/json;charset=UTF-8");
-			response.setStatus(SC_BAD_REQUEST);
+			response.setStatus(SC_UNAUTHORIZED);
 			response.getWriter().write(objectMapper.writeValueAsString(new ErrorResponse(e.getMessage())));
 
 			return;
