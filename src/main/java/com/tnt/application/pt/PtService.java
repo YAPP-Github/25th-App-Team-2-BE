@@ -1,6 +1,5 @@
 package com.tnt.application.pt;
 
-import static com.tnt.common.error.model.ErrorMessage.DIET_DUPLICATE_TIME;
 import static com.tnt.common.error.model.ErrorMessage.PT_LESSON_DUPLICATE_TIME;
 import static com.tnt.common.error.model.ErrorMessage.PT_LESSON_MORE_THAN_ONE_A_DAY;
 import static com.tnt.common.error.model.ErrorMessage.PT_LESSON_NOT_FOUND;
@@ -215,15 +214,9 @@ public class PtService {
 	}
 
 	@Transactional
-	public CreateDietResponse createDiet(Long memberId, CreateDietRequest request, String dietImageUrl) {
-		Trainee trainee = traineeService.getTraineeWithMemberId(memberId);
-
-		if (dietService.isDietExistWithTraineeIdAndDate(trainee.getId(), request.date())) {
-			throw new ConflictException(DIET_DUPLICATE_TIME);
-		}
-
+	public CreateDietResponse createDiet(Long traineeId, CreateDietRequest request, String dietImageUrl) {
 		Diet diet = Diet.builder()
-			.traineeId(trainee.getId())
+			.traineeId(traineeId)
 			.date(request.date())
 			.dietImageUrl(dietImageUrl)
 			.memo(request.memo())

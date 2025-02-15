@@ -1,6 +1,7 @@
 package com.tnt.presentation.trainee;
 
 import static com.tnt.common.constant.ImageConstant.DIET_S3_IMAGE_PATH;
+import static com.tnt.common.error.model.ErrorMessage.DIET_DUPLICATE_TIME;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
@@ -21,6 +22,10 @@ import org.springframework.web.multipart.MultipartFile;
 import com.tnt.application.member.NotificationService;
 import com.tnt.application.pt.PtService;
 import com.tnt.application.s3.S3Service;
+import com.tnt.application.trainee.DietService;
+import com.tnt.application.trainee.TraineeService;
+import com.tnt.common.error.exception.ConflictException;
+import com.tnt.domain.trainee.Trainee;
 import com.tnt.dto.trainee.request.ConnectWithTrainerRequest;
 import com.tnt.dto.trainee.request.CreateDietRequest;
 import com.tnt.dto.trainee.response.ConnectWithTrainerResponse;
@@ -43,9 +48,11 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class TraineeController {
 
-	private final PtService ptService;
-	private final NotificationService notificationService;
+	private final TraineeService traineeService;
 	private final S3Service s3Service;
+	private final PtService ptService;
+	private final DietService dietService;
+	private final NotificationService notificationService;
 
 	@Operation(summary = "트레이너 연결 요청 API")
 	@ResponseStatus(CREATED)
@@ -65,6 +72,12 @@ public class TraineeController {
 	public CreateDietResponse createDiet(@AuthMember Long memberId,
 		@RequestPart("request") @Valid CreateDietRequest request,
 		@RequestPart(value = "dietImage", required = false) MultipartFile dietImage) {
+		Trainee trainee = traineeService.getTraineeWithMemberId(memberId);
+
+		if (dietService.isDietExistWithTraineeIdAndDate(trainee.getId(), request.date())) {
+			throw new ConflictException(DIET_DUPLICATE_TIME);
+		}
+
 		String dietImageUrl = s3Service.uploadImage(null, DIET_S3_IMAGE_PATH, dietImage);
 
 		return ptService.createDiet(memberId, request, dietImageUrl);
