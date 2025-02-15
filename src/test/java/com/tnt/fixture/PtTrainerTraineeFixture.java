@@ -49,4 +49,18 @@ public class PtTrainerTraineeFixture {
 			.totalPtCount(totalPtCount)
 			.build();
 	}
+
+	public static PtTrainerTrainee getPtTrainerTrainee4(Trainer trainer, Trainee trainee) {
+		LocalDate startDate = LocalDate.of(2025, 1, 1);
+		Integer totalPtCount = 1;
+		Integer finishedPtCount = 1;
+
+		return PtTrainerTrainee.builder()
+			.trainer(trainer)
+			.trainee(trainee)
+			.startedAt(startDate)
+			.finishedPtCount(finishedPtCount)
+			.totalPtCount(totalPtCount)
+			.build();
+	}
 }

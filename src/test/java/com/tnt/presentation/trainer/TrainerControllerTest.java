@@ -972,45 +972,24 @@ class TrainerControllerTest {
 		trainer = trainerRepository.save(trainer);
 		trainee = traineeRepository.save(trainee);
 
-		PtTrainerTrainee ptTrainerTrainee = PtTrainerTraineeFixture.getPtTrainerTrainee3(trainer, trainee);
+		PtTrainerTrainee ptTrainerTrainee = PtTrainerTraineeFixture.getPtTrainerTrainee4(trainer, trainee);
 
 		ptTrainerTraineeRepository.save(ptTrainerTrainee);
-
-		PtGoal ptGoal1 = PtGoal.builder()
-			.traineeId(trainee.getId())
-			.content("다이어트")
-			.build();
-
-		PtGoal ptGoal2 = PtGoal.builder()
-			.traineeId(trainee.getId())
-			.content("체중 감량")
-			.build();
-
-		ptGoalRepository.saveAll(List.of(ptGoal1, ptGoal2));
 
 		LocalDateTime startDate1 = LocalDateTime.parse("2025-02-01T11:30");
 		LocalDateTime endDate1 = LocalDateTime.parse("2025-02-01T13:00");
 
-		LocalDateTime startDate2 = LocalDateTime.parse("2025-02-07T11:30");
-		LocalDateTime endDate2 = LocalDateTime.parse("2025-02-07T13:00");
+		PtLesson ptLessons = PtLesson.builder()
+			.ptTrainerTrainee(ptTrainerTrainee)
+			.session(1)
+			.lessonStart(startDate1)
+			.lessonEnd(endDate1)
+			.build();
 
-		List<PtLesson> ptLessons = List.of(PtLesson.builder()
-				.ptTrainerTrainee(ptTrainerTrainee)
-				.session(9)
-				.lessonStart(startDate1)
-				.lessonEnd(endDate1)
-				.build(),
-			PtLesson.builder()
-				.ptTrainerTrainee(ptTrainerTrainee)
-				.session(10)
-				.lessonStart(startDate2)
-				.lessonEnd(endDate2)
-				.build());
+		ptLessonRepository.save(ptLessons);
 
-		ptLessonRepository.saveAll(ptLessons);
-
-		LocalDateTime start = LocalDateTime.of(2025, 1, 1, 10, 30);
-		LocalDateTime end = LocalDateTime.of(2025, 1, 1, 11, 30);
+		LocalDateTime start = LocalDateTime.of(2025, 2, 2, 10, 30);
+		LocalDateTime end = LocalDateTime.of(2025, 2, 2, 11, 30);
 		String memo = "THIS IS MEMO";
 
 		CreatePtLessonRequest request = new CreatePtLessonRequest(start, end, memo, trainee.getId());

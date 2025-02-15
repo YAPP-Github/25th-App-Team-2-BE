@@ -15,7 +15,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -26,6 +25,7 @@ import com.tnt.application.trainee.DietService;
 import com.tnt.application.trainee.PtGoalService;
 import com.tnt.application.trainee.TraineeService;
 import com.tnt.application.trainer.TrainerService;
+import com.tnt.common.error.exception.BadRequestException;
 import com.tnt.common.error.exception.ConflictException;
 import com.tnt.common.error.exception.NotFoundException;
 import com.tnt.domain.member.Member;
@@ -368,9 +368,6 @@ public class PtService {
 		int temp = 0;
 
 		if (!lessonsForTrainee.isEmpty()) {
-			if (Objects.equals(lessonsForTrainee.getLast().getSession(), ptTrainerTrainee.getTotalPtCount())) {
-				throw new ConflictException(PT_LESSON_OVERFLOW);
-			}
 
 			for (PtLesson toCompare : lessonsForTrainee) {
 				if (toCompare.getLessonStart().isBefore(start)) {
@@ -387,6 +384,12 @@ public class PtService {
 			}
 		}
 
-		return ptTrainerTrainee.getFinishedPtCount() + 1 + temp;
+		int nextSession = ptTrainerTrainee.getFinishedPtCount() + 1 + temp;
+
+		if (nextSession > ptTrainerTrainee.getTotalPtCount()) {
+			throw new BadRequestException(PT_LESSON_OVERFLOW);
+		}
+
+		return nextSession;
 	}
 }
