@@ -227,6 +227,52 @@ class TraineeControllerTest {
 	}
 
 	@Test
+	@DisplayName("통합 테스트 - 트레이니 중복 시간대 식단 등록 실패")
+	void create_diet_duplicate_time_fail() throws Exception {
+		// given
+		Member traineeMember = MemberFixture.getTraineeMember2();
+
+		traineeMember = memberRepository.save(traineeMember);
+
+		CustomUserDetails traineeUserDetails = new CustomUserDetails(traineeMember.getId(),
+			traineeMember.getId().toString(),
+			authoritiesMapper.mapAuthorities(List.of(new SimpleGrantedAuthority("ROLE_USER"))));
+
+		Authentication authentication = new UsernamePasswordAuthenticationToken(traineeUserDetails, null,
+			authoritiesMapper.mapAuthorities(traineeUserDetails.getAuthorities()));
+
+		SecurityContextHolder.getContext().setAuthentication(authentication);
+
+		Trainee trainee = TraineeFixture.getTrainee1(traineeMember);
+
+		traineeRepository.save(trainee);
+
+		Diet diet = DietFixture.getDiet1(trainee.getId());
+
+		dietRepository.save(diet);
+
+		LocalDateTime date = LocalDateTime.parse("2025-02-01T11:38");
+		String memo = "배부르다";
+
+		CreateDietRequest request = new CreateDietRequest(date, DINNER, memo);
+
+		MockMultipartFile dietImage = new MockMultipartFile("dietImage", "test.jpg", IMAGE_JPEG_VALUE,
+			"test image content".getBytes());
+
+		// when
+		var jsonRequest = new MockMultipartFile("request", "", APPLICATION_JSON_VALUE,
+			objectMapper.writeValueAsString(request).getBytes());
+		var result = mockMvc.perform(multipart("/trainees/diets")
+			.file(jsonRequest)
+			.file(dietImage)
+			.contentType(MULTIPART_FORM_DATA_VALUE));
+
+		// then
+		result.andExpect(status().isConflict())
+			.andDo(print());
+	}
+
+	@Test
 	@DisplayName("통합 테스트 - 트레이니 특정 식단 조회 성공")
 	void get_diet_with_diet_id_success() throws Exception {
 		// given

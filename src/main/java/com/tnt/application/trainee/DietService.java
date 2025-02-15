@@ -3,6 +3,7 @@ package com.tnt.application.trainee;
 import static com.tnt.common.error.model.ErrorMessage.DIET_NOT_FOUND;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -42,5 +43,9 @@ public class DietService {
 
 	public List<Diet> getDietsWithTraineeIdForTraineeCalendar(Long traineeId, LocalDate startDate, LocalDate endDate) {
 		return dietSearchRepository.findAllByTraineeIdForTraineeCalendar(traineeId, startDate, endDate);
+	}
+
+	public boolean isDietExistWithTraineeIdAndDate(Long traineeId, LocalDateTime date) {
+		return dietRepository.existsByTraineeIdAndDateAndDeletedAtIsNull(traineeId, date);
 	}
 }
