@@ -362,17 +362,17 @@ public class PtService {
 	}
 
 	private int validateAndGetNextSession(PtTrainerTrainee ptTrainerTrainee, LocalDateTime start) {
-		List<PtLesson> notCompletedLessons =
-			ptLessonRepository.findAllByPtTrainerTraineeAndIsCompletedIsFalseAndDeletedAtIsNull(ptTrainerTrainee);
+		List<PtLesson> lessonsForTrainee =
+			ptLessonRepository.findAllByPtTrainerTraineeAndDeletedAtIsNull(ptTrainerTrainee);
 
 		int temp = 0;
 
-		if (!notCompletedLessons.isEmpty()) {
-			if (Objects.equals(notCompletedLessons.getLast().getSession(), ptTrainerTrainee.getTotalPtCount())) {
+		if (!lessonsForTrainee.isEmpty()) {
+			if (Objects.equals(lessonsForTrainee.getLast().getSession(), ptTrainerTrainee.getTotalPtCount())) {
 				throw new ConflictException(PT_LESSON_OVERFLOW);
 			}
 
-			for (PtLesson toCompare : notCompletedLessons) {
+			for (PtLesson toCompare : lessonsForTrainee) {
 				if (toCompare.getLessonStart().isBefore(start)) {
 					temp += 1;
 				} else {
@@ -381,8 +381,8 @@ public class PtService {
 			}
 
 			// 뒤에 있는 수업 회차 다시 +1 update
-			for (int i = temp; i < notCompletedLessons.size(); i++) {
-				PtLesson lesson = notCompletedLessons.get(i);
+			for (int i = temp; i < lessonsForTrainee.size(); i++) {
+				PtLesson lesson = lessonsForTrainee.get(i);
 				lesson.increaseSession();
 			}
 		}
