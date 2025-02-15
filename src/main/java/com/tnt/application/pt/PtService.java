@@ -130,7 +130,7 @@ public class PtService {
 
 			return new Lesson(String.valueOf(ptLesson.getId()),
 				String.valueOf(trainee.getId()), trainee.getMember().getName(),
-				trainee.getMember().getProfileImageUrl(), ptTrainerTrainee.getCurrentPtSession(),
+				trainee.getMember().getProfileImageUrl(), ptLesson.getSession(),
 				ptLesson.getLessonStart(), ptLesson.getLessonEnd(), ptLesson.getIsCompleted());
 		}).toList();
 
