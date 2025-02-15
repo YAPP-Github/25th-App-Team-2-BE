@@ -20,6 +20,7 @@ import javax.imageio.ImageIO;
 
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StopWatch;
 import org.springframework.web.multipart.MultipartFile;
 
 import net.coobird.thumbnailator.Thumbnails;
@@ -76,7 +77,12 @@ public class S3Service {
 		String extension = validateImageFormat(image);
 
 		try {
+			StopWatch sw = new StopWatch();
+			sw.start();
 			byte[] processedImage = processImage(image, extension);
+			sw.stop();
+
+			log.info("========== 이미지 처리 시간: {}ms ==========", sw.getTotalTimeMillis());
 
 			return s3Adapter.uploadFile(processedImage, folderPath, extension);
 		} catch (Exception e) {
