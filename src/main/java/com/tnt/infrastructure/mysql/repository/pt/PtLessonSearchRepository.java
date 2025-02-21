@@ -82,11 +82,13 @@ public class PtLessonSearchRepository {
 			.fetch();
 	}
 
-	public boolean existsByStartAndEnd(LocalDateTime start, LocalDateTime end) {
+	public boolean existsByStartAndEnd(PtTrainerTrainee pt, LocalDateTime start, LocalDateTime end) {
 		return jpaQueryFactory
 			.selectOne()
 			.from(ptLesson)
+			.join(ptLesson.ptTrainerTrainee, ptTrainerTrainee)
 			.where(
+				ptTrainerTrainee.trainer.id.eq(pt.getTrainer().getId()),
 				ptLesson.lessonStart.lt(end),
 				ptLesson.lessonEnd.gt(start),
 				ptLesson.deletedAt.isNull(),
@@ -101,7 +103,8 @@ public class PtLessonSearchRepository {
 			.from(ptLesson)
 			.join(ptLesson.ptTrainerTrainee, ptTrainerTrainee)
 			.where(
-				ptTrainerTrainee.eq(pt),
+				ptTrainerTrainee.trainer.id.eq(pt.getTrainer().getId()),
+				ptTrainerTrainee.trainee.id.eq(pt.getTrainee().getId()),
 				ptLesson.lessonStart.year().eq(start.getYear())
 					.and(ptLesson.lessonStart.month().eq(start.getMonthValue()))
 					.and(ptLesson.lessonStart.dayOfMonth().eq(start.getDayOfMonth())),

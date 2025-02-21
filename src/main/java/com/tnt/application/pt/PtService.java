@@ -192,7 +192,7 @@ public class PtService {
 		// 트레이너의 기존 pt 수업중에 중복되는 시간대가 있는지 확인
 		validateLessonTime(ptTrainerTrainee, request.start(), request.end());
 
-		int nextSession = validateAndGetNextSession(ptTrainerTrainee, request.start());
+		int nextSession = validateAndGetNextSession(ptTrainerTrainee);
 
 		PtLesson ptLesson = PtLesson.builder()
 			.ptTrainerTrainee(ptTrainerTrainee)
@@ -210,8 +210,10 @@ public class PtService {
 		trainerService.validateTrainerRegistration(memberId);
 
 		PtLesson ptLesson = getPtLessonWithId(ptLessonId);
-		ptLesson.getPtTrainerTrainee().completeLesson(ptLesson.getSession());
-		ptLesson.completeLesson();
+		PtTrainerTrainee ptTrainerTrainee = ptLesson.getPtTrainerTrainee();
+
+		ptTrainerTrainee.completeLesson();
+		ptLesson.completeLesson(ptTrainerTrainee.getFinishedPtCount());
 	}
 
 	@Transactional
@@ -356,7 +358,7 @@ public class PtService {
 	}
 
 	private void validateLessonTime(PtTrainerTrainee ptTrainerTrainee, LocalDateTime start, LocalDateTime end) {
-		if (ptLessonSearchRepository.existsByStartAndEnd(start, end)) {
+		if (ptLessonSearchRepository.existsByStartAndEnd(ptTrainerTrainee, start, end)) {
 			throw new ConflictException(PT_LESSON_DUPLICATE_TIME);
 		}
 
@@ -365,35 +367,14 @@ public class PtService {
 		}
 	}
 
-	private int validateAndGetNextSession(PtTrainerTrainee ptTrainerTrainee, LocalDateTime start) {
+	private int validateAndGetNextSession(PtTrainerTrainee ptTrainerTrainee) {
 		List<PtLesson> lessonsForTrainee =
 			ptLessonRepository.findAllByPtTrainerTraineeAndDeletedAtIsNull(ptTrainerTrainee);
 
-		int temp = 0;
-
-		if (!lessonsForTrainee.isEmpty()) {
-
-			for (PtLesson toCompare : lessonsForTrainee) {
-				if (toCompare.getLessonStart().isBefore(start)) {
-					temp += 1;
-				} else {
-					break;
-				}
-			}
-
-			// 뒤에 있는 수업 회차 다시 +1 update
-			for (int i = temp; i < lessonsForTrainee.size(); i++) {
-				PtLesson lesson = lessonsForTrainee.get(i);
-				lesson.increaseSession();
-			}
-		}
-
-		int nextSession = ptTrainerTrainee.getFinishedPtCount() + 1 + temp;
-
-		if (nextSession > ptTrainerTrainee.getTotalPtCount()) {
+		if (lessonsForTrainee.size() >= ptTrainerTrainee.getTotalPtCount()) {
 			throw new BadRequestException(PT_LESSON_OVERFLOW);
 		}
 
-		return nextSession;
+		return ptTrainerTrainee.getCurrentPtSession();
 	}
 }

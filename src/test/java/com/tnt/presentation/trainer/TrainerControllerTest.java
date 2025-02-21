@@ -651,12 +651,12 @@ class TrainerControllerTest {
 		assertThat(ptLessonsResult.getFirst().getPtTrainerTrainee()).isEqualTo(ptTrainerTrainee);
 		assertThat(ptLessonsResult.get(1).getLessonStart()).isEqualTo(ptLessons.getFirst().getLessonStart());
 		assertThat(ptLessonsResult.get(1).getLessonEnd()).isEqualTo(ptLessons.getFirst().getLessonEnd());
-		assertThat(ptLessonsResult.get(1).getSession()).isEqualTo(5);
+		assertThat(ptLessonsResult.get(1).getSession()).isEqualTo(4);
 		assertThat(ptLessonsResult.get(1).getMemo()).isEqualTo(ptLessons.getFirst().getMemo());
 		assertThat(ptLessonsResult.get(1).getPtTrainerTrainee()).isEqualTo(ptTrainerTrainee);
 		assertThat(ptLessonsResult.getLast().getLessonStart()).isEqualTo(ptLessons.getLast().getLessonStart());
 		assertThat(ptLessonsResult.getLast().getLessonEnd()).isEqualTo(ptLessons.getLast().getLessonEnd());
-		assertThat(ptLessonsResult.getLast().getSession()).isEqualTo(6);
+		assertThat(ptLessonsResult.getLast().getSession()).isEqualTo(5);
 		assertThat(ptLessonsResult.getLast().getMemo()).isEqualTo(ptLessons.getLast().getMemo());
 		assertThat(ptLessonsResult.getLast().getPtTrainerTrainee()).isEqualTo(ptTrainerTrainee);
 	}
@@ -822,7 +822,7 @@ class TrainerControllerTest {
 		assertThat(ptLessonsResult.get(1).getPtTrainerTrainee()).isEqualTo(ptTrainerTrainee);
 		assertThat(ptLessonsResult.getLast().getLessonStart()).isEqualTo(start);
 		assertThat(ptLessonsResult.getLast().getLessonEnd()).isEqualTo(end);
-		assertThat(ptLessonsResult.getLast().getSession()).isEqualTo(6);
+		assertThat(ptLessonsResult.getLast().getSession()).isEqualTo(4);
 		assertThat(ptLessonsResult.getLast().getMemo()).isEqualTo(memo);
 		assertThat(ptLessonsResult.getLast().getPtTrainerTrainee()).isEqualTo(ptTrainerTrainee);
 	}

@@ -17,6 +17,7 @@ public enum ErrorMessage {
 	IMAGE_NOT_SUPPORT("지원하지 않는 이미지 형식입니다. jpg, jpeg, png, svg만 가능합니다."),
 	INVALID_REQUEST_NOT_MATCH("요청자와 요청이 일치하지 않습니다."),
 	INVALID_REQUEST_BODY("요청 바디가 올바르지 않습니다."),
+	MAX_UPLOAD_SIZE_EXCEEDED("파일 업로드 크기 10MB 제한을 초과했습니다."),
 
 	CLIENT_BAD_REQUEST("잘못된 요청입니다."),
 	FAILED_TO_PROCESS_REQUEST("요청 진행에 실패했습니다."),
@@ -74,12 +75,12 @@ public enum ErrorMessage {
 	PT_TRAINEE_ALREADY_EXIST("이미 다른 트레이너와 연결되어 있습니다."),
 	PT_TRAINER_TRAINEE_NOT_FOUND("존재하지 않는 연결 정보입니다."),
 	PT_TRAINER_TRAINEE_NULL("트레이너 - 트레이니 연결 정보가 null 입니다."),
-	PT_TRAINER_TRAINEE_COMPLETE_IN_ORDER("PT 세션을 순서대로 완료해주세요."),
+	PT_TRAINER_TRAINEE_COMPLETE_IN_ORDER("PT 회차를 순서대로 완료해주세요."),
 
 	PT_LESSON_INVALID_MEMO("수업 메모의 길이는 공백 포함 30자 이하이어야 합니다."),
 	PT_LESSON_DUPLICATE_TIME("이미 예약된 시간대입니다."),
 	PT_LESSON_NOT_FOUND("존재하지 않는 수업입니다."),
-	PT_LESSON_OVERFLOW("총 수업 수 보다 수업을 더 추가할 수 없습니다."),
+	PT_LESSON_OVERFLOW("총 PT 회차보다 더 많은 수업을 추가할 수 없습니다."),
 	PT_LESSON_MORE_THAN_ONE_A_DAY("한명의 수업은 하루에 하나만 추가할 수 있습니다."),
 
 	DIET_NULL_TRAINEE_ID("식단 트레이니 id가 null 입니다."),

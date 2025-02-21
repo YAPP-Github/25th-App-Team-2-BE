@@ -1,6 +1,5 @@
 package com.tnt.domain.pt;
 
-import static com.tnt.common.error.model.ErrorMessage.PT_TRAINER_TRAINEE_COMPLETE_IN_ORDER;
 import static com.tnt.common.error.model.ErrorMessage.TRAINEE_NULL;
 import static com.tnt.common.error.model.ErrorMessage.TRAINER_NULL;
 import static jakarta.persistence.ConstraintMode.NO_CONSTRAINT;
@@ -9,7 +8,6 @@ import static java.util.Objects.requireNonNull;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-import com.tnt.common.error.exception.BadRequestException;
 import com.tnt.domain.trainee.Trainee;
 import com.tnt.domain.trainer.Trainer;
 import com.tnt.infrastructure.mysql.BaseTimeEntity;
@@ -75,11 +73,7 @@ public class PtTrainerTrainee extends BaseTimeEntity {
 		return this.finishedPtCount + 1;
 	}
 
-	public void completeLesson(int ptLessonSession) {
-		if (getCurrentPtSession() != ptLessonSession) {
-			throw new BadRequestException(PT_TRAINER_TRAINEE_COMPLETE_IN_ORDER);
-		}
-
+	public void completeLesson() {
 		this.finishedPtCount++;
 	}
 

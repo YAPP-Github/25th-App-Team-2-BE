@@ -72,16 +72,13 @@ public class PtLesson extends BaseTimeEntity {
 		validateAndSetMemo(memo);
 	}
 
-	public void completeLesson() {
+	public void completeLesson(Integer finishedSession) {
 		this.isCompleted = true;
+		this.session = finishedSession;
 	}
 
 	public void softDelete() {
 		this.deletedAt = LocalDateTime.now();
-	}
-
-	public void increaseSession() {
-		this.session++;
 	}
 
 	private void validateAndSetMemo(String memo) {

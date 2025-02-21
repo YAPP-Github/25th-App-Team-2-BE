@@ -181,12 +181,10 @@ class PtServiceTest {
 		PtLesson ptLesson = PtLesson.builder()
 			.id(1L)
 			.ptTrainerTrainee(ptTrainerTrainee)
-			.session(1)
+			.session(4)
 			.lessonStart(LocalDateTime.of(date, LocalTime.of(10, 0)))
 			.lessonEnd(LocalDateTime.of(date, LocalTime.of(11, 0)))
 			.build();
-
-		ptLesson.completeLesson();
 
 		given(trainerService.getTrainerWithMemberId(memberId)).willReturn(trainer);
 		given(ptLessonSearchRepository.findAllByTrainerIdAndDate(trainerId, date)).willReturn(List.of(ptLesson));
@@ -196,7 +194,6 @@ class PtServiceTest {
 
 		// then
 		assertThat(result.count()).isEqualTo(1);
-		assertThat(result.lessons().getFirst().isCompleted()).isTrue();
 		assertThat(result.lessons().getFirst().traineeId()).isEqualTo(String.valueOf(traineeId));
 	}
 

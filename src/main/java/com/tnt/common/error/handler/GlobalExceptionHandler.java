@@ -2,6 +2,7 @@ package com.tnt.common.error.handler;
 
 import static com.tnt.common.error.model.ErrorMessage.INPUT_VALUE_IS_INVALID;
 import static com.tnt.common.error.model.ErrorMessage.INVALID_REQUEST_BODY;
+import static com.tnt.common.error.model.ErrorMessage.MAX_UPLOAD_SIZE_EXCEEDED;
 import static com.tnt.common.error.model.ErrorMessage.MISSING_REQUIRED_PARAMETER_ERROR;
 import static com.tnt.common.error.model.ErrorMessage.PARAMETER_FORMAT_NOT_CORRECT;
 import static com.tnt.common.error.model.ErrorMessage.SERVER_ERROR;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import com.tnt.common.error.exception.BadRequestException;
 import com.tnt.common.error.exception.ConflictException;
@@ -143,6 +145,14 @@ public class GlobalExceptionHandler {
 		log.error(exception.getMessage(), exception);
 
 		return new ErrorResponse(exception.getMessage());
+	}
+
+	@ResponseStatus(BAD_REQUEST)
+	@ExceptionHandler(MaxUploadSizeExceededException.class)
+	protected ErrorResponse handleMaxUploadSizeExceededException(MaxUploadSizeExceededException exception) {
+		log.error(exception.getMessage(), exception);
+
+		return new ErrorResponse(MAX_UPLOAD_SIZE_EXCEEDED.getMessage());
 	}
 
 	@ResponseStatus(INTERNAL_SERVER_ERROR)
